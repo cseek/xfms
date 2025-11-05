@@ -1,0 +1,452 @@
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs-extra');
+const router = express.Router();
+
+// 配置 multer 用于固件文件上传
+const firmwareStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // 生成唯一文件夹名
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const folderName = 'firmware-' + uniqueSuffix;
+        const dir = path.join(__dirname, '../../uploads/firmwares', folderName);
+        fs.ensureDirSync(dir);
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        // 保留原始文件名
+        cb(null, file.originalname);
+    }
+});
+
+const uploadFirmware = multer({ 
+    storage: firmwareStorage,
+    limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB
+    }
+});
+
+// 配置 multer 用于测试报告上传
+const testReportStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // 生成唯一文件夹名
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const folderName = 'test-report-' + uniqueSuffix;
+        const dir = path.join(__dirname, '../../uploads/test-reports', folderName);
+        fs.ensureDirSync(dir);
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        // 保留原始文件名
+        cb(null, file.originalname);
+    }
+});
+
+const uploadTestReport = multer({ 
+    storage: testReportStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB
+    }
+});
+
+// 获取固件列表
+router.get('/', (req, res) => {
+    let sql = `
+        SELECT f.*, m.name as module_name, p.name as project_name, u.username as uploader_name
+        FROM firmwares f
+        LEFT JOIN modules m ON f.module_id = m.id
+        LEFT JOIN projects p ON f.project_id = p.id
+        LEFT JOIN users u ON f.uploaded_by = u.id
+        WHERE 1=1
+    `;
+    let params = [];
+
+    // 过滤条件
+    if (req.query.module_id) {
+        sql += ' AND f.module_id = ?';
+        params.push(req.query.module_id);
+    }
+
+    if (req.query.project_id) {
+        sql += ' AND f.project_id = ?';
+        params.push(req.query.project_id);
+    }
+
+    if (req.query.environment) {
+        sql += ' AND f.environment = ?';
+        params.push(req.query.environment);
+    }
+
+    sql += ' ORDER BY f.created_at DESC';
+
+    req.db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+        res.json(rows);
+    });
+});
+
+// 上传固件
+router.post('/upload', uploadFirmware.single('firmware'), (req, res) => {
+    // 检查用户权限：管理员和研发人员可以上传
+    const user = req.session.user;
+    if (!user || (user.role !== 'admin' && user.role !== 'developer')) {
+        // 删除已上传的文件和文件夹
+        if (req.file) {
+            const fileDir = path.dirname(req.file.path);
+            fs.removeSync(fileDir); // 删除整个文件夹
+        }
+        return res.status(403).json({ error: '没有权限上传固件' });
+    }
+
+    const { module_id, project_id, version, description, additional_info } = req.body;
+
+    if (!module_id || !project_id || !version) {
+        // 删除已上传的文件和文件夹
+        if (req.file) {
+            const fileDir = path.dirname(req.file.path);
+            fs.removeSync(fileDir); // 删除整个文件夹
+        }
+        return res.status(400).json({ error: '模块、项目和版本号不能为空' });
+    }
+
+    // 验证版本号格式
+    const versionRegex = /^v\d+\.\d+\.\d+$/;
+    if (!versionRegex.test(version)) {
+        if (req.file) {
+            const fileDir = path.dirname(req.file.path);
+            fs.removeSync(fileDir); // 删除整个文件夹
+        }
+        return res.status(400).json({ error: '版本号格式不正确，应为 v主版本.次版本.修订版本，例如 v1.5.1' });
+    }
+
+    if (!req.file) {
+        return res.status(400).json({ error: '固件文件不能为空' });
+    }
+
+    // 检查模块和项目是否存在
+    const checkSql = `
+        SELECT COUNT(*) as module_count FROM modules WHERE id = ?;
+        SELECT COUNT(*) as project_count FROM projects WHERE id = ?;
+    `;
+    req.db.get('SELECT COUNT(*) as module_count FROM modules WHERE id = ?', [module_id], (err, moduleResult) => {
+        if (err) {
+            if (req.file) {
+                const fileDir = path.dirname(req.file.path);
+                fs.removeSync(fileDir); // 删除整个文件夹
+            }
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (moduleResult.module_count === 0) {
+            if (req.file) {
+                const fileDir = path.dirname(req.file.path);
+                fs.removeSync(fileDir); // 删除整个文件夹
+            }
+            return res.status(400).json({ error: '模块不存在' });
+        }
+
+        req.db.get('SELECT COUNT(*) as project_count FROM projects WHERE id = ?', [project_id], (err, projectResult) => {
+            if (err) {
+                if (req.file) {
+                    const fileDir = path.dirname(req.file.path);
+                    fs.removeSync(fileDir); // 删除整个文件夹
+                }
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            if (projectResult.project_count === 0) {
+                if (req.file) {
+                    const fileDir = path.dirname(req.file.path);
+                    fs.removeSync(fileDir); // 删除整个文件夹
+                }
+                return res.status(400).json({ error: '项目不存在' });
+            }
+
+            // 插入固件记录
+            const insertSql = `
+                INSERT INTO firmwares 
+                (module_id, project_id, version, description, additional_info, file_path, file_size, uploaded_by, environment, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'test', 'pending')
+            `;
+            const fileSize = req.file.size;
+
+            req.db.run(insertSql, [module_id, project_id, version, description, additional_info, req.file.path, fileSize, user.id], function(err) {
+                if (err) {
+                    if (req.file) {
+                        const fileDir = path.dirname(req.file.path);
+                        fs.removeSync(fileDir); // 删除整个文件夹
+                    }
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: '数据库错误' });
+                }
+
+                // 记录历史
+                const historySql = `
+                    INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
+                    VALUES (?, ?, 'upload', ?, ?)
+                `;
+                const notes = `上传固件，文件: ${req.file.originalname}`;
+                req.db.run(historySql, [this.lastID, version, user.id, notes], function(err) {
+                    if (err) {
+                        console.error('Failed to record history:', err);
+                    }
+                });
+
+                res.json({
+                    message: '固件上传成功',
+                    firmwareId: this.lastID
+                });
+            });
+        });
+    });
+});
+
+// 下载固件
+router.get('/:id/download', (req, res) => {
+    const firmwareId = req.params.id;
+
+    const sql = 'SELECT file_path FROM firmwares WHERE id = ?';
+    req.db.get(sql, [firmwareId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (!row) {
+            return res.status(404).json({ error: '固件不存在' });
+        }
+
+        const filePath = row.file_path;
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: '固件文件不存在' });
+        }
+
+        // 获取原始文件名
+        const fileName = path.basename(filePath);
+        // 设置 Content-Disposition 头，指定文件名
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.download(filePath, fileName);
+    });
+});
+
+// 更新固件状态
+router.put('/:id/status', (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.status(401).json({ error: '未登录' });
+    }
+
+    // 只有测试人员和管理员可以更新状态
+    if (user.role !== 'tester' && user.role !== 'admin') {
+        return res.status(403).json({ error: '没有权限更新固件状态' });
+    }
+
+    const firmwareId = req.params.id;
+    const { status } = req.body;
+
+    const allowedStatus = ['testing', 'passed', 'failed', 'released', 'obsolete'];
+    if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ error: '状态不合法' });
+    }
+
+    // 获取当前固件信息
+    const getSql = 'SELECT * FROM firmwares WHERE id = ?';
+    req.db.get(getSql, [firmwareId], (err, firmware) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (!firmware) {
+            return res.status(404).json({ error: '固件不存在' });
+        }
+
+        let updateSql = 'UPDATE firmwares SET status = ?, updated_at = CURRENT_TIMESTAMP';
+        let params = [status];
+
+        // 如果状态是 released，则环境改为 release
+        if (status === 'released') {
+            updateSql += ', environment = ?';
+            params.push('release');
+        }
+
+        updateSql += ' WHERE id = ?';
+        params.push(firmwareId);
+
+        req.db.run(updateSql, params, function(err) {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            // 记录历史
+            const historySql = `
+                INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
+                VALUES (?, ?, ?, ?, ?)
+            `;
+            const notes = `状态变更为: ${status}`;
+            req.db.run(historySql, [firmwareId, firmware.version, 'status_change', user.id, notes], function(err) {
+                if (err) {
+                    console.error('Failed to record history:', err);
+                }
+            });
+
+            res.json({ message: '状态更新成功' });
+        });
+    });
+});
+
+// 上传测试报告
+router.post('/:id/test-report', uploadTestReport.single('test_report'), (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        // 删除已上传的文件和文件夹
+        if (req.file) {
+            const fileDir = path.dirname(req.file.path);
+            fs.removeSync(fileDir); // 删除整个文件夹
+        }
+        return res.status(401).json({ error: '未登录' });
+    }
+
+    // 只有测试人员和管理员可以上传测试报告
+    if (user.role !== 'tester' && user.role !== 'admin') {
+        if (req.file) {
+            const fileDir = path.dirname(req.file.path);
+            fs.removeSync(fileDir); // 删除整个文件夹
+        }
+        return res.status(403).json({ error: '没有权限上传测试报告' });
+    }
+
+    const firmwareId = req.params.id;
+
+    if (!req.file) {
+        return res.status(400).json({ error: '测试报告文件不能为空' });
+    }
+
+    const updateSql = 'UPDATE firmwares SET test_report_path = ? WHERE id = ?';
+    req.db.run(updateSql, [req.file.path, firmwareId], function(err) {
+        if (err) {
+            if (req.file) {
+                const fileDir = path.dirname(req.file.path);
+                fs.removeSync(fileDir); // 删除整个文件夹
+            }
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (this.changes === 0) {
+            if (req.file) {
+                const fileDir = path.dirname(req.file.path);
+                fs.removeSync(fileDir); // 删除整个文件夹
+            }
+            return res.status(404).json({ error: '固件不存在' });
+        }
+
+        // 记录历史
+        const historySql = `
+            INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
+            SELECT id, version, 'upload_test_report', ?, ? FROM firmwares WHERE id = ?
+        `;
+        const notes = `上传测试报告: ${req.file.originalname}`;
+        req.db.run(historySql, [user.id, notes, firmwareId], function(err) {
+            if (err) {
+                console.error('Failed to record history:', err);
+            }
+        });
+
+        res.json({ message: '测试报告上传成功' });
+    });
+});
+
+// 下载测试报告
+router.get('/:id/download-test-report', (req, res) => {
+    const firmwareId = req.params.id;
+
+    const sql = 'SELECT test_report_path FROM firmwares WHERE id = ?';
+    req.db.get(sql, [firmwareId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (!row || !row.test_report_path) {
+            return res.status(404).json({ error: '测试报告不存在' });
+        }
+
+        const filePath = row.test_report_path;
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: '测试报告文件不存在' });
+        }
+
+        // 获取原始文件名
+        const fileName = path.basename(filePath);
+        // 设置 Content-Disposition 头，指定文件名
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.download(filePath, fileName);
+    });
+});
+
+// 删除固件
+router.delete('/:id', (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.status(401).json({ error: '未登录' });
+    }
+
+    const firmwareId = req.params.id;
+
+    // 获取固件信息
+    const getSql = 'SELECT * FROM firmwares WHERE id = ?';
+    req.db.get(getSql, [firmwareId], (err, firmware) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (!firmware) {
+            return res.status(404).json({ error: '固件不存在' });
+        }
+
+        // 只有管理员或上传者可以删除
+        if (user.role !== 'admin' && firmware.uploaded_by !== user.id) {
+            return res.status(403).json({ error: '没有权限删除此固件' });
+        }
+
+        // 删除文件和文件夹
+        if (fs.existsSync(firmware.file_path)) {
+            const fileDir = path.dirname(firmware.file_path);
+            fs.removeSync(fileDir); // 删除整个文件夹
+        }
+        if (firmware.test_report_path && fs.existsSync(firmware.test_report_path)) {
+            const testReportDir = path.dirname(firmware.test_report_path);
+            fs.removeSync(testReportDir); // 删除整个文件夹
+        }
+
+        // 删除数据库记录
+        const deleteSql = 'DELETE FROM firmwares WHERE id = ?';
+        req.db.run(deleteSql, [firmwareId], function(err) {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            // 删除历史记录
+            const deleteHistorySql = 'DELETE FROM firmware_history WHERE firmware_id = ?';
+            req.db.run(deleteHistorySql, [firmwareId], function(err) {
+                if (err) {
+                    console.error('Failed to delete history:', err);
+                }
+            });
+
+            res.json({ message: '固件删除成功' });
+        });
+    });
+});
+
+module.exports = router;

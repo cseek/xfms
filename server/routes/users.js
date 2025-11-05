@@ -1,0 +1,122 @@
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const router = express.Router();
+
+// 只有管理员可以访问用户管理
+const adminRequired = (req, res, next) => {
+    if (req.session.user && req.session.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ error: '需要管理员权限' });
+    }
+};
+
+// 获取所有用户（仅管理员）
+router.get('/', adminRequired, (req, res) => {
+    const sql = 'SELECT id, username, role, email, created_at FROM users ORDER BY created_at DESC';
+    req.db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+        res.json(rows);
+    });
+});
+
+// 创建用户（仅管理员）
+router.post('/', adminRequired, (req, res) => {
+    const { username, password, role, email } = req.body;
+
+    if (!username || !password || !role) {
+        return res.status(400).json({ error: '用户名、密码和角色不能为空' });
+    }
+
+    const allowedRoles = ['developer', 'tester', 'user'];
+    if (!allowedRoles.includes(role)) {
+        return res.status(400).json({ error: '角色不合法' });
+    }
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    const sql = 'INSERT INTO users (username, password, role, email) VALUES (?, ?, ?, ?)';
+    req.db.run(sql, [username, hashedPassword, role, email], function(err) {
+        if (err) {
+            if (err.message.includes('UNIQUE constraint failed')) {
+                return res.status(400).json({ error: '用户名已存在' });
+            }
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        res.json({
+            message: '用户创建成功',
+            userId: this.lastID
+        });
+    });
+});
+
+// 更新用户（仅管理员）
+router.put('/:id', adminRequired, (req, res) => {
+    const userId = req.params.id;
+    const { password, role, email } = req.body;
+
+    // 检查用户是否存在
+    const checkSql = 'SELECT * FROM users WHERE id = ?';
+    req.db.get(checkSql, [userId], (err, user) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: '用户不存在' });
+        }
+
+        let updateSql = 'UPDATE users SET role = ?, email = ?';
+        let params = [role, email];
+
+        if (password) {
+            updateSql += ', password = ?';
+            const hashedPassword = bcrypt.hashSync(password, 10);
+            params.push(hashedPassword);
+        }
+
+        updateSql += ' WHERE id = ?';
+        params.push(userId);
+
+        req.db.run(updateSql, params, function(err) {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            res.json({ message: '用户更新成功' });
+        });
+    });
+});
+
+// 删除用户（仅管理员）
+router.delete('/:id', adminRequired, (req, res) => {
+    const userId = req.params.id;
+
+    // 不能删除自己
+    if (req.session.user.id == userId) {
+        return res.status(400).json({ error: '不能删除当前登录的用户' });
+    }
+
+    const sql = 'DELETE FROM users WHERE id = ?';
+    req.db.run(sql, [userId], function(err) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ error: '用户不存在' });
+        }
+
+        res.json({ message: '用户删除成功' });
+    });
+});
+
+module.exports = router;
