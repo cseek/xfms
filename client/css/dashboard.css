@@ -728,14 +728,14 @@ body {
   color: white;
 }
 
-.role-badge.moderator {
+.role-badge.tester {
   background: linear-gradient(135deg, #51cf66, #40c057);
   color: white;
 }
 
-.role-badge.editor {
+.role-badge.developer {
   background: linear-gradient(135deg, #ffd43b, #fcc419);
-  color: #333;
+  color: white;
 }
 
 /* 操作按钮区域优化 */
