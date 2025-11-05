@@ -92,22 +92,22 @@ renderFirmwares() {
             </button>
         `);
 
-        // 测试报告相关按钮 - 测试人员和管理员
-        if (userRole === 'tester' || userRole === 'admin') {
-            if (!firmware.test_report_path) {
+        // 测试报告相关按钮 - 所有人均可下载
+        // if (userRole === 'tester' || userRole === 'admin') {
+            if (!firmware.test_report_path && userRole === 'tester') {
                 buttons.push(`
-                    <button class="action-btn test-btn" data-action="upload-test-report" data-id="${firmware.id}">
-                        <i class="fas fa-upload"></i> 上传测试报告
+                    <button class="action-btn u_test-btn" data-action="upload-test-report" data-id="${firmware.id}">
+                        <i class="fas fa-upload"></i> 提交测试报告
                     </button>
                 `);
-            } else {
+            } else if (firmware.test_report_path) {
                 buttons.push(`
-                    <button class="action-btn test-btn" data-action="download-test-report" data-id="${firmware.id}">
-                        <i class="fas fa-file-download"></i> 下载测试报告
+                    <button class="action-btn d_test-btn" data-action="download-test-report" data-id="${firmware.id}">
+                        <i class="fas fa-file-download"></i> 获取测试报告
                     </button>
                 `);
             }
-        }
+        // }
 
         // 测试流程按钮
         if (firmware.environment === 'test') {
@@ -177,68 +177,67 @@ renderFirmwares() {
         }
     }
 
-async downloadFirmware(firmwareId) {
-    try {
-        const response = await fetch(`/api/firmwares/${firmwareId}/download`);
-        if (!response.ok) throw new Error('Download failed');
-        
-        // 从 Content-Disposition 头中获取原始文件名
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let fileName = `firmware_${firmwareId}.bin`; // 默认文件名
-        
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-            if (filenameMatch && filenameMatch[1]) {
-                fileName = filenameMatch[1];
-            }
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName; // 使用原始文件名
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (error) {
-        console.error('Download error:', error);
-        Utils.showMessage('下载失败', 'error');
-    }
-}
+    async downloadFirmware(firmwareId) {
+        try {
+            const response = await fetch(`/api/firmwares/${firmwareId}/download`);
+            if (!response.ok) throw new Error('Download failed');
 
-async downloadTestReport(firmwareId) {
-    try {
-        const response = await fetch(`/api/firmwares/${firmwareId}/download-test-report`);
-        if (!response.ok) throw new Error('Test report download failed');
-        
-        // 从 Content-Disposition 头中获取原始文件名
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let fileName = `test_report_${firmwareId}.pdf`; // 默认文件名
-        
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-            if (filenameMatch && filenameMatch[1]) {
-                fileName = filenameMatch[1];
-            }
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName; // 使用原始文件名
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (error) {
-        console.error('Test report download error:', error);
-        Utils.showMessage('测试报告下载失败', 'error');
-    }
-}
+            // 从 Content-Disposition 头中获取原始文件名
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let fileName = `firmware_${firmwareId}.bin`; // 默认文件名
 
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (filenameMatch && filenameMatch[1]) {
+                    fileName = filenameMatch[1];
+                }
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName; // 使用原始文件名
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Download error:', error);
+            Utils.showMessage('下载失败', 'error');
+        }
+    }
+
+    async downloadTestReport(firmwareId) {
+        try {
+            const response = await fetch(`/api/firmwares/${firmwareId}/download-test-report`);
+            if (!response.ok) throw new Error('Test report download failed');
+
+            // 从 Content-Disposition 头中获取原始文件名
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let fileName = `test_report_${firmwareId}.pdf`; // 默认文件名
+
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (filenameMatch && filenameMatch[1]) {
+                    fileName = filenameMatch[1];
+                }
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName; // 使用原始文件名
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Test report download error:', error);
+            Utils.showMessage('测试报告下载失败', 'error');
+        }
+    }
 
     async updateFirmwareStatus(firmwareId, status) {
         try {

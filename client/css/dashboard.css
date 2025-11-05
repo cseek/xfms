@@ -328,7 +328,8 @@ body {
 }
 
 .download-btn { background: var(--primary-color); color: white; }
-.test-btn { background: var(--primary-color); color: white; }
+.u_test-btn { background: var(--dark-color); color: white; }
+.d_test-btn { background: var(--primary-color); color: white; }
 .release-btn { background: var(--success-color); color: white; }
 .obsolete-btn { background: var(--warning-color); color: white; }
 .delete-btn { background: #95a5a6; color: white; }
