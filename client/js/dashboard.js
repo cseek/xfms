@@ -9,6 +9,11 @@ class Dashboard {
         await this.checkAuth();
         await this.loadUserInfo();
         this.setupEventListeners();
+        
+        // 在初始化时加载模块和项目数据到过滤器
+        await firmwareManager.loadModulesForSelect();
+        await firmwareManager.loadProjectsForSelect();
+        
         this.loadCurrentPage();
     }
 
