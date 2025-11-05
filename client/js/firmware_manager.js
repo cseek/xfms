@@ -29,57 +29,57 @@ class FirmwareManager {
         }
     }
 
-renderFirmwares() {
-    const grid = document.getElementById('firmwareGrid');
-    if (!grid) return;
-
-    if (this.firmwares.length === 0) {
-        grid.innerHTML = '<div class="no-data">暂无固件数据</div>';
-        return;
+    renderFirmwares() {
+        const grid = document.getElementById('firmwareGrid');
+        if (!grid) return;
+    
+        if (this.firmwares.length === 0) {
+            grid.innerHTML = '<div class="no-data">暂无固件数据</div>';
+            return;
+        }
+    
+        grid.innerHTML = this.firmwares.map(firmware => `
+            <div class="firmware-card" data-id="${firmware.id}">
+                <div class="firmware-header">
+                    <div class="firmware-info">
+                        <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
+                        <div class="firmware-version">${firmware.version}</div>
+                    </div>
+                    <span class="status-badge ${firmware.status}">${this.getStatusDisplayName(firmware.status)}</span>
+                </div>
+                <div class="firmware-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>上传者: ${firmware.uploader_name}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-database"></i>
+                        <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>
+                    </div>
+                    ${firmware.description ? `
+                    <div class="meta-item">
+                        <i class="fas fa-file-alt"></i>
+                        <span>发布描述: ${firmware.description}</span>
+                    </div>` : ''}
+                    ${firmware.additional_info ? `
+                    <div class="meta-item">
+                        <i class="fas fa-info-circle"></i>
+                        <span>补充信息: ${firmware.additional_info}</span>
+                    </div>` : ''}
+                </div>
+                <div class="firmware-actions">
+                    ${this.renderActionButtons(firmware)}
+                </div>
+            </div>
+        `).join('');
+                    
+        // 添加事件监听器
+        this.attachFirmwareEventListeners();
     }
-
-    grid.innerHTML = this.firmwares.map(firmware => `
-        <div class="firmware-card" data-id="${firmware.id}">
-            <div class="firmware-header">
-                <div class="firmware-info">
-                    <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
-                    <div class="firmware-version">${firmware.version}</div>
-                </div>
-                <span class="status-badge ${firmware.status}">${this.getStatusDisplayName(firmware.status)}</span>
-            </div>
-            <div class="firmware-meta">
-                <div class="meta-item">
-                    <i class="fas fa-user"></i>
-                    <span>上传者: ${firmware.uploader_name}</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-calendar"></i>
-                    <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fas fa-database"></i>
-                    <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>
-                </div>
-                ${firmware.description ? `
-                <div class="meta-item">
-                    <i class="fas fa-file-alt"></i>
-                    <span>发布描述: ${firmware.description}</span>
-                </div>` : ''}
-                ${firmware.additional_info ? `
-                <div class="meta-item">
-                    <i class="fas fa-info-circle"></i>
-                    <span>补充信息: ${firmware.additional_info}</span>
-                </div>` : ''}
-            </div>
-            <div class="firmware-actions">
-                ${this.renderActionButtons(firmware)}
-            </div>
-        </div>
-    `).join('');
-
-    // 添加事件监听器
-    this.attachFirmwareEventListeners();
-}
 
     renderActionButtons(firmware) {
         const buttons = [];
