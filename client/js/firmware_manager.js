@@ -32,12 +32,12 @@ class FirmwareManager {
     renderFirmwares() {
         const grid = document.getElementById('firmwareGrid');
         if (!grid) return;
-    
+
         if (this.firmwares.length === 0) {
             grid.innerHTML = '<div class="no-data">暂无固件数据</div>';
             return;
         }
-    
+
         grid.innerHTML = this.firmwares.map(firmware => `
             <div class="firmware-card" data-id="${firmware.id}">
                 <div class="firmware-header">
@@ -76,7 +76,7 @@ class FirmwareManager {
                 </div>
             </div>
         `).join('');
-                    
+
         // 添加事件监听器
         this.attachFirmwareEventListeners();
     }
@@ -84,13 +84,6 @@ class FirmwareManager {
     renderActionButtons(firmware) {
         const buttons = [];
         const userRole = dashboard.currentUser.role;
-
-        // 下载按钮 - 所有用户可见
-        buttons.push(`
-            <button class="action-btn download-btn" data-action="download" data-id="${firmware.id}">
-                <i class="fas fa-download"></i> 下载
-            </button>
-        `);
 
         // 测试报告相关按钮 - 所有人均可下载
         // if (userRole === 'tester' || userRole === 'admin') {
@@ -108,6 +101,13 @@ class FirmwareManager {
                 `);
             }
         // }
+
+        // 下载按钮 - 所有用户可见
+        buttons.push(`
+            <button class="action-btn download-btn" data-action="download" data-id="${firmware.id}">
+                <i class="fas fa-download"></i> 下载
+            </button>
+        `);
 
         // 测试流程按钮
         if (firmware.environment === 'test') {
