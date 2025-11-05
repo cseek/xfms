@@ -62,7 +62,7 @@ body {
 }
 
 .menu-item {
-    display: flex;
+    display: block;
     align-items: center;
     padding: 12px 20px;
     color: #bdc3c7;
