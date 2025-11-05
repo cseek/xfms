@@ -9,11 +9,11 @@ class Dashboard {
         await this.checkAuth();
         await this.loadUserInfo();
         this.setupEventListeners();
-        
+
         // 在初始化时加载模块和项目数据到过滤器
         await firmwareManager.loadModulesForSelect();
         await firmwareManager.loadProjectsForSelect();
-        
+
         this.loadCurrentPage();
     }
 
@@ -160,6 +160,16 @@ class Dashboard {
         document.getElementById('pageTitle').textContent = titles[pageName] || pageName;
 
         this.currentPage = pageName;
+
+        // 如果是固件管理页面，默认激活第一个标签页（上传固件）
+        if (pageName === 'firmware-management') {
+            this.switchTab('upload');
+        }
+
+        // 如果是系统管理页面，默认激活第一个标签页（用户管理）
+        if (pageName === 'system-management') {
+            this.switchTab('users');
+        }
 
         // 加载页面数据
         this.loadPageData(pageName);
