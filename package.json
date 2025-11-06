@@ -23,5 +23,5 @@
   },
   "keywords": ["firmware", "management", "nodejs"],
   "author": "Aurson",
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
