@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>固件管理系统 - 固件列表</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div id="sidebarContainer"></div>
+        <main class="main-content">
+            <div id="headerContainer"></div>
+            <div class="content-area">
+                <div class="page active">
+                    <div class="page-header">
+                        <div class="filters">
+                            <select id="moduleFilter" class="filter-select">
+                                <option value="">所有模块</option>
+                            </select>
+                            <select id="projectFilter" class="filter-select">
+                                <option value="">所有项目</option>
+                            </select>
+                            <select id="environmentFilter" class="filter-select">
+                                <option value="">所有环境</option>
+                                <option value="test">测试线</option>
+                                <option value="release">发布线</option>
+                            </select>
+                            <button id="searchBtn" class="search-btn">
+                                <i class="fas fa-search"></i>
+                                搜索
+                            </button>
+                        </div>
+                        <button id="uploadBtn" class="upload-btn" style="display:none;">
+                            <i class="fas fa-upload"></i>
+                            上传固件
+                        </button>
+                    </div>
+                    <div class="firmware-grid" id="firmwareGrid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script src="../js/firmware_manager.js"></script>
+    <script src="../js/modal_manager.js"></script>
+    <script src="../js/pages/firmware-list-page.js"></script>
+</body>
+</html>

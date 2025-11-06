@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 showMessage('登录成功！', 'success');
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/firmwares';
                 }, 1000);
             } else {
                 showMessage(data.error || '登录失败', 'error');

@@ -384,7 +384,7 @@ class FirmwareManager {
                 await this.loadFirmwares();
                 
                 // 切换到固件列表页面
-                dashboard.switchPage('firmware-list');
+                window.location.href = '/firmwares';
             } else {
                 throw new Error(data.error || 'Upload failed');
             }

@@ -70,6 +70,13 @@ app.use((req, res, next) => {
     next();
 });
 
+const ensureAuthenticated = (req, res, next) => {
+    if (!req.session.user) {
+        return res.redirect('/');
+    }
+    next();
+};
+
 // 路由配置
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -82,11 +89,24 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/login.html'));
 });
 
+app.get('/firmwares', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/firmware-list.html'));
+});
+
+app.get('/manage/firmware', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/firmware-management.html'));
+});
+
+app.get('/system', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/system-management.html'));
+});
+
+app.get('/about', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/about.html'));
+});
+
 app.get('/dashboard', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/');
-    }
-    res.sendFile(path.join(__dirname, '../client/html/dashboard.html'));
+    res.redirect('/firmwares');
 });
 
 // 错误处理中间件
