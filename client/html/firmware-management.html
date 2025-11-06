@@ -76,16 +76,14 @@
                                     <div class="form-row form-row--file">
                                         <div class="form-group form-group--file">
                                             <label for="firmwareFile">固件文件 *</label>
-                                            <div class="file-upload">
+                                            <div class="file-picker" data-role="file-picker">
                                                 <input type="file" id="firmwareFile" name="firmware"
                                                     accept=".bin,.hex,.img,.zip,.tar.gz,.pkg,.deb,.app,.exe,.msi,.dmg,.rpm,.xpk,.apk"
                                                     required>
-                                                <label class="file-upload__trigger" for="firmwareFile" role="button"
-                                                    tabindex="0">
-                                                    <i class="fas fa-folder-open"></i>
-                                                    选择固件文件
+                                                <label class="file-picker__control" for="firmwareFile" tabindex="0">
+                                                    <span class="file-picker__button">选择固件文件</span>
+                                                    <span class="file-picker__name" data-role="file-name">尚未选择文件</span>
                                                 </label>
-                                                <span class="file-upload__name" data-role="file-name">尚未选择文件</span>
                                             </div>
                                         </div>
                                         <div class="form-group form-group--submit">

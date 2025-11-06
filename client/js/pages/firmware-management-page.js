@@ -80,8 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const fileInput = document.getElementById('firmwareFile');
-            const fileNameEl = document.querySelector('[data-role="file-name"]');
-            const fileTrigger = document.querySelector('.file-upload__trigger');
+            const filePicker = document.querySelector('[data-role="file-picker"]');
+            const fileNameEl = filePicker?.querySelector('[data-role="file-name"]');
+            const fileControl = filePicker?.querySelector('.file-picker__control');
             const defaultFileText = '尚未选择文件';
 
             const updateFileName = () => {
@@ -95,7 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileNameEl && (fileNameEl.textContent = defaultFileText);
             });
 
-            fileTrigger?.addEventListener('keydown', (event) => {
+            fileControl?.addEventListener('click', (event) => {
+                event.preventDefault();
+                fileInput?.click();
+            });
+
+            fileControl?.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
                     fileInput?.click();

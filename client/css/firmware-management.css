@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 01:43:27
+ * @LastEditTime: 2025-11-07 05:45:45
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -22,14 +22,13 @@
  * limitations under the License.
  */
  
-
 .upload-card {
     background: #fff;
     border-radius: 18px;
     padding: 32px 36px 36px;
     box-shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.45);
     border: 1px solid rgba(15, 23, 42, 0.08);
-    max-width: 760px;
+    max-width: 950px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -81,24 +80,13 @@
     align-items: center;
 }
 
-.file-upload {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: #f3f4f6;
-    border: 1px dashed rgba(102, 126, 234, 0.4);
-    border-radius: 12px;
-    padding: 14px 18px;
+.file-picker {
     position: relative;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.file-upload:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(123, 124, 127, 0.18);
-}
-
-.file-upload input[type="file"] {
+.file-picker input[type="file"] {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -110,35 +98,44 @@
     border: 0;
 }
 
-.file-upload__trigger {
+.file-picker__control {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(102, 126, 234, 0.35);
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.file-picker__control:hover {
+    border-color: var(--primary-color);
+    background: #fff;
+    box-shadow: 0 8px 20px -18px rgba(15, 23, 42, 0.45);
+}
+
+.file-picker__control:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+}
+
+.file-picker__button {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    padding: 8px 18px;
     background: var(--primary-color);
     color: #fff;
     border-radius: 8px;
-    padding: 10px 18px;
-    font-weight: 600;
     font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
-    outline: none;
+    font-weight: 600;
+    flex-shrink: 0;
 }
 
-.file-upload__trigger:hover {
-    background: var(--secondary-color);
-    transform: translateY(-1px);
-}
-
-.file-upload__trigger:focus-visible {
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.35);
-}
-
-.file-upload__trigger i {
-    font-size: 16px;
-}
-
-.file-upload__name {
+.file-picker__name {
     font-size: 14px;
     color: #4b5563;
     flex: 1;
@@ -146,12 +143,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.file-upload__hint {
-    font-size: 12px;
-    color: #6b7280;
-    line-height: 1.5;
 }
 
 @media (max-width: 768px) {
@@ -166,13 +157,19 @@
         gap: 12px;
     }
 
-    .file-upload {
+    .file-picker__control {
         flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
+        align-items: flex-start;
+        gap: 10px;
     }
 
-    .file-upload__name {
+    .file-picker__button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .file-picker__name {
+        width: 100%;
         white-space: normal;
         word-break: break-all;
     }
