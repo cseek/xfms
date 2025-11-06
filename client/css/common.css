@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 01:43:02
+ * @LastEditTime: 2025-11-07 06:13:29
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -442,11 +442,11 @@ body {
     border: none;
     padding: 12px 30px;
     border-radius: 6px;
+    width: 100%;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
     align-items: center;
     gap: 8px;
 }
