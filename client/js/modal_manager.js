@@ -399,6 +399,34 @@ class ModalManager {
             submitBtn.disabled = false;
         }
     }
+
+    showFirmwareDetails(firmware) {
+        const fileName = firmware.file_path ? firmware.file_path.split('/').pop() : '未知文件';
+        const testReportName = firmware.test_report_path ? firmware.test_report_path.split('/').pop() : null;
+
+        const content = `
+            <div class="firmware-details">
+                <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
+                <div class="detail-row"><strong>版本：</strong> ${firmware.version || '-'}</div>
+                <div class="detail-row"><strong>上传者：</strong> ${firmware.uploader_name || '-'}</div>
+                <div class="detail-row"><strong>上传时间：</strong> ${firmware.created_at ? new Date(firmware.created_at).toLocaleString('zh-CN') : '-'}</div>
+                <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
+                <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'} &nbsp; <strong>环境：</strong> ${firmware.environment || '-'}</div>
+                <hr />
+                <div class="detail-row"><strong>发布描述：</strong></div>
+                <div class="detail-block">${firmware.description ? firmware.description.replace(/\n/g, '<br/>') : '<em>无</em>'}</div>
+                <div class="detail-row"><strong>补充信息：</strong></div>
+                <div class="detail-block">${firmware.additional_info ? firmware.additional_info.replace(/\n/g, '<br/>') : '<em>无</em>'}</div>
+                <div class="modal-actions" style="margin-top:12px; display:flex; gap:8px;">
+                    <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">关闭</button>
+                    <a class="btn-submit" href="/api/firmwares/${firmware.id}/download" style="text-decoration:none; display:inline-block; padding:6px 10px; background:#1976d2; color:#fff; border-radius:4px;">下载固件</a>
+                    ${testReportName ? `<a class="btn-submit" href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none; display:inline-block; padding:6px 10px; background:#4caf50; color:#fff; border-radius:4px;">下载测试报告</a>` : ''}
+                </div>
+            </div>
+        `;
+
+        this.showModal(`固件详情 - ${firmware.version || ''}`, content);
+    }
 }
 
 // 初始化模态框管理器

@@ -160,14 +160,23 @@ class FirmwareManager {
             `);
         }
 
+        // 详情按钮 - 所有用户可见
+        buttons.unshift(`
+            <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
+                <i class="fas fa-info-circle"></i> 详情
+            </button>
+        `);
+
         return buttons.join('');
     }
 
     attachFirmwareEventListeners() {
         document.querySelectorAll('.firmware-card [data-action]').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const action = e.target.getAttribute('data-action');
-                const firmwareId = e.target.getAttribute('data-id');
+                // use currentTarget to avoid clicks on inner <i> or text nodes
+                const target = e.currentTarget;
+                const action = target.getAttribute('data-action');
+                const firmwareId = target.getAttribute('data-id');
                 this.handleFirmwareAction(action, firmwareId);
             });
         });
@@ -186,6 +195,10 @@ class FirmwareManager {
                 break;
             case 'upload-test-report':
                 modalManager.showUploadTestReportModal(firmwareId);
+                break;
+            case 'details':
+                // 使用 modal 显示完整信息
+                modalManager.showFirmwareDetails(firmware);
                 break;
             case 'release':
                 await this.updateFirmwareStatus(firmwareId, 'released');
