@@ -130,7 +130,7 @@ class FirmwareManager {
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-file-alt"></i>
-                        <span class="meta-truncated">发布描述: ${ (firmware.description && String(firmware.description).trim()) ? this.truncateAndEscape(firmware.description, 80) : '无' }</span>
+                        <span class="meta-truncated">固件描述: ${ (firmware.description && String(firmware.description).trim()) ? this.truncateAndEscape(firmware.description, 80) : '无' }</span>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-info-circle"></i>
