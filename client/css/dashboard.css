@@ -333,6 +333,16 @@ body {
     text-align: center;
 }
 
+/* 一行截断文本，用于卡片中的描述和补充信息 */
+.meta-truncated {
+    display: inline-block;
+    max-width: calc(100% - 40px); /* 留出图标和间距 */
+    white-space: nowrap; /* 单行显示 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 以省略号(...)结尾 */
+    vertical-align: middle;
+}
+
 .firmware-actions {
     display: flex;
     gap: 8px;

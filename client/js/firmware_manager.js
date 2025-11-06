@@ -29,6 +29,25 @@ class FirmwareManager {
         this.projects = [];
     }
 
+    // 简单的 HTML 转义，防止插入不安全的内容
+    escapeHtml(str) {
+        if (!str && str !== 0) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // 截断为单行并以三个点结尾（如果超过长度）
+    truncateAndEscape(text, maxChars = 80) {
+        if (text == null) return '';
+        const s = String(text);
+        if (s.length <= maxChars) return this.escapeHtml(s);
+        return this.escapeHtml(s.slice(0, Math.max(0, maxChars - 3)) + '...');
+    }
+
     async loadFirmwares(filters = {}) {
         try {
             // 构建查询参数
@@ -87,12 +106,12 @@ class FirmwareManager {
                     ${firmware.description ? `
                     <div class="meta-item">
                         <i class="fas fa-file-alt"></i>
-                        <span>发布描述: ${firmware.description}</span>
+                        <span class="meta-truncated">发布描述: ${this.truncateAndEscape(firmware.description, 80)}</span>
                     </div>` : ''}
                     ${firmware.additional_info ? `
                     <div class="meta-item">
                         <i class="fas fa-info-circle"></i>
-                        <span>补充信息: ${firmware.additional_info}</span>
+                        <span class="meta-truncated">补充信息: ${this.truncateAndEscape(firmware.additional_info, 80)}</span>
                     </div>` : ''}
                 </div>
                 <div class="firmware-actions">
