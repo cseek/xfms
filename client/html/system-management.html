@@ -42,10 +42,13 @@
                         <div id="users" class="tab-pane">
                             <div class="management-header">
                                 <h3>用户管理</h3>
-                                <button id="addUserBtn" class="add-btn">
-                                    <i class="fas fa-plus"></i>
-                                    添加用户
-                                </button>
+                                <div class="management-actions">
+                                    <input type="search" id="userSearch" class="management-search-input" placeholder="搜索用户..." aria-label="搜索用户">
+                                    <button id="addUserBtn" class="add-btn">
+                                        <i class="fas fa-plus"></i>
+                                        添加用户
+                                    </button>
+                                </div>
                             </div>
                             <div class="users-table" id="usersTable"></div>
                         </div>

@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 06:13:29
+ * @LastEditTime: 2025-11-07 07:21:10
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -43,7 +43,7 @@ body {
     --light-color: #ecf0f1;
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
-    --header-height: 60px;
+    --header-height: 65px;
 }
 
 body {
@@ -463,6 +463,34 @@ body {
     margin-bottom: 20px;
 }
 
+.management-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.management-search-input {
+    padding: 10px 14px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 220px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    color: inherit;
+}
+
+.management-search-input::placeholder {
+    color: #9ca3af;
+}
+
+.management-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
 .add-btn {
     background: var(--primary-color);
     color: #fff;
@@ -681,5 +709,19 @@ body {
 
     .form-row {
         grid-template-columns: 1fr;
+    }
+
+    .management-actions {
+        width: 100%;
+    }
+
+    .management-actions .management-search-input,
+    .management-actions .add-btn {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .management-actions .add-btn {
+        justify-content: center;
     }
 }

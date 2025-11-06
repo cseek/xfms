@@ -27,6 +27,7 @@ class UserManager {
         this.users = [];
         this.pageSize = 10;
         this.currentPage = 1;
+        this.searchQuery = '';
     }
 
     async loadUsers() {
@@ -43,21 +44,57 @@ class UserManager {
         }
     }
 
+    setSearchQuery(query) {
+        this.searchQuery = query ?? '';
+        this.currentPage = 1;
+        this.renderUsers();
+    }
+
+    getFilteredUsers() {
+        const keyword = this.searchQuery.trim().toLowerCase();
+        if (!keyword) {
+            return this.users.slice();
+        }
+
+        return this.users.filter(user => {
+            const username = (user.username || '').toLowerCase();
+            const email = (user.email || '').toLowerCase();
+            const role = (user.role || '').toLowerCase();
+            const roleLabel = (this.getRoleDisplayName(user.role) || '').toLowerCase();
+            return username.includes(keyword) ||
+                email.includes(keyword) ||
+                role.includes(keyword) ||
+                roleLabel.includes(keyword);
+        });
+    }
+
     renderUsers() {
         const table = document.getElementById('usersTable');
         if (!table) return;
 
-        if (this.users.length === 0) {
-            table.innerHTML = '<div class="no-data">暂无用户数据</div>';
+        const pageContainer = document.getElementById('users') || table.parentElement;
+        const searchInput = document.getElementById('userSearch');
+        if (searchInput && searchInput.value !== this.searchQuery) {
+            searchInput.value = this.searchQuery;
+        }
+
+        const filteredUsers = this.getFilteredUsers();
+
+        if (filteredUsers.length === 0) {
+            const message = this.searchQuery.trim() ? '未找到匹配的用户' : '暂无用户数据';
+            table.innerHTML = `<div class="no-data">${message}</div>`;
+            const oldPag = pageContainer?.querySelector('.pagination');
+            oldPag?.remove();
             return;
         }
+
         // pagination for users
-        const total = this.users.length;
+        const total = filteredUsers.length;
         const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
         if (this.currentPage > totalPages) this.currentPage = totalPages;
         const start = (this.currentPage - 1) * this.pageSize;
         const end = start + this.pageSize;
-        const pageItems = this.users.slice(start, end);
+        const pageItems = filteredUsers.slice(start, end);
 
         table.innerHTML = `
             <div class="table-container">
@@ -98,7 +135,6 @@ class UserManager {
         paginationHtml += '</div>';
 
         // insert pagination into the users tab container
-        const pageContainer = document.getElementById('users') || table.parentElement;
         const oldPag = pageContainer.querySelector('.pagination');
         if (oldPag) oldPag.remove();
         pageContainer.insertAdjacentHTML('beforeend', paginationHtml);

@@ -117,6 +117,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('addProjectBtn')?.addEventListener('click', () => {
                 modalManager.showAddProjectModal();
             });
+
+            const moduleSearchInput = document.getElementById('moduleSearch');
+            moduleSearchInput?.addEventListener('input', (event) => {
+                firmwareManager.setModuleSearchQuery(event.target.value);
+            });
+
+            moduleSearchInput?.addEventListener('search', (event) => {
+                firmwareManager.setModuleSearchQuery(event.target.value);
+            });
+
+            const projectSearchInput = document.getElementById('projectSearch');
+            projectSearchInput?.addEventListener('input', (event) => {
+                firmwareManager.setProjectSearchQuery(event.target.value);
+            });
+
+            projectSearchInput?.addEventListener('search', (event) => {
+                firmwareManager.setProjectSearchQuery(event.target.value);
+            });
         }
     });
 });

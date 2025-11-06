@@ -27,6 +27,8 @@ class FirmwareManager {
         this.firmwares = [];
         this.modules = [];
         this.projects = [];
+        this.moduleSearchQuery = '';
+        this.projectSearchQuery = '';
         // pagination state
         this.pageSize = 10; // items per page
         this.currentPage = 1; // firmware list page
@@ -425,21 +427,71 @@ class FirmwareManager {
         }
     }
 
+    setModuleSearchQuery(query) {
+        this.moduleSearchQuery = query ?? '';
+        this.modulesPage = 1;
+        this.renderModules();
+    }
+
+    getFilteredModules() {
+        const keyword = this.moduleSearchQuery.trim().toLowerCase();
+        if (!keyword) {
+            return this.modules.slice();
+        }
+
+        return this.modules.filter(module => {
+            const name = (module.name || '').toLowerCase();
+            const description = (module.description || '').toLowerCase();
+            return name.includes(keyword) || description.includes(keyword);
+        });
+    }
+
+    setProjectSearchQuery(query) {
+        this.projectSearchQuery = query ?? '';
+        this.projectsPage = 1;
+        this.renderProjects();
+    }
+
+    getFilteredProjects() {
+        const keyword = this.projectSearchQuery.trim().toLowerCase();
+        if (!keyword) {
+            return this.projects.slice();
+        }
+
+        return this.projects.filter(project => {
+            const name = (project.name || '').toLowerCase();
+            const description = (project.description || '').toLowerCase();
+            return name.includes(keyword) || description.includes(keyword);
+        });
+    }
+
     renderModules() {
         const list = document.getElementById('modulesList');
         if (!list) return;
 
-        if (this.modules.length === 0) {
-            list.innerHTML = '<div class="no-data">暂无模块数据</div>';
+        const pageContainer = document.getElementById('modules') || list.parentElement;
+        const searchInput = document.getElementById('moduleSearch');
+        if (searchInput && searchInput.value !== this.moduleSearchQuery) {
+            searchInput.value = this.moduleSearchQuery;
+        }
+
+        const filteredModules = this.getFilteredModules();
+
+        if (filteredModules.length === 0) {
+            const message = this.moduleSearchQuery.trim() ? '未找到匹配的模块' : '暂无模块数据';
+            list.innerHTML = `<div class="no-data">${message}</div>`;
+            const oldPag = pageContainer?.querySelector('.pagination');
+            oldPag?.remove();
             return;
         }
+
         // pagination for modules
-        const total = this.modules.length;
+        const total = filteredModules.length;
         const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
         if (this.modulesPage > totalPages) this.modulesPage = totalPages;
         const start = (this.modulesPage - 1) * this.pageSize;
         const end = start + this.pageSize;
-        const pageItems = this.modules.slice(start, end);
+        const pageItems = filteredModules.slice(start, end);
 
         list.innerHTML = pageItems.map(module => `
             <div class="management-item">
@@ -463,8 +515,7 @@ class FirmwareManager {
         paginationHtml += '</div>';
 
         // insert pagination into the modules tab (not the whole page bottom)
-        const pageContainer = document.getElementById('modules') || list.parentElement;
-        const oldPag = pageContainer.querySelector('.pagination');
+    const oldPag = pageContainer.querySelector('.pagination');
         if (oldPag) oldPag.remove();
         pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
@@ -491,17 +542,29 @@ class FirmwareManager {
         const list = document.getElementById('projectsList');
         if (!list) return;
 
-        if (this.projects.length === 0) {
-            list.innerHTML = '<div class="no-data">暂无项目数据</div>';
+        const pageContainer = document.getElementById('projects') || list.parentElement;
+        const searchInput = document.getElementById('projectSearch');
+        if (searchInput && searchInput.value !== this.projectSearchQuery) {
+            searchInput.value = this.projectSearchQuery;
+        }
+
+        const filteredProjects = this.getFilteredProjects();
+
+        if (filteredProjects.length === 0) {
+            const message = this.projectSearchQuery.trim() ? '未找到匹配的项目' : '暂无项目数据';
+            list.innerHTML = `<div class="no-data">${message}</div>`;
+            const oldPag = pageContainer?.querySelector('.pagination');
+            oldPag?.remove();
             return;
         }
+
         // pagination for projects
-        const total = this.projects.length;
+        const total = filteredProjects.length;
         const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
         if (this.projectsPage > totalPages) this.projectsPage = totalPages;
         const start = (this.projectsPage - 1) * this.pageSize;
         const end = start + this.pageSize;
-        const pageItems = this.projects.slice(start, end);
+        const pageItems = filteredProjects.slice(start, end);
 
         list.innerHTML = pageItems.map(project => `
             <div class="management-item">
@@ -524,8 +587,7 @@ class FirmwareManager {
         paginationHtml += `<button class="projects-next" data-page="${Math.min(totalPages, this.projectsPage + 1)}" ${this.projectsPage===totalPages? 'disabled':''}>下一页</button>`;
         paginationHtml += '</div>';
 
-        const pageContainer = document.getElementById('projects') || list.parentElement;
-        const oldPag = pageContainer.querySelector('.pagination');
+    const oldPag = pageContainer.querySelector('.pagination');
         if (oldPag) oldPag.remove();
         pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 

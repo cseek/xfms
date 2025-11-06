@@ -97,20 +97,26 @@
                         <div id="modules" class="tab-pane">
                             <div class="management-header">
                                 <h3>模块管理</h3>
-                                <button id="addModuleBtn" class="add-btn">
-                                    <i class="fas fa-plus"></i>
-                                    添加模块
-                                </button>
+                                <div class="management-actions">
+                                    <input type="search" id="moduleSearch" class="management-search-input" placeholder="搜索模块..." aria-label="搜索模块">
+                                    <button id="addModuleBtn" class="add-btn">
+                                        <i class="fas fa-plus"></i>
+                                        添加模块
+                                    </button>
+                                </div>
                             </div>
                             <div class="management-list" id="modulesList"></div>
                         </div>
                         <div id="projects" class="tab-pane">
                             <div class="management-header">
                                 <h3>项目管理</h3>
-                                <button id="addProjectBtn" class="add-btn">
-                                    <i class="fas fa-plus"></i>
-                                    添加项目
-                                </button>
+                                <div class="management-actions">
+                                    <input type="search" id="projectSearch" class="management-search-input" placeholder="搜索项目..." aria-label="搜索项目">
+                                    <button id="addProjectBtn" class="add-btn">
+                                        <i class="fas fa-plus"></i>
+                                        添加项目
+                                    </button>
+                                </div>
                             </div>
                             <div class="management-list" id="projectsList"></div>
                         </div>

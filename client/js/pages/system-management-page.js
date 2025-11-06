@@ -71,6 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('addUserBtn')?.addEventListener('click', () => {
                 modalManager.showAddUserModal();
             });
+
+            const userSearchInput = document.getElementById('userSearch');
+            userSearchInput?.addEventListener('input', (event) => {
+                userManager.setSearchQuery(event.target.value);
+            });
+
+            userSearchInput?.addEventListener('search', (event) => {
+                userManager.setSearchQuery(event.target.value);
+            });
         }
     });
 });
