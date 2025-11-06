@@ -331,6 +331,14 @@ body {
 .version-status.released { background-color: #20c997; }
 .version-status.obsolete { background-color: #000; }
 
+/* 卡片左侧边线跟随状态颜色 */
+.firmware-card.pending { border-left-color: #6c757d; }
+.firmware-card.testing { border-left-color: #17a2b8; }
+.firmware-card.passed { border-left-color: #28a745; }
+.firmware-card.failed { border-left-color: #dc3545; }
+.firmware-card.released { border-left-color: #20c997; }
+.firmware-card.obsolete { border-left-color: #000; }
+
 .version-status {
     display: inline-flex;
     align-items: center;

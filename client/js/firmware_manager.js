@@ -104,7 +104,7 @@ class FirmwareManager {
     const pageItems = this.firmwares.slice(start, end);
 
         grid.innerHTML = pageItems.map(firmware => `
-            <div class="firmware-card" data-id="${firmware.id}">
+            <div class="firmware-card ${firmware.status || ''}" data-id="${firmware.id}">
                 <div class="firmware-header">
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
