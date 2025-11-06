@@ -123,16 +123,14 @@ class FirmwareManager {
                         <i class="fas fa-database"></i>
                         <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>
                     </div>
-                    ${firmware.description ? `
                     <div class="meta-item">
                         <i class="fas fa-file-alt"></i>
-                        <span class="meta-truncated">发布描述: ${this.truncateAndEscape(firmware.description, 80)}</span>
-                    </div>` : ''}
-                    ${firmware.additional_info ? `
+                        <span class="meta-truncated">发布描述: ${ (firmware.description && String(firmware.description).trim()) ? this.truncateAndEscape(firmware.description, 80) : '无' }</span>
+                    </div>
                     <div class="meta-item">
                         <i class="fas fa-info-circle"></i>
-                        <span class="meta-truncated">补充信息: ${this.truncateAndEscape(firmware.additional_info, 80)}</span>
-                    </div>` : ''}
+                        <span class="meta-truncated">补充信息: ${ (firmware.additional_info && String(firmware.additional_info).trim()) ? this.truncateAndEscape(firmware.additional_info, 80) : '无' }</span>
+                    </div>
                 </div>
                 <div class="firmware-actions">
                     ${this.renderActionButtons(firmware)}
