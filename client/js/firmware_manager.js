@@ -108,9 +108,14 @@ class FirmwareManager {
                 <div class="firmware-header">
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
-                        <div class="version-status ${firmware.status || ''}">
-                            <span class="version-text">${firmware.version}</span>
-                            <span class="status-text">${this.getStatusDisplayName(firmware.status)}</span>
+                        <div style="display:inline-flex; align-items:center; gap:8px;">
+                            <div class="version-status ${firmware.status || ''}">
+                                <span class="version-text">${firmware.version}</span>
+                                <span class="status-text">${this.getStatusDisplayName(firmware.status)}</span>
+                            </div>
+                            <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
+                                <i class="fas fa-info-circle"></i> 详情
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -150,7 +155,7 @@ class FirmwareManager {
         // 添加事件监听器
         this.attachFirmwareEventListeners();
         // attach pagination listeners
-        const pag = document.querySelector('.pagination');
+    const pag = grid.querySelector('.pagination');
         if (pag) {
             const prevBtn = pag.querySelector('.page-prev');
             const nextBtn = pag.querySelector('.page-next');
@@ -207,12 +212,7 @@ class FirmwareManager {
             `);
         }
 
-        // 详情按钮 - 所有用户可见
-        buttons.unshift(`
-            <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
-                <i class="fas fa-info-circle"></i> 详情
-            </button>
-        `);
+        // 详情按钮改为放置在状态后方（在 renderFirmwares 中内联渲染），这里不再加入到按钮组中
 
         return buttons.join('');
     }
