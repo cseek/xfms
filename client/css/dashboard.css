@@ -306,14 +306,20 @@ body {
 }
 
 .firmware-version {
-    background: var(--primary-color);
-    color: white;
     padding: 2px 8px;
     border-radius: 12px;
     font-weight: 600;
     font-size: 14px;
-    color: #f6ff00;
+    color: white;
 }
+
+/* 使版本标签的背景与状态徽章一致 */
+.firmware-version.pending { background-color: #6c757d; }
+.firmware-version.testing { background-color: #17a2b8; }
+.firmware-version.passed { background-color: #28a745; }
+.firmware-version.failed { background-color: #dc3545; }
+.firmware-version.released { background-color: #20c997; }
+.firmware-version.obsolete { background-color: #6c757d; }
 
 .firmware-meta {
     margin-bottom: 15px;

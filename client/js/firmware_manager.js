@@ -86,7 +86,7 @@ class FirmwareManager {
                 <div class="firmware-header">
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
-                        <div class="firmware-version">${firmware.version}</div>
+                        <div class="firmware-version ${firmware.status || ''}">${firmware.version}</div>
                     </div>
                     <span class="status-badge ${firmware.status}">${this.getStatusDisplayName(firmware.status)}</span>
                 </div>
