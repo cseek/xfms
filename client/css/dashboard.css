@@ -339,6 +339,61 @@ body {
 .firmware-card.released { border-left-color: #20c997; }
 .firmware-card.obsolete { border-left-color: #000; }
 
+/* 固件列表内的分页：在固件列表容器底部居中（不包含侧边栏） */
+#firmware-list .pagination {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin: 16px auto;
+}
+
+#firmware-list .pagination .page-prev,
+#firmware-list .pagination .page-next {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08);
+    background: white;
+    cursor: pointer;
+}
+
+#firmware-list .pagination .page-prev[disabled],
+#firmware-list .pagination .page-next[disabled] {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* Modules / Projects / Users pagination share the same look and are placed inside their respective tab panes */
+#modules .pagination,
+#projects .pagination,
+#users .pagination,
+.management-list .pagination {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    margin: 16px auto;
+}
+
+#modules .pagination button,
+#projects .pagination button,
+#users .pagination button,
+.management-list .pagination button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08);
+    background: white;
+    cursor: pointer;
+}
+
+#modules .pagination button[disabled],
+#projects .pagination button[disabled],
+#users .pagination button[disabled],
+.management-list .pagination button[disabled] {
+    opacity: 0.5;
+    cursor: default;
+}
+
 .version-status {
     display: inline-flex;
     align-items: center;

@@ -143,19 +143,23 @@ class FirmwareManager {
             </div>
         `).join('');
 
-        // append pagination controls: show current/total (e.g. "1/16") centered at screen bottom
-        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        // build pagination controls (show current/total)
+        let paginationHtml = '<div class="pagination">';
         paginationHtml += `<button class="page-prev" data-page="${Math.max(1, this.currentPage - 1)}" ${this.currentPage===1? 'disabled':''}>上一页</button>`;
         paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.currentPage}/${totalPages}</span>`;
         paginationHtml += `<button class="page-next" data-page="${Math.min(totalPages, this.currentPage + 1)}" ${this.currentPage===totalPages? 'disabled':''}>下一页</button>`;
         paginationHtml += '</div>';
 
-        grid.innerHTML += paginationHtml;
+        // 插入到固件列表页面区域底部（不包含侧边栏），先移除旧的分页节点再插入，避免重复
+        const pageContainer = document.getElementById('firmware-list') || grid.parentElement;
+        const oldPag = pageContainer.querySelector('.pagination');
+        if (oldPag) oldPag.remove();
+        pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
         // 添加事件监听器
         this.attachFirmwareEventListeners();
-        // attach pagination listeners
-    const pag = grid.querySelector('.pagination');
+        // attach pagination listeners (inside the firmware-list container)
+        const pag = pageContainer.querySelector('.pagination');
         if (pag) {
             const prevBtn = pag.querySelector('.page-prev');
             const nextBtn = pag.querySelector('.page-next');
@@ -451,17 +455,22 @@ class FirmwareManager {
             </div>
         `).join('');
 
-        // pagination controls (compact current/total at bottom center)
-        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        // pagination controls (compact current/total) — insert into modules tab container
+        let paginationHtml = '<div class="pagination">';
         paginationHtml += `<button class="modules-prev" data-page="${Math.max(1, this.modulesPage - 1)}" ${this.modulesPage===1? 'disabled':''}>上一页</button>`;
         paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.modulesPage}/${totalPages}</span>`;
         paginationHtml += `<button class="modules-next" data-page="${Math.min(totalPages, this.modulesPage + 1)}" ${this.modulesPage===totalPages? 'disabled':''}>下一页</button>`;
         paginationHtml += '</div>';
-        list.innerHTML += paginationHtml;
+
+        // insert pagination into the modules tab (not the whole page bottom)
+        const pageContainer = document.getElementById('modules') || list.parentElement;
+        const oldPag = pageContainer.querySelector('.pagination');
+        if (oldPag) oldPag.remove();
+        pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
         this.attachManagementEventListeners('modules');
-        // pagination listeners
-        const pagModules = document.querySelector('.pagination');
+        // pagination listeners (attach inside the modules tab)
+        const pagModules = pageContainer.querySelector('.pagination');
         if (pagModules) {
             const prev = pagModules.querySelector('.modules-prev');
             const next = pagModules.querySelector('.modules-next');
@@ -508,17 +517,21 @@ class FirmwareManager {
             </div>
         `).join('');
 
-        // pagination controls (compact current/total at bottom center)
-        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        // pagination controls (compact current/total) — insert into projects tab container
+        let paginationHtml = '<div class="pagination">';
         paginationHtml += `<button class="projects-prev" data-page="${Math.max(1, this.projectsPage - 1)}" ${this.projectsPage===1? 'disabled':''}>上一页</button>`;
         paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.projectsPage}/${totalPages}</span>`;
         paginationHtml += `<button class="projects-next" data-page="${Math.min(totalPages, this.projectsPage + 1)}" ${this.projectsPage===totalPages? 'disabled':''}>下一页</button>`;
         paginationHtml += '</div>';
-        list.innerHTML += paginationHtml;
+
+        const pageContainer = document.getElementById('projects') || list.parentElement;
+        const oldPag = pageContainer.querySelector('.pagination');
+        if (oldPag) oldPag.remove();
+        pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
         this.attachManagementEventListeners('projects');
-        // pagination listeners
-        const pagProjects = document.querySelector('.pagination');
+        // pagination listeners (attach inside the projects tab)
+        const pagProjects = pageContainer.querySelector('.pagination');
         if (pagProjects) {
             const prev = pagProjects.querySelector('.projects-prev');
             const next = pagProjects.querySelector('.projects-next');

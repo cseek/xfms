@@ -90,17 +90,22 @@ class UserManager {
             </div>
         `;
 
-        // pagination controls (compact current/total at bottom center)
-        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        // pagination controls (compact current/total) - insert into users tab container
+        let paginationHtml = '<div class="pagination">';
         paginationHtml += `<button class="users-prev" data-page="${Math.max(1, this.currentPage - 1)}" ${this.currentPage===1? 'disabled':''}>上一页</button>`;
         paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.currentPage}/${totalPages}</span>`;
         paginationHtml += `<button class="users-next" data-page="${Math.min(totalPages, this.currentPage + 1)}" ${this.currentPage===totalPages? 'disabled':''}>下一页</button>`;
         paginationHtml += '</div>';
-        table.innerHTML += paginationHtml;
+
+        // insert pagination into the users tab container
+        const pageContainer = document.getElementById('users') || table.parentElement;
+        const oldPag = pageContainer.querySelector('.pagination');
+        if (oldPag) oldPag.remove();
+        pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
         this.attachUserEventListeners();
-        // pagination listeners
-        const pagUsers = document.querySelector('.pagination');
+        // pagination listeners (attach inside users tab)
+        const pagUsers = pageContainer.querySelector('.pagination');
         if (pagUsers) {
             const prev = pagUsers.querySelector('.users-prev');
             const next = pagUsers.querySelector('.users-next');
