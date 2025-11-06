@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-06 11:09:49
+ * @LastEditTime: 2025-11-06 13:42:29
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -47,7 +47,7 @@ const firmwareStorage = multer.diskStorage({
 const uploadFirmware = multer({ 
     storage: firmwareStorage,
     limits: {
-        fileSize: 100 * 1024 * 1024 // 100MB
+        fileSize: 1024 * 1024 * 1024 // 1GB
     }
 });
 
@@ -70,7 +70,7 @@ const testReportStorage = multer.diskStorage({
 const uploadTestReport = multer({ 
     storage: testReportStorage,
     limits: {
-        fileSize: 10 * 1024 * 1024 // 10MB
+        fileSize: 50 * 1024 * 1024 // 10MB
     }
 });
 
