@@ -287,7 +287,7 @@ body {
 .firmware-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-start; /* allow version/status to sit below the title inside firmware-info */
     margin-bottom: 12px;
     gap: 15px;
 }
@@ -295,6 +295,16 @@ body {
 .firmware-info {
     flex: 1;
     min-width: 0; /* 防止文本溢出 */
+}
+
+.firmware-info .version-status {
+    margin-top: 6px;
+}
+
+.header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .firmware-title {
@@ -313,13 +323,41 @@ body {
     color: white;
 }
 
-/* 使版本标签的背景与状态徽章一致 */
-.firmware-version.pending { background-color: #6c757d; }
-.firmware-version.testing { background-color: #17a2b8; }
-.firmware-version.passed { background-color: #28a745; }
-.firmware-version.failed { background-color: #dc3545; }
-.firmware-version.released { background-color: #20c997; }
-.firmware-version.obsolete { background-color: #6c757d; }
+/* 组合版：版本和状态共享同一背景（优先使用 .version-status） */
+.version-status.pending { background-color: #6c757d; }
+.version-status.testing { background-color: #17a2b8; }
+.version-status.passed { background-color: #28a745; }
+.version-status.failed { background-color: #dc3545; }
+.version-status.released { background-color: #20c997; }
+.version-status.obsolete { background-color: #000; }
+
+.version-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.version-status .version-text { display: inline-block; }
+.version-status .status-text {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.95;
+    padding-left: 6px;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    margin-left: 6px;
+}
+
+/* 保持旧的单独元素样式兼容（如果其他地方仍用 .firmware-version/.status-badge） */
+.firmware-version, .status-badge {
+    line-height: 1;
+    padding: 4px 8px;
+}
 
 .firmware-meta {
     margin-bottom: 15px;
