@@ -61,6 +61,17 @@ class ModalManager {
         document.body.style.overflow = 'hidden';
     }
 
+    // 简单 HTML 转义，防止注入
+    escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     hideModal() {
         this.modal.style.display = 'none';
         document.body.style.overflow = 'auto';
@@ -416,9 +427,9 @@ class ModalManager {
                 <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'} ${!testReportName && dashboard && dashboard.currentUser && dashboard.currentUser.role === 'tester' ? `<button type="button" class="btn-submit" onclick="modalManager.showUploadTestReportModal(${firmware.id})" style="margin-left:8px; padding:6px 8px;">上传测试报告</button>` : ''}</div>
                 <hr />
                 <div class="detail-row"><strong>发布描述：</strong></div>
-                <div class="detail-block">${firmware.description ? firmware.description.replace(/\n/g, '<br/>') : '<em>无</em>'}</div>
+                <div class="detail-block">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
                 <div class="detail-row"><strong>补充信息：</strong></div>
-                <div class="detail-block">${firmware.additional_info ? firmware.additional_info.replace(/\n/g, '<br/>') : '<em>无</em>'}</div>
+                <div class="detail-block">${firmware.additional_info ? this.escapeHtml(firmware.additional_info).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
                 
             </div>
         `;
