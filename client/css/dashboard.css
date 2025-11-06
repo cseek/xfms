@@ -160,6 +160,15 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* 侧边栏底部版本信息 */
+.sidebar-version {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #95a5a6;
+    letter-spacing: .4px;
+}
+
 /* 主内容区样式 */
 .main-content {
     flex: 1;
