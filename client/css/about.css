@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 01:45:02
+ * @LastEditTime: 2025-11-07 01:42:53
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -21,10 +21,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+.about-content {
+    display: grid;
+    gap: 20px;
+    align-content: start;
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    dashboard.init({
-        pageId: 'about',
-        pageTitle: '关于系统'
-    });
-});
+.about-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.about-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+}
+
+.about-card ul {
+    margin-left: 20px;
+    color: #555;
+    line-height: 1.8;
+}
