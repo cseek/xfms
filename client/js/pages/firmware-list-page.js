@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             await firmwareManager.loadProjectsForSelect();
             await firmwareManager.loadFirmwares();
 
-            const searchBtn = document.getElementById('searchBtn');
             const uploadBtn = document.getElementById('uploadBtn');
             const moduleFilter = document.getElementById('moduleFilter');
             const projectFilter = document.getElementById('projectFilter');
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             };
 
-            searchBtn?.addEventListener('click', triggerSearch);
             moduleFilter?.addEventListener('change', triggerSearch);
             projectFilter?.addEventListener('change', triggerSearch);
             environmentFilter?.addEventListener('change', triggerSearch);
