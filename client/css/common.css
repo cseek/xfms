@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 07:21:10
+ * @LastEditTime: 2025-11-07 07:35:09
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -461,6 +461,13 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    gap: 16px;
+}
+
+.management-title {
+    flex: 1;
+    display: flex;
+    align-items: center;
 }
 
 .management-actions {
@@ -479,6 +486,10 @@ body {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     background: #fff;
     color: inherit;
+}
+
+.management-search-input--standalone {
+    width: 15%;
 }
 
 .management-search-input::placeholder {
@@ -715,13 +726,17 @@ body {
         width: 100%;
     }
 
-    .management-actions .management-search-input,
-    .management-actions .add-btn {
+    .management-title,
+    .management-actions {
         flex: 1 1 100%;
+    }
+
+    .management-title .management-search-input--standalone,
+    .management-actions .add-btn {
         width: 100%;
     }
 
-    .management-actions .add-btn {
+    .management-actions {
         justify-content: center;
     }
 }
