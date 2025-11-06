@@ -419,7 +419,11 @@ class ModalManager {
                 <div class="detail-row"><strong>补充信息：</strong></div>
                 <div class="detail-block">${firmware.additional_info ? firmware.additional_info.replace(/\n/g, '<br/>') : '<em>无</em>'}</div>
                 <div class="modal-actions" style="margin-top:12px; display:flex; gap:8px; align-items:center;">
-                    ${testReportName ? `<a class="btn-submit" href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none; display:inline-block; padding:8px 12px;">下载测试报告</a>` : ''}
+                    ${testReportName ? `
+                        <a class="btn-submit" href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none; display:inline-block; padding:8px 12px;">下载测试报告</a>
+                    ` : (dashboard && dashboard.currentUser && dashboard.currentUser.role === 'tester' ? `
+                        <button type="button" class="btn-submit" onclick="modalManager.showUploadTestReportModal(${firmware.id})" style="padding:8px 12px;">提交测试报告</button>
+                    ` : '')}
                 </div>
             </div>
         `;

@@ -130,22 +130,7 @@ class FirmwareManager {
         const buttons = [];
         const userRole = dashboard.currentUser.role;
 
-        // 测试报告相关按钮 - 所有人均可下载
-        // if (userRole === 'tester' || userRole === 'admin') {
-            if (!firmware.test_report_path && userRole === 'tester') {
-                buttons.push(`
-                    <button class="action-btn u_test-btn" data-action="upload-test-report" data-id="${firmware.id}">
-                        <i class="fas fa-upload"></i> 提交测试报告
-                    </button>
-                `);
-            } else if (firmware.test_report_path) {
-                buttons.push(`
-                    <button class="action-btn d_test-btn" data-action="download-test-report" data-id="${firmware.id}">
-                        <i class="fas fa-file-download"></i> 获取测试报告
-                    </button>
-                `);
-            }
-        // }
+        // 测试报告相关按钮已移至详情页（详情页中会根据权限显示“获取/下载测试报告”或“提交测试报告”）
 
         // 下载按钮 - 所有用户可见
         buttons.push(`
