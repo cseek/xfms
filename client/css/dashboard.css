@@ -548,6 +548,27 @@ body {
     transition: all 0.3s ease;
 }
 
+/* 上传表单中特定 textarea 与版本输入框保持相同高度 */
+#uploadForm textarea {
+    width: 585px; /* target width requested */
+    height: 42px; /* target height requested (will be overridden per-field where needed) */
+    min-height: 42px;
+    resize: vertical; /* still allow users to expand if needed */
+}
+
+/* 指定上传表单里特定字段的高度为 43.5px */
+#uploadForm #version {
+    height: 43.5px;
+    line-height: 43.5px;
+}
+
+#uploadForm #description,
+#uploadForm #additionalInfo {
+    height: 43.5px;
+    min-height: 43.5px;
+    line-height: 20px; /* 保持多行文本时的可读性 */
+}
+
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
