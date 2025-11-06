@@ -548,7 +548,7 @@ body {
     padding: 0;
     border-radius: 10px;
     width: 90%;
-    max-width: 500px;
+    max-width: 720px; /* 增大模态宽度以便显示详情 */
     position: relative;
     animation: slideIn 0.3s ease;
 }
@@ -574,6 +574,53 @@ body {
 
 .modal-body {
     padding: 30px;
+}
+
+/* 兼容 id=modalBody 的样式（模态内容直接注入到 #modalBody） */
+#modalBody {
+    padding: 24px 28px;
+    max-height: 72vh;
+    overflow: auto;
+}
+
+/* 固件详情样式 */
+.firmware-details {
+    font-size: 14px;
+    color: #333;
+}
+
+.firmware-details .detail-row {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.firmware-details .detail-block {
+    background: #fbfdff;
+    border: 1px solid #eef4fb;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    color: #444;
+    max-height: 28vh;
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* 调整 modal 按钮样式，使其在详情中更统一 */
+#modalBody .btn-submit {
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+#modalBody .btn-submit:hover {
+    opacity: 0.95;
 }
 
 /* 表单验证样式 */
