@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 07:35:09
+ * @LastEditTime: 2025-11-07 07:45:56
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -73,6 +73,7 @@ body {
 }
 
 .sidebar-header {
+    height: var(--header-height);
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
@@ -177,6 +178,20 @@ body {
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+    margin-bottom: 2px;
+}
+
+.page-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 2px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
 }
 
 .user-info {

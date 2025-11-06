@@ -30,7 +30,9 @@ class FirmwareManager {
         this.moduleSearchQuery = '';
         this.projectSearchQuery = '';
         // pagination state
-        this.pageSize = 10; // items per page
+    this.pageSize = 10; // items per page (firmware list)
+    this.modulesPageSize = 4;
+    this.projectsPageSize = 4;
         this.currentPage = 1; // firmware list page
         this.modulesPage = 1;
         this.projectsPage = 1;
@@ -487,10 +489,11 @@ class FirmwareManager {
 
         // pagination for modules
         const total = filteredModules.length;
-        const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+    const pageSize = this.modulesPageSize;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
         if (this.modulesPage > totalPages) this.modulesPage = totalPages;
-        const start = (this.modulesPage - 1) * this.pageSize;
-        const end = start + this.pageSize;
+    const start = (this.modulesPage - 1) * pageSize;
+    const end = start + pageSize;
         const pageItems = filteredModules.slice(start, end);
 
         list.innerHTML = pageItems.map(module => `
@@ -560,10 +563,11 @@ class FirmwareManager {
 
         // pagination for projects
         const total = filteredProjects.length;
-        const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+    const pageSize = this.projectsPageSize;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
         if (this.projectsPage > totalPages) this.projectsPage = totalPages;
-        const start = (this.projectsPage - 1) * this.pageSize;
-        const end = start + this.pageSize;
+    const start = (this.projectsPage - 1) * pageSize;
+    const end = start + pageSize;
         const pageItems = filteredProjects.slice(start, end);
 
         list.innerHTML = pageItems.map(project => `

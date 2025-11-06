@@ -25,7 +25,7 @@
 class UserManager {
     constructor() {
         this.users = [];
-        this.pageSize = 10;
+    this.pageSize = 7;
         this.currentPage = 1;
         this.searchQuery = '';
     }
