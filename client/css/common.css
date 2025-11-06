@@ -102,6 +102,50 @@ body {
     padding: 20px 0;
 }
 
+.sidebar-menu .has-submenu {
+    position: relative;
+}
+
+.submenu-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+
+.submenu-arrow {
+    margin-left: auto;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.has-submenu.open .submenu-arrow {
+    transform: rotate(225deg);
+}
+
+.submenu {
+    list-style: none;
+    padding: 0 0 5px 20px;
+    display: none;
+}
+
+.has-submenu.open > .submenu {
+    display: block;
+}
+
+.submenu-item {
+    padding-left: 40px;
+    font-size: 14px;
+}
+
 .menu-item {
     display: flex;
     align-items: center;

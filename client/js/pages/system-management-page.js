@@ -23,32 +23,54 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    dashboard.init({
-        pageId: 'system-management',
-        pageTitle: '系统管理',
-        onReady: async () => {
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabPanes = document.querySelectorAll('.tab-pane');
+    const searchParams = new URLSearchParams(window.location.search);
+    const availableSections = ['users', 'settings'];
+    let section = searchParams.get('section') || 'users';
 
-            const switchTab = (target) => {
-                tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === target));
-                tabPanes.forEach(pane => pane.classList.toggle('active', pane.id === target));
+    if (!availableSections.includes(section)) {
+        section = 'users';
+    }
+
+    const sectionTitles = {
+        users: '系统管理 - 用户管理',
+        settings: '系统管理 - 系统设置'
+    };
+
+    dashboard.init({
+        pageId: `system-management-${section}`,
+        pageTitle: sectionTitles[section] || '系统管理',
+        onReady: async () => {
+            const paneMap = {
+                users: document.getElementById('users'),
+                settings: document.getElementById('settings')
             };
 
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const tab = e.currentTarget.dataset.tab;
-                    switchTab(tab);
+            const activateSection = async (target) => {
+                Object.entries(paneMap).forEach(([key, pane]) => {
+                    pane?.classList.toggle('active', key === target);
                 });
-            });
+
+                switch (target) {
+                    case 'users':
+                        dashboard.setPageTitle(sectionTitles.users);
+                        if (dashboard.currentUser?.role === 'admin') {
+                            await userManager.loadUsers();
+                        }
+                        break;
+                    case 'settings':
+                        dashboard.setPageTitle(sectionTitles.settings);
+                        break;
+                    default:
+                        dashboard.setPageTitle('系统管理');
+                        break;
+                }
+            };
+
+            await activateSection(section);
 
             document.getElementById('addUserBtn')?.addEventListener('click', () => {
                 modalManager.showAddUserModal();
             });
-
-            if (dashboard.currentUser?.role === 'admin') {
-                await userManager.loadUsers();
-            }
         }
     });
 });

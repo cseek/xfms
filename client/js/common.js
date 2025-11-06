@@ -175,7 +175,7 @@ class DashboardApp {
             return;
         }
 
-        if (pageId === 'system-management' && this.currentUser.role !== 'admin') {
+        if (pageId.startsWith('system-management') && this.currentUser.role !== 'admin') {
             Utils.showMessage('您没有权限访问系统管理页面', 'warning');
             window.location.href = '/firmwares';
         }
@@ -239,14 +239,39 @@ class DashboardApp {
     }
 
     highlightActiveNav(pageId) {
-        const navItems = document.querySelectorAll('.menu-item');
-        navItems.forEach(item => {
-            if (item.dataset.page === pageId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) {
+            return;
+        }
+
+        sidebar.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        sidebar.querySelectorAll('.has-submenu').forEach(parent => {
+            parent.classList.remove('open');
+            const toggle = parent.querySelector('.submenu-toggle');
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
             }
         });
+
+        const activeItem = sidebar.querySelector(`.menu-item[data-page="${pageId}"]`);
+        if (!activeItem) {
+            return;
+        }
+
+        activeItem.classList.add('active');
+
+        const parentSubmenu = activeItem.closest('.has-submenu');
+        if (parentSubmenu) {
+            parentSubmenu.classList.add('open');
+            const toggle = parentSubmenu.querySelector('.submenu-toggle');
+            if (toggle) {
+                toggle.classList.add('active');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+        }
     }
 
     bindGlobalEvents() {
@@ -264,7 +289,12 @@ class DashboardApp {
     }
 
     bindSidebarNavigation() {
-        const aboutLink = document.querySelector('.sidebar .menu-item[data-page="about"]');
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) {
+            return;
+        }
+
+        const aboutLink = sidebar.querySelector('.menu-item[data-page="about"]');
 
         if (aboutLink && !aboutLink.dataset.boundAboutNav) {
             aboutLink.addEventListener('click', (event) => {
@@ -273,6 +303,26 @@ class DashboardApp {
             });
             aboutLink.dataset.boundAboutNav = 'true';
         }
+
+        sidebar.querySelectorAll('.submenu-toggle').forEach(toggle => {
+            if (toggle.dataset.boundSubmenuToggle) {
+                return;
+            }
+
+            const parentItem = toggle.closest('.has-submenu');
+
+            const setExpanded = (expanded) => {
+                toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            };
+
+            toggle.addEventListener('click', () => {
+                const isOpen = parentItem?.classList.toggle('open');
+                setExpanded(Boolean(isOpen));
+            });
+
+            setExpanded(parentItem?.classList.contains('open'));
+            toggle.dataset.boundSubmenuToggle = 'true';
+        });
     }
 
     async handleAboutNavigation() {

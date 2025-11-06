@@ -23,35 +23,55 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const availableSections = ['upload', 'modules', 'projects'];
+    let section = searchParams.get('section') || 'upload';
+
+    if (!availableSections.includes(section)) {
+        section = 'upload';
+    }
+
+    const sectionTitles = {
+        upload: '固件管理 - 上传固件',
+        modules: '固件管理 - 模块管理',
+        projects: '固件管理 - 项目管理'
+    };
+
     dashboard.init({
-        pageId: 'firmware-management',
-        pageTitle: '固件管理',
+        pageId: `firmware-management-${section}`,
+        pageTitle: sectionTitles[section] || '固件管理',
         onReady: async () => {
             await firmwareManager.loadModulesForSelect();
             await firmwareManager.loadProjectsForSelect();
-            await firmwareManager.loadModules();
-            await firmwareManager.loadProjects();
 
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabPanes = document.querySelectorAll('.tab-pane');
+            const paneMap = {
+                upload: document.getElementById('upload'),
+                modules: document.getElementById('modules'),
+                projects: document.getElementById('projects')
+            };
 
-            const switchTab = (target) => {
-                tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === target));
-                tabPanes.forEach(pane => pane.classList.toggle('active', pane.id === target));
+            const activateSection = (target) => {
+                const resolved = availableSections.includes(target) ? target : 'upload';
 
-                if (target === 'modules') {
-                    firmwareManager.loadModules();
-                } else if (target === 'projects') {
-                    firmwareManager.loadProjects();
+                Object.entries(paneMap).forEach(([key, pane]) => {
+                    pane?.classList.toggle('active', key === resolved);
+                });
+
+                dashboard.setPageTitle(sectionTitles[resolved] || '固件管理');
+
+                switch (resolved) {
+                    case 'modules':
+                        firmwareManager.loadModules();
+                        break;
+                    case 'projects':
+                        firmwareManager.loadProjects();
+                        break;
+                    default:
+                        break;
                 }
             };
 
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const tab = e.currentTarget.dataset.tab;
-                    switchTab(tab);
-                });
-            });
+            activateSection(section);
 
             const uploadForm = document.getElementById('uploadForm');
             uploadForm?.addEventListener('submit', (e) => {
