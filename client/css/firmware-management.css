@@ -22,23 +22,87 @@
  * limitations under the License.
  */
  
+
+.upload-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px 36px 36px;
+    box-shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.upload-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.upload-card__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+}
+
+.upload-card__subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+    max-width: 420px;
+}
+
+.upload-card__icon {
+    font-size: 46px;
+    color: var(--primary-color);
+    background: rgba(102, 126, 234, 0.12);
+    padding: 18px;
+    border-radius: 16px;
+    align-self: center;
+}
+
+.upload-card .upload-form {
+    max-width: 100%;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .upload-card {
+        padding: 24px 20px 28px;
+        gap: 20px;
+    }
+
+    .upload-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .upload-card__icon {
+        font-size: 36px;
+        padding: 14px;
+    }
+}
+
 #uploadForm textarea {
-    width: 585px;
-    height: 42px;
-    min-height: 42px;
+    width: 100%;
+    min-height: 108px;
     resize: vertical;
 }
 
 #uploadForm #version {
-    height: 43.5px;
-    line-height: 43.5px;
+    height: 48px;
+    line-height: 48px;
 }
 
-#uploadForm #description,
-#uploadForm #additionalInfo {
-    height: 43.5px;
-    min-height: 43.5px;
-    line-height: 20px;
+#uploadForm #description {
+    min-height: 108px;
+    line-height: 1.6;
 }
 
 #modules .pagination,
