@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 05:05:19
+ * @LastEditTime: 2025-11-07 05:17:16
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -21,9 +21,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
- 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,6 +32,7 @@
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/firmware-management.css">
 </head>
+
 <body>
     <div class="dashboard-container">
         <div id="sidebarContainer"></div>
@@ -63,18 +65,23 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="version">版本号 *</label>
-                                        <input type="text" id="version" name="version" required placeholder="例如: v1.5.1" pattern="^v\d+\.\d+\.\d+$">
+                                        <input type="text" id="version" name="version" required placeholder="例如: v1.5.1"
+                                            pattern="^v\d+\.\d+\.\d+$">
                                     </div>
                                     <div class="form-group">
                                         <label for="description">固件描述</label>
-                                        <textarea id="description" name="description" rows="3" placeholder="请输入固件描述..."></textarea>
+                                        <textarea id="description" name="description" rows="3"
+                                            placeholder="请输入固件描述..."></textarea>
                                     </div>
                                     <div class="form-row form-row--file">
                                         <div class="form-group form-group--file">
                                             <label for="firmwareFile">固件文件 *</label>
                                             <div class="file-upload">
-                                                <input type="file" id="firmwareFile" name="firmware" accept=".bin,.hex,.img,.zip,.tar.gz" required>
-                                                <label class="file-upload__trigger" for="firmwareFile" role="button" tabindex="0">
+                                                <input type="file" id="firmwareFile" name="firmware"
+                                                    accept=".bin,.hex,.img,.zip,.tar.gz,.pkg,.deb,.app,.exe,.msi,.dmg,.rpm,.xpk,.apk"
+                                                    required>
+                                                <label class="file-upload__trigger" for="firmwareFile" role="button"
+                                                    tabindex="0">
                                                     <i class="fas fa-folder-open"></i>
                                                     选择固件文件
                                                 </label>
@@ -129,4 +136,5 @@
     <script src="../js/modal_manager.js"></script>
     <script src="../js/pages/firmware-management-page.js"></script>
 </body>
+
 </html>
