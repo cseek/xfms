@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 01:45:44
+ * @LastEditTime: 2025-11-07 04:43:47
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -419,17 +419,15 @@ class ModalManager {
             <div class="firmware-details">
                 <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
                 <div class="detail-row"><strong>版本：</strong> ${firmware.version || '-'}</div>
-                <div class="detail-row"><strong>固件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
+                <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
                 <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
                 <div class="detail-row"><strong>环境：</strong> ${firmware.environment || '-'}</div>
-                <div class="detail-row"><strong>上传者：</strong> ${firmware.uploader_name || '-'}</div>
+                <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
                 <div class="detail-row"><strong>上传时间：</strong> ${firmware.created_at ? new Date(firmware.created_at).toLocaleString('zh-CN') : '-'}</div>
                 <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'} ${!testReportName && dashboard && dashboard.currentUser && dashboard.currentUser.role === 'tester' ? `<button type="button" class="btn-submit" onclick="modalManager.showUploadTestReportModal(${firmware.id})" style="margin-left:8px; padding:6px 8px;">上传测试报告</button>` : ''}</div>
                 <hr />
                 <div class="detail-row"><strong>固件描述：</strong></div>
                 <div class="detail-block">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
-                <div class="detail-row"><strong>补充信息：</strong></div>
-                <div class="detail-block">${firmware.additional_info ? this.escapeHtml(firmware.additional_info).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
                 
             </div>
         `;

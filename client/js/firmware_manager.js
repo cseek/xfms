@@ -121,6 +121,10 @@ class FirmwareManager {
                 </div>
                 <div class="firmware-meta">
                     <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>上传人员: ${firmware.uploader_name || '未知'}</span>
+                    </div>
+                    <div class="meta-item">
                         <i class="fas fa-calendar"></i>
                         <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
                     </div>
@@ -131,10 +135,6 @@ class FirmwareManager {
                     <div class="meta-item">
                         <i class="fas fa-file-alt"></i>
                         <span class="meta-truncated">固件描述: ${ (firmware.description && String(firmware.description).trim()) ? this.truncateAndEscape(firmware.description, 80) : '无' }</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-info-circle"></i>
-                        <span class="meta-truncated">补充信息: ${ (firmware.additional_info && String(firmware.additional_info).trim()) ? this.truncateAndEscape(firmware.additional_info, 80) : '无' }</span>
                     </div>
                 </div>
                 <div class="firmware-actions">
