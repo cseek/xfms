@@ -86,6 +86,7 @@ class DashboardApp {
         this.sidebarLoaded = false;
         this.headerLoaded = false;
         this.currentPageId = null;
+        this.isLoadingAbout = false;
         this.handleResize = this.handleResize.bind(this);
     }
 
@@ -146,6 +147,8 @@ class DashboardApp {
             sidebarContainer.innerHTML = sidebarHtml;
             this.sidebarLoaded = true;
         }
+
+        this.bindSidebarNavigation();
 
         if (!this.headerLoaded) {
             const headerHtml = await this.fetchPartial('/html/partials/header.html');
@@ -257,6 +260,82 @@ class DashboardApp {
         if (toggleBtn && !toggleBtn.dataset.bound) {
             toggleBtn.addEventListener('click', () => this.toggleSidebar());
             toggleBtn.dataset.bound = 'true';
+        }
+    }
+
+    bindSidebarNavigation() {
+        const aboutLink = document.querySelector('.sidebar .menu-item[data-page="about"]');
+
+        if (aboutLink && !aboutLink.dataset.boundAboutNav) {
+            aboutLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.handleAboutNavigation();
+            });
+            aboutLink.dataset.boundAboutNav = 'true';
+        }
+    }
+
+    async handleAboutNavigation() {
+        if (this.isLoadingAbout) {
+            return;
+        }
+
+        try {
+            this.isLoadingAbout = true;
+            await this.loadAboutContent();
+        } finally {
+            this.isLoadingAbout = false;
+        }
+    }
+
+    async loadAboutContent() {
+        const targetContainer = document.querySelector('.main-content .content-area');
+        if (!targetContainer) {
+            console.warn('Content area not found when loading About page.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/about', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to load /about: ${response.status}`);
+            }
+
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            const aboutContent = doc.querySelector('.content-area');
+
+            if (!aboutContent) {
+                throw new Error('About page template missing .content-area block');
+            }
+
+            targetContainer.innerHTML = aboutContent.innerHTML;
+
+            this.ensureStylesheet('/css/about.css');
+            this.setPageTitle('关于系统');
+            this.highlightActiveNav('about');
+            this.currentPageId = 'about';
+        } catch (error) {
+            console.error('Failed to load About page content:', error);
+            Utils.showMessage('加载关于页面失败，请稍后重试', 'error');
+        }
+    }
+
+    ensureStylesheet(href) {
+        const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+            .some(link => link.getAttribute('href') === href);
+
+        if (!existing) {
+            const linkEl = document.createElement('link');
+            linkEl.rel = 'stylesheet';
+            linkEl.href = href;
+            document.head.appendChild(linkEl);
         }
     }
 
