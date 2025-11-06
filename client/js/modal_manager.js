@@ -408,10 +408,11 @@ class ModalManager {
             <div class="firmware-details">
                 <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
                 <div class="detail-row"><strong>版本：</strong> ${firmware.version || '-'}</div>
+                <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
+                <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
+                <div class="detail-row"><strong>环境：</strong> ${firmware.environment || '-'}</div>
                 <div class="detail-row"><strong>上传者：</strong> ${firmware.uploader_name || '-'}</div>
                 <div class="detail-row"><strong>上传时间：</strong> ${firmware.created_at ? new Date(firmware.created_at).toLocaleString('zh-CN') : '-'}</div>
-                <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
-                <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'} &nbsp; <strong>环境：</strong> ${firmware.environment || '-'}</div>
                 <hr />
                 <div class="detail-row"><strong>发布描述：</strong></div>
                 <div class="detail-block">${firmware.description ? firmware.description.replace(/\n/g, '<br/>') : '<em>无</em>'}</div>
