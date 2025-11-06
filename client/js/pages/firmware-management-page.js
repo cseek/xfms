@@ -79,6 +79,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 firmwareManager.uploadFirmware();
             });
 
+            const fileInput = document.getElementById('firmwareFile');
+            const fileNameEl = document.querySelector('[data-role="file-name"]');
+            const fileTrigger = document.querySelector('.file-upload__trigger');
+            const defaultFileText = '尚未选择文件';
+
+            const updateFileName = () => {
+                if (!fileNameEl) return;
+                const files = fileInput?.files;
+                fileNameEl.textContent = files && files.length ? files[0].name : defaultFileText;
+            };
+
+            fileInput?.addEventListener('change', updateFileName);
+            uploadForm?.addEventListener('reset', () => {
+                fileNameEl && (fileNameEl.textContent = defaultFileText);
+            });
+
+            fileTrigger?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    fileInput?.click();
+                }
+            });
+
+            updateFileName();
+
             document.getElementById('addModuleBtn')?.addEventListener('click', () => {
                 modalManager.showAddModuleModal();
             });

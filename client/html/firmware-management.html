@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 04:53:08
+ * @LastEditTime: 2025-11-07 05:05:19
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -43,10 +43,8 @@
                             <div class="upload-card">
                                 <div class="upload-card__header">
                                     <div>
-                                        <h2 class="upload-card__title">上传固件</h2>
                                         <p class="upload-card__subtitle">请认真填写固件基础信息并上传文件，如有问题可咨询相关人员。</p>
                                     </div>
-                                    <i class="fas fa-cloud-upload-alt upload-card__icon" aria-hidden="true"></i>
                                 </div>
                                 <form id="uploadForm" class="upload-form">
                                     <div class="form-row">
@@ -71,15 +69,22 @@
                                         <label for="description">固件描述</label>
                                         <textarea id="description" name="description" rows="3" placeholder="请输入固件描述..."></textarea>
                                     </div>
-                                    <div class="form-row">
-                                        <div class="form-group" style="flex: 1;">
+                                    <div class="form-row form-row--file">
+                                        <div class="form-group form-group--file">
                                             <label for="firmwareFile">固件文件 *</label>
-                                            <input type="file" id="firmwareFile" name="firmware" accept=".bin,.hex,.img,.zip,.tar.gz" required>
+                                            <div class="file-upload">
+                                                <input type="file" id="firmwareFile" name="firmware" accept=".bin,.hex,.img,.zip,.tar.gz" required>
+                                                <label class="file-upload__trigger" for="firmwareFile" role="button" tabindex="0">
+                                                    <i class="fas fa-folder-open"></i>
+                                                    选择固件文件
+                                                </label>
+                                                <span class="file-upload__name" data-role="file-name">尚未选择文件</span>
+                                            </div>
                                         </div>
-                                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                                        <div class="form-group form-group--submit">
                                             <button type="submit" class="submit-btn">
                                                 <i class="fas fa-upload"></i>
-                                                上传固件
+                                                上传
                                             </button>
                                         </div>
                                     </div>
