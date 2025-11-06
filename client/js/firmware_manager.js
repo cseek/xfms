@@ -27,6 +27,16 @@ class FirmwareManager {
         this.firmwares = [];
         this.modules = [];
         this.projects = [];
+        // pagination state
+        this.pageSize = 10; // items per page
+        this.currentPage = 1; // firmware list page
+        this.modulesPage = 1;
+        this.projectsPage = 1;
+        // re-render firmwares on resize to recalc columns/rows
+        window.addEventListener('resize', () => {
+            const grid = document.getElementById('firmwareGrid');
+            if (grid) this.renderFirmwares();
+        });
     }
 
     // 简单的 HTML 转义，防止插入不安全的内容
@@ -62,6 +72,7 @@ class FirmwareManager {
             if (!response.ok) throw new Error('Failed to load firmwares');
             
             this.firmwares = await response.json();
+            this.currentPage = 1; // reset to first page on reload
             this.renderFirmwares();
             
             // 更新过滤器选项
@@ -80,8 +91,19 @@ class FirmwareManager {
             grid.innerHTML = '<div class="no-data">暂无固件数据</div>';
             return;
         }
+    // pagination logic: show 2 rows per page (dynamically calculate columns based on container width)
+    const total = this.firmwares.length;
+    const containerWidth = grid.clientWidth || grid.offsetWidth || 900;
+    const cardMinWidth = 300; // matches CSS min width for cards
+    const columns = Math.max(1, Math.floor(containerWidth / cardMinWidth));
+    const itemsPerPage = columns * 2; // two rows
+    const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
+    if (this.currentPage > totalPages) this.currentPage = totalPages;
+    const start = (this.currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = this.firmwares.slice(start, end);
 
-        grid.innerHTML = this.firmwares.map(firmware => `
+        grid.innerHTML = pageItems.map(firmware => `
             <div class="firmware-card" data-id="${firmware.id}">
                 <div class="firmware-header">
                     <div class="firmware-info">
@@ -93,10 +115,6 @@ class FirmwareManager {
                     </div>
                 </div>
                 <div class="firmware-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-user"></i>
-                        <span>上传者: ${firmware.uploader_name}</span>
-                    </div>
                     <div class="meta-item">
                         <i class="fas fa-calendar"></i>
                         <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
@@ -122,8 +140,33 @@ class FirmwareManager {
             </div>
         `).join('');
 
+        // append pagination controls: show current/total (e.g. "1/16") centered at screen bottom
+        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        paginationHtml += `<button class="page-prev" data-page="${Math.max(1, this.currentPage - 1)}" ${this.currentPage===1? 'disabled':''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.currentPage}/${totalPages}</span>`;
+        paginationHtml += `<button class="page-next" data-page="${Math.min(totalPages, this.currentPage + 1)}" ${this.currentPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += '</div>';
+
+        grid.innerHTML += paginationHtml;
+
         // 添加事件监听器
         this.attachFirmwareEventListeners();
+        // attach pagination listeners
+        const pag = document.querySelector('.pagination');
+        if (pag) {
+            const prevBtn = pag.querySelector('.page-prev');
+            const nextBtn = pag.querySelector('.page-next');
+            if (prevBtn) prevBtn.addEventListener('click', () => {
+                const page = parseInt(prevBtn.getAttribute('data-page')) || 1;
+                this.currentPage = page;
+                this.renderFirmwares();
+            });
+            if (nextBtn) nextBtn.addEventListener('click', () => {
+                const page = parseInt(nextBtn.getAttribute('data-page')) || totalPages;
+                this.currentPage = page;
+                this.renderFirmwares();
+            });
+        }
     }
 
     renderActionButtons(firmware) {
@@ -358,6 +401,7 @@ class FirmwareManager {
             if (!response.ok) throw new Error('Failed to load modules');
             
             this.modules = await response.json();
+            this.modulesPage = 1;
             this.renderModules();
         } catch (error) {
             console.error('Error loading modules:', error);
@@ -371,6 +415,7 @@ class FirmwareManager {
             if (!response.ok) throw new Error('Failed to load projects');
             
             this.projects = await response.json();
+            this.projectsPage = 1;
             this.renderProjects();
         } catch (error) {
             console.error('Error loading projects:', error);
@@ -386,8 +431,15 @@ class FirmwareManager {
             list.innerHTML = '<div class="no-data">暂无模块数据</div>';
             return;
         }
+        // pagination for modules
+        const total = this.modules.length;
+        const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+        if (this.modulesPage > totalPages) this.modulesPage = totalPages;
+        const start = (this.modulesPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        const pageItems = this.modules.slice(start, end);
 
-        list.innerHTML = this.modules.map(module => `
+        list.innerHTML = pageItems.map(module => `
             <div class="management-item">
                 <div>
                     <strong>${module.name}</strong>
@@ -401,7 +453,31 @@ class FirmwareManager {
             </div>
         `).join('');
 
+        // pagination controls (compact current/total at bottom center)
+        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        paginationHtml += `<button class="modules-prev" data-page="${Math.max(1, this.modulesPage - 1)}" ${this.modulesPage===1? 'disabled':''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.modulesPage}/${totalPages}</span>`;
+        paginationHtml += `<button class="modules-next" data-page="${Math.min(totalPages, this.modulesPage + 1)}" ${this.modulesPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += '</div>';
+        list.innerHTML += paginationHtml;
+
         this.attachManagementEventListeners('modules');
+        // pagination listeners
+        const pagModules = document.querySelector('.pagination');
+        if (pagModules) {
+            const prev = pagModules.querySelector('.modules-prev');
+            const next = pagModules.querySelector('.modules-next');
+            if (prev) prev.addEventListener('click', () => {
+                const p = parseInt(prev.getAttribute('data-page')) || 1;
+                this.modulesPage = p;
+                this.renderModules();
+            });
+            if (next) next.addEventListener('click', () => {
+                const p = parseInt(next.getAttribute('data-page')) || totalPages;
+                this.modulesPage = p;
+                this.renderModules();
+            });
+        }
     }
 
     renderProjects() {
@@ -412,8 +488,15 @@ class FirmwareManager {
             list.innerHTML = '<div class="no-data">暂无项目数据</div>';
             return;
         }
+        // pagination for projects
+        const total = this.projects.length;
+        const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+        if (this.projectsPage > totalPages) this.projectsPage = totalPages;
+        const start = (this.projectsPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        const pageItems = this.projects.slice(start, end);
 
-        list.innerHTML = this.projects.map(project => `
+        list.innerHTML = pageItems.map(project => `
             <div class="management-item">
                 <div>
                     <strong>${project.name}</strong>
@@ -427,7 +510,31 @@ class FirmwareManager {
             </div>
         `).join('');
 
+        // pagination controls (compact current/total at bottom center)
+        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        paginationHtml += `<button class="projects-prev" data-page="${Math.max(1, this.projectsPage - 1)}" ${this.projectsPage===1? 'disabled':''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.projectsPage}/${totalPages}</span>`;
+        paginationHtml += `<button class="projects-next" data-page="${Math.min(totalPages, this.projectsPage + 1)}" ${this.projectsPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += '</div>';
+        list.innerHTML += paginationHtml;
+
         this.attachManagementEventListeners('projects');
+        // pagination listeners
+        const pagProjects = document.querySelector('.pagination');
+        if (pagProjects) {
+            const prev = pagProjects.querySelector('.projects-prev');
+            const next = pagProjects.querySelector('.projects-next');
+            if (prev) prev.addEventListener('click', () => {
+                const p = parseInt(prev.getAttribute('data-page')) || 1;
+                this.projectsPage = p;
+                this.renderProjects();
+            });
+            if (next) next.addEventListener('click', () => {
+                const p = parseInt(next.getAttribute('data-page')) || totalPages;
+                this.projectsPage = p;
+                this.renderProjects();
+            });
+        }
     }
 
     attachManagementEventListeners(type) {

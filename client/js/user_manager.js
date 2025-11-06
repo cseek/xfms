@@ -25,6 +25,8 @@
 class UserManager {
     constructor() {
         this.users = [];
+        this.pageSize = 10;
+        this.currentPage = 1;
     }
 
     async loadUsers() {
@@ -33,6 +35,7 @@ class UserManager {
             if (!response.ok) throw new Error('Failed to load users');
             
             this.users = await response.json();
+            this.currentPage = 1;
             this.renderUsers();
         } catch (error) {
             console.error('Error loading users:', error);
@@ -48,6 +51,13 @@ class UserManager {
             table.innerHTML = '<div class="no-data">暂无用户数据</div>';
             return;
         }
+        // pagination for users
+        const total = this.users.length;
+        const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+        if (this.currentPage > totalPages) this.currentPage = totalPages;
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        const pageItems = this.users.slice(start, end);
 
         table.innerHTML = `
             <div class="table-container">
@@ -62,7 +72,7 @@ class UserManager {
                         </tr>
                     </thead>
                     <tbody>
-                        ${this.users.map(user => `
+                        ${pageItems.map(user => `
                             <tr>
                                 <td>${user.username}</td>
                                 <td><span class="role-badge ${user.role}">${this.getRoleDisplayName(user.role)}</span></td>
@@ -80,7 +90,31 @@ class UserManager {
             </div>
         `;
 
+        // pagination controls (compact current/total at bottom center)
+        let paginationHtml = '<div class="pagination" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; justify-content:center; z-index:999;">';
+        paginationHtml += `<button class="users-prev" data-page="${Math.max(1, this.currentPage - 1)}" ${this.currentPage===1? 'disabled':''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.currentPage}/${totalPages}</span>`;
+        paginationHtml += `<button class="users-next" data-page="${Math.min(totalPages, this.currentPage + 1)}" ${this.currentPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += '</div>';
+        table.innerHTML += paginationHtml;
+
         this.attachUserEventListeners();
+        // pagination listeners
+        const pagUsers = document.querySelector('.pagination');
+        if (pagUsers) {
+            const prev = pagUsers.querySelector('.users-prev');
+            const next = pagUsers.querySelector('.users-next');
+            if (prev) prev.addEventListener('click', () => {
+                const p = parseInt(prev.getAttribute('data-page')) || 1;
+                this.currentPage = p;
+                this.renderUsers();
+            });
+            if (next) next.addEventListener('click', () => {
+                const p = parseInt(next.getAttribute('data-page')) || totalPages;
+                this.currentPage = p;
+                this.renderUsers();
+            });
+        }
     }
 
     renderUserActions(user) {
