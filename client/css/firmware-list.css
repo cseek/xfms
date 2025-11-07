@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 07:07:39
+ * @LastEditTime: 2025-11-07 08:23:19
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -85,7 +85,7 @@
     transition: all 0.3s ease;
     border-left: 4px solid var(--primary-color);
     height: 100%;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     justify-content: space-between;
 }

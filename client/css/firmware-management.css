@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 08:12:09
+ * @LastEditTime: 2025-11-07 08:21:07
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -28,9 +28,10 @@
     padding: 32px 36px 36px;
     box-shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.45);
     border: 1px solid rgba(15, 23, 42, 0.08);
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     gap: 28px;
 }
@@ -196,29 +197,4 @@
     line-height: 1.6;
 }
 
-#modules .pagination,
-#projects .pagination,
-.management-list .pagination {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-    margin: 16px auto;
-}
-
-#modules .pagination button,
-#projects .pagination button,
-.management-list .pagination button {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: #fff;
-    cursor: pointer;
-}
-
-#modules .pagination button[disabled],
-#projects .pagination button[disabled],
-.management-list .pagination button[disabled] {
-    opacity: 0.5;
-    cursor: default;
-}
+/* 模块与项目分页使用通用样式，详见 common.css */
