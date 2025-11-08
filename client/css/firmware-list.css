@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 08:23:19
+ * @LastEditTime: 2025-11-08 21:24:31
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -210,7 +210,7 @@
 .d_test-btn { background: var(--primary-color); color: #fff; }
 .release-btn { background: var(--success-color); color: #fff; }
 .obsolete-btn { background: var(--warning-color); color: #fff; }
-.delete-btn { background: red; color: #fff; }
+.delete-btn { background: rgb(184, 2, 2); color: #fff; }
 
 .action-btn:hover {
     opacity: 0.9;
