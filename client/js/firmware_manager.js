@@ -30,17 +30,15 @@ class FirmwareManager {
         this.moduleSearchQuery = '';
         this.projectSearchQuery = '';
         // pagination state
-    this.pageSize = 10; // items per page (firmware list)
-    this.modulesPageSize = 4;
-    this.projectsPageSize = 4;
-        this.currentPage = 1; // firmware list page
+        this.pageSize = 8; // 服务端分页大小
+        this.modulesPageSize = 4;
+        this.projectsPageSize = 4;
+        this.currentPage = 1; // 当前页码
+        this.totalPages = 1; // 总页数
+        this.total = 0; // 总记录数
         this.modulesPage = 1;
         this.projectsPage = 1;
-        // re-render firmwares on resize to recalc columns/rows
-        window.addEventListener('resize', () => {
-            const grid = document.getElementById('firmwareGrid');
-            if (grid) this.renderFirmwares();
-        });
+        this.currentFilters = {}; // 保存当前的过滤条件
     }
 
     // 简单的 HTML 转义，防止插入不安全的内容
@@ -62,10 +60,17 @@ class FirmwareManager {
         return this.escapeHtml(s.slice(0, Math.max(0, maxChars - 3)) + '...');
     }
 
-    async loadFirmwares(filters = {}) {
+    async loadFirmwares(filters = {}, page = 1) {
         try {
+            // 保存过滤条件，用于翻页时使用
+            this.currentFilters = filters;
+            this.currentPage = page;
+
             // 构建查询参数
             const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('pageSize', this.pageSize);
+            
             Object.keys(filters).forEach(key => {
                 if (filters[key]) {
                     params.append(key, filters[key]);
@@ -75,8 +80,14 @@ class FirmwareManager {
             const response = await fetch(`/api/firmwares?${params}`);
             if (!response.ok) throw new Error('Failed to load firmwares');
             
-            this.firmwares = await response.json();
-            this.currentPage = 1; // reset to first page on reload
+            const result = await response.json();
+            
+            // 处理服务端分页响应
+            this.firmwares = result.data || [];
+            this.currentPage = result.pagination?.page || 1;
+            this.totalPages = result.pagination?.totalPages || 1;
+            this.total = result.pagination?.total || 0;
+            
             this.renderFirmwares();
             
             // 更新过滤器选项
@@ -93,21 +104,15 @@ class FirmwareManager {
 
         if (this.firmwares.length === 0) {
             grid.innerHTML = '<div class="no-data">暂无固件数据</div>';
+            // 清除分页控件
+            const pageContainer = grid.parentElement;
+            const oldPag = pageContainer?.querySelector('.pagination');
+            if (oldPag) oldPag.remove();
             return;
         }
-    // pagination logic: show 2 rows per page (dynamically calculate columns based on container width)
-    const total = this.firmwares.length;
-    const containerWidth = grid.clientWidth || grid.offsetWidth || 900;
-    const cardMinWidth = 300; // matches CSS min width for cards
-    const columns = Math.max(1, Math.floor(containerWidth / cardMinWidth));
-    const itemsPerPage = columns * 2; // two rows
-    const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
-    if (this.currentPage > totalPages) this.currentPage = totalPages;
-    const start = (this.currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageItems = this.firmwares.slice(start, end);
 
-        grid.innerHTML = pageItems.map(firmware => `
+        // 直接渲染当前页的数据（服务端已分页）
+        grid.innerHTML = this.firmwares.map(firmware => `
             <div class="firmware-card ${firmware.status || ''}" data-id="${firmware.id}">
                 <div class="firmware-header">
                     <div class="firmware-info">
@@ -147,36 +152,43 @@ class FirmwareManager {
             </div>
         `).join('');
 
-        // build pagination controls (show current/total)
+        // 构建分页控件
         let paginationHtml = '<div class="pagination">';
-        paginationHtml += `<button class="page-prev" data-page="${Math.max(1, this.currentPage - 1)}" ${this.currentPage===1? 'disabled':''}>上一页</button>`;
-        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.currentPage}/${totalPages}</span>`;
-        paginationHtml += `<button class="page-next" data-page="${Math.min(totalPages, this.currentPage + 1)}" ${this.currentPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += `<button class="page-prev" ${this.currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">第 ${this.currentPage}/${this.totalPages} 页 (共 ${this.total} 条)</span>`;
+        paginationHtml += `<button class="page-next" ${this.currentPage === this.totalPages ? 'disabled' : ''}>下一页</button>`;
         paginationHtml += '</div>';
 
-        // 插入到固件列表页面区域底部（不包含侧边栏），先移除旧的分页节点再插入，避免重复
-        const pageContainer = document.getElementById('firmware-list') || grid.parentElement;
-        const oldPag = pageContainer.querySelector('.pagination');
+        // 插入分页控件
+        const pageContainer = grid.parentElement;
+        const oldPag = pageContainer?.querySelector('.pagination');
         if (oldPag) oldPag.remove();
         pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
         // 添加事件监听器
         this.attachFirmwareEventListeners();
-        // attach pagination listeners (inside the firmware-list container)
+        
+        // 添加分页按钮事件监听
         const pag = pageContainer.querySelector('.pagination');
         if (pag) {
             const prevBtn = pag.querySelector('.page-prev');
             const nextBtn = pag.querySelector('.page-next');
-            if (prevBtn) prevBtn.addEventListener('click', () => {
-                const page = parseInt(prevBtn.getAttribute('data-page')) || 1;
-                this.currentPage = page;
-                this.renderFirmwares();
-            });
-            if (nextBtn) nextBtn.addEventListener('click', () => {
-                const page = parseInt(nextBtn.getAttribute('data-page')) || totalPages;
-                this.currentPage = page;
-                this.renderFirmwares();
-            });
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.loadFirmwares(this.currentFilters, this.currentPage - 1);
+                    }
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (this.currentPage < this.totalPages) {
+                        this.loadFirmwares(this.currentFilters, this.currentPage + 1);
+                    }
+                });
+            }
         }
     }
 

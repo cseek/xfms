@@ -77,48 +77,88 @@ const uploadTestReport = multer({
     }
 });
 
-// 获取固件列表
+// 获取固件列表（支持服务端分页）
 router.get('/', (req, res) => {
-    let sql = `
-        SELECT f.*, m.name as module_name, p.name as project_name, u.username as uploader_name
-        FROM firmwares f
-        LEFT JOIN modules m ON f.module_id = m.id
-        LEFT JOIN projects p ON f.project_id = p.id
-        LEFT JOIN users u ON f.uploaded_by = u.id
-        WHERE 1=1
-    `;
+    // 分页参数
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 8; // 默认每页8条
+    const offset = (page - 1) * pageSize;
+
+    let whereClause = 'WHERE 1=1';
     let params = [];
 
     // 过滤条件
     if (req.query.module_id) {
-        sql += ' AND f.module_id = ?';
+        whereClause += ' AND f.module_id = ?';
         params.push(req.query.module_id);
     }
 
     if (req.query.project_id) {
-        sql += ' AND f.project_id = ?';
+        whereClause += ' AND f.project_id = ?';
         params.push(req.query.project_id);
     }
 
     if (req.query.environment) {
-        sql += ' AND f.environment = ?';
+        whereClause += ' AND f.environment = ?';
         params.push(req.query.environment);
     }
 
     // 搜索过滤 - 在固件描述中查找关键字
     if (req.query.search) {
-        sql += ' AND f.description LIKE ?';
+        whereClause += ' AND f.description LIKE ?';
         params.push('%' + req.query.search + '%');
     }
 
-    sql += ' ORDER BY f.created_at DESC';
+    // 先查询总数
+    const countSql = `
+        SELECT COUNT(*) as total
+        FROM firmwares f
+        LEFT JOIN modules m ON f.module_id = m.id
+        LEFT JOIN projects p ON f.project_id = p.id
+        LEFT JOIN users u ON f.uploaded_by = u.id
+        ${whereClause}
+    `;
 
-    req.db.all(sql, params, (err, rows) => {
+    req.db.get(countSql, params, (err, countResult) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
-        res.json(rows);
+
+        const total = countResult.total;
+        const totalPages = Math.ceil(total / pageSize);
+
+        // 查询分页数据
+        const dataSql = `
+            SELECT f.*, m.name as module_name, p.name as project_name, u.username as uploader_name
+            FROM firmwares f
+            LEFT JOIN modules m ON f.module_id = m.id
+            LEFT JOIN projects p ON f.project_id = p.id
+            LEFT JOIN users u ON f.uploaded_by = u.id
+            ${whereClause}
+            ORDER BY f.created_at DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const dataParams = [...params, pageSize, offset];
+
+        req.db.all(dataSql, dataParams, (err, rows) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+            
+            // 返回分页信息和数据
+            res.json({
+                data: rows,
+                pagination: {
+                    page: page,
+                    pageSize: pageSize,
+                    total: total,
+                    totalPages: totalPages
+                }
+            });
+        });
     });
 });
 
