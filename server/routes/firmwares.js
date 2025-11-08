@@ -26,6 +26,9 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs-extra');
+const config = require('../config');
+const { requireAuth, canUploadFirmware, canTestFirmware } = require('../middleware/auth');
+const { cleanupUploadedFile, isValidVersionFormat } = require('../utils/fileUtils');
 const router = express.Router();
 
 // 配置 multer 用于固件文件上传
@@ -47,7 +50,7 @@ const firmwareStorage = multer.diskStorage({
 const uploadFirmware = multer({ 
     storage: firmwareStorage,
     limits: {
-        fileSize: 1024 * 1024 * 1024 // 1GB
+        fileSize: config.upload.firmwareMaxSize
     }
 });
 
@@ -70,7 +73,7 @@ const testReportStorage = multer.diskStorage({
 const uploadTestReport = multer({ 
     storage: testReportStorage,
     limits: {
-        fileSize: 50 * 1024 * 1024 // 10MB
+        fileSize: config.upload.testReportMaxSize
     }
 });
 
@@ -114,36 +117,18 @@ router.get('/', (req, res) => {
 });
 
 // 上传固件
-router.post('/upload', uploadFirmware.single('firmware'), (req, res) => {
-    // 检查用户权限：管理员和研发人员可以上传
+router.post('/upload', canUploadFirmware, uploadFirmware.single('firmware'), (req, res) => {
     const user = req.session.user;
-    if (!user || (user.role !== 'admin' && user.role !== 'developer')) {
-        // 删除已上传的文件和文件夹
-        if (req.file) {
-            const fileDir = path.dirname(req.file.path);
-            fs.removeSync(fileDir); // 删除整个文件夹
-        }
-        return res.status(403).json({ error: '没有权限上传固件' });
-    }
-
     const { module_id, project_id, version, description, additional_info } = req.body;
 
     if (!module_id || !project_id || !version) {
-        // 删除已上传的文件和文件夹
-        if (req.file) {
-            const fileDir = path.dirname(req.file.path);
-            fs.removeSync(fileDir); // 删除整个文件夹
-        }
+        cleanupUploadedFile(req.file);
         return res.status(400).json({ error: '模块、项目和版本号不能为空' });
     }
 
     // 验证版本号格式
-    const versionRegex = /^v\d+\.\d+\.\d+$/;
-    if (!versionRegex.test(version)) {
-        if (req.file) {
-            const fileDir = path.dirname(req.file.path);
-            fs.removeSync(fileDir); // 删除整个文件夹
-        }
+    if (!isValidVersionFormat(version)) {
+        cleanupUploadedFile(req.file);
         return res.status(400).json({ error: '版本号格式不正确，应为 v主版本.次版本.修订版本，例如 v1.5.1' });
     }
 
@@ -152,43 +137,27 @@ router.post('/upload', uploadFirmware.single('firmware'), (req, res) => {
     }
 
     // 检查模块和项目是否存在
-    const checkSql = `
-        SELECT COUNT(*) as module_count FROM modules WHERE id = ?;
-        SELECT COUNT(*) as project_count FROM projects WHERE id = ?;
-    `;
     req.db.get('SELECT COUNT(*) as module_count FROM modules WHERE id = ?', [module_id], (err, moduleResult) => {
         if (err) {
-            if (req.file) {
-                const fileDir = path.dirname(req.file.path);
-                fs.removeSync(fileDir); // 删除整个文件夹
-            }
+            cleanupUploadedFile(req.file);
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
 
         if (moduleResult.module_count === 0) {
-            if (req.file) {
-                const fileDir = path.dirname(req.file.path);
-                fs.removeSync(fileDir); // 删除整个文件夹
-            }
+            cleanupUploadedFile(req.file);
             return res.status(400).json({ error: '模块不存在' });
         }
 
         req.db.get('SELECT COUNT(*) as project_count FROM projects WHERE id = ?', [project_id], (err, projectResult) => {
             if (err) {
-                if (req.file) {
-                    const fileDir = path.dirname(req.file.path);
-                    fs.removeSync(fileDir); // 删除整个文件夹
-                }
+                cleanupUploadedFile(req.file);
                 console.error('Database error:', err);
                 return res.status(500).json({ error: '数据库错误' });
             }
 
             if (projectResult.project_count === 0) {
-                if (req.file) {
-                    const fileDir = path.dirname(req.file.path);
-                    fs.removeSync(fileDir); // 删除整个文件夹
-                }
+                cleanupUploadedFile(req.file);
                 return res.status(400).json({ error: '项目不存在' });
             }
 
@@ -202,10 +171,7 @@ router.post('/upload', uploadFirmware.single('firmware'), (req, res) => {
 
             req.db.run(insertSql, [module_id, project_id, version, description, additional_info, req.file.path, fileSize, user.id], function(err) {
                 if (err) {
-                    if (req.file) {
-                        const fileDir = path.dirname(req.file.path);
-                        fs.removeSync(fileDir); // 删除整个文件夹
-                    }
+                    cleanupUploadedFile(req.file);
                     console.error('Database error:', err);
                     return res.status(500).json({ error: '数据库错误' });
                 }
@@ -231,8 +197,8 @@ router.post('/upload', uploadFirmware.single('firmware'), (req, res) => {
     });
 });
 
-// 下载固件
-router.get('/:id/download', (req, res) => {
+// 下载固件（所有已登录用户都可以下载）
+router.get('/:id/download', requireAuth, (req, res) => {
     const firmwareId = req.params.id;
 
     const sql = 'SELECT file_path FROM firmwares WHERE id = ?';
@@ -260,17 +226,8 @@ router.get('/:id/download', (req, res) => {
 });
 
 // 更新固件状态
-router.put('/:id/status', (req, res) => {
+router.put('/:id/status', canTestFirmware, (req, res) => {
     const user = req.session.user;
-    if (!user) {
-        return res.status(401).json({ error: '未登录' });
-    }
-
-    // 只有测试人员和管理员可以更新状态
-    if (user.role !== 'tester' && user.role !== 'admin') {
-        return res.status(403).json({ error: '没有权限更新固件状态' });
-    }
-
     const firmwareId = req.params.id;
     const { status } = req.body;
 
@@ -327,26 +284,8 @@ router.put('/:id/status', (req, res) => {
 });
 
 // 上传测试报告
-router.post('/:id/test-report', uploadTestReport.single('test_report'), (req, res) => {
+router.post('/:id/test-report', canTestFirmware, uploadTestReport.single('test_report'), (req, res) => {
     const user = req.session.user;
-    if (!user) {
-        // 删除已上传的文件和文件夹
-        if (req.file) {
-            const fileDir = path.dirname(req.file.path);
-            fs.removeSync(fileDir); // 删除整个文件夹
-        }
-        return res.status(401).json({ error: '未登录' });
-    }
-
-    // 只有测试人员和管理员可以上传测试报告
-    if (user.role !== 'tester' && user.role !== 'admin') {
-        if (req.file) {
-            const fileDir = path.dirname(req.file.path);
-            fs.removeSync(fileDir); // 删除整个文件夹
-        }
-        return res.status(403).json({ error: '没有权限上传测试报告' });
-    }
-
     const firmwareId = req.params.id;
 
     if (!req.file) {
@@ -356,19 +295,13 @@ router.post('/:id/test-report', uploadTestReport.single('test_report'), (req, re
     const updateSql = 'UPDATE firmwares SET test_report_path = ? WHERE id = ?';
     req.db.run(updateSql, [req.file.path, firmwareId], function(err) {
         if (err) {
-            if (req.file) {
-                const fileDir = path.dirname(req.file.path);
-                fs.removeSync(fileDir); // 删除整个文件夹
-            }
+            cleanupUploadedFile(req.file);
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
 
         if (this.changes === 0) {
-            if (req.file) {
-                const fileDir = path.dirname(req.file.path);
-                fs.removeSync(fileDir); // 删除整个文件夹
-            }
+            cleanupUploadedFile(req.file);
             return res.status(404).json({ error: '固件不存在' });
         }
 
@@ -388,8 +321,8 @@ router.post('/:id/test-report', uploadTestReport.single('test_report'), (req, re
     });
 });
 
-// 下载测试报告
-router.get('/:id/download-test-report', (req, res) => {
+// 下载测试报告（所有已登录用户都可以下载）
+router.get('/:id/download-test-report', requireAuth, (req, res) => {
     const firmwareId = req.params.id;
 
     const sql = 'SELECT test_report_path FROM firmwares WHERE id = ?';

@@ -9,19 +9,24 @@
     "dev": "nodemon server/app.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
-    "multer": "^1.4.5-lts.1",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "fs-extra": "^11.1.1",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.7",
     "path": "^0.12.7",
-    "fs-extra": "^11.1.1"
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["firmware", "management", "nodejs"],
+  "keywords": [
+    "firmware",
+    "management",
+    "nodejs"
+  ],
   "author": "Aurson",
   "license": "Apache-2.0"
 }

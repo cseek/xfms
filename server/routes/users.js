@@ -24,16 +24,8 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const { adminRequired } = require('../middleware/auth');
 const router = express.Router();
-
-// 只有管理员可以访问用户管理
-const adminRequired = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'admin') {
-        next();
-    } else {
-        res.status(403).json({ error: '需要管理员权限' });
-    }
-};
 
 // 获取所有用户（仅管理员）
 router.get('/', adminRequired, (req, res) => {

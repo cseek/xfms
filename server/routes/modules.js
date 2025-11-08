@@ -23,15 +23,8 @@
  */
 
 const express = require('express');
+const { adminRequired } = require('../middleware/auth');
 const router = express.Router();
-
-const adminRequired = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'admin') {
-        next();
-    } else {
-        res.status(403).json({ error: '需要管理员权限' });
-    }
-};
 
 // 获取所有模块
 router.get('/', (req, res) => {

@@ -2,51 +2,51 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-06 11:10:27
- * @Description:
+ * @LastEditTime: 2025-11-08
+ * @Description: Email notification utilities (OPTIONAL - Currently not in use)
+ * 
+ * 注意：此模块为可选功能，当前未启用。
+ * 若要启用邮件通知功能，请按以下步骤操作：
+ * 1. 在 .env 文件中设置 EMAIL_ENABLED=true
+ * 2. 配置正确的 SMTP 服务器信息
+ * 3. 在需要的路由中引入并调用相应的邮件发送函数
+ * 
+ * NOTE: This module is optional and currently not enabled.
+ * To enable email notifications:
+ * 1. Set EMAIL_ENABLED=true in .env file
+ * 2. Configure correct SMTP server settings
+ * 3. Import and call email functions in routes as needed
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
  *       \_,_/\_,_/_/ /___/\___/_//_/
  *      
  * Copyright (c) 2025 by Aurson, All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 const nodemailer = require('nodemailer');
+const config = require('../config');
 
-// 创建邮件传输器（这里使用 Ethereal 测试邮件服务，实际使用时请配置真实的SMTP）
-const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-        user: 'your-email@ethereal.email', // 替换为你的 Ethereal 邮箱
-        pass: 'your-password' // 替换为你的 Ethereal 密码
-    }
-});
+// 只在启用邮件功能时创建传输器
+let transporter = null;
 
-// 或者使用 Gmail（注意：需要开启两步验证并使用应用专用密码）
-// const transporter = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//         user: 'your-email@gmail.com',
-//         pass: 'your-app-password'
-//     }
-// });
+if (config.email.enabled) {
+    transporter = nodemailer.createTransport({
+        host: config.email.host,
+        port: config.email.port,
+        secure: config.email.secure,
+        auth: config.email.auth
+    });
+}
 
 class Mailer {
     static async sendFirmwareUploadNotification(firmwareInfo) {
+        if (!config.email.enabled || !transporter) {
+            console.log('Email notifications are disabled');
+            return;
+        }
+
         const mailOptions = {
-            from: '"固件管理系统" <noreply@firmware-system.com>',
+            from: config.email.from,
             to: 'admin@example.com', // 这里可以配置管理员的邮箱，或者从数据库读取
             subject: `新固件上传 - ${firmwareInfo.module_name} ${firmwareInfo.project_name} ${firmwareInfo.version}`,
             html: `
@@ -70,8 +70,13 @@ class Mailer {
     }
 
     static async sendFirmwareStatusChangeNotification(firmwareInfo, oldStatus, newStatus) {
+        if (!config.email.enabled || !transporter) {
+            console.log('Email notifications are disabled');
+            return;
+        }
+
         const mailOptions = {
-            from: '"固件管理系统" <noreply@firmware-system.com>',
+            from: config.email.from,
             to: 'admin@example.com', // 这里可以配置相关人员的邮箱
             subject: `固件状态更新 - ${firmwareInfo.module_name} ${firmwareInfo.project_name} ${firmwareInfo.version}`,
             html: `

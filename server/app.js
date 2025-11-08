@@ -25,7 +25,10 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const sqlite3 = require('sqlite3').verbose();
+
+const config = require('./config');
+const { attachDatabase, closeDatabase } = require('./utils/database');
+const { ensureAuthenticated } = require('./middleware/auth');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -34,7 +37,7 @@ const moduleRoutes = require('./routes/modules');
 const projectRoutes = require('./routes/projects');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.server.port;
 
 // 中间件配置
 app.use(express.json({ limit: '10mb' }));
@@ -51,31 +54,10 @@ app.use((req, res, next) => {
 });
 
 // Session配置
-app.use(session({
-    secret: 'firmware-management-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24小时
-}));
+app.use(session(config.session));
 
-// 数据库连接中间件
-app.use((req, res, next) => {
-    const dbPath = path.join(__dirname, '../database/firmware.db');
-    req.db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
-        if (err) {
-            console.error('Error opening database:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-    });
-    next();
-});
-
-const ensureAuthenticated = (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/');
-    }
-    next();
-};
+// 数据库连接中间件（使用单例模式）
+app.use(attachDatabase);
 
 // 路由配置
 app.use('/api/auth', authRoutes);
@@ -115,15 +97,17 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
-// 关闭数据库连接
-app.use((req, res, next) => {
-    if (req.db) {
-        req.db.close((err) => {
-            if (err) {
-                console.error('Error closing database:', err);
-            }
-        });
-    }
+// 优雅关闭
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    closeDatabase();
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('SIGINT signal received: closing HTTP server');
+    closeDatabase();
+    process.exit(0);
 });
 
 app.listen(PORT, () => {
