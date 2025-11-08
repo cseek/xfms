@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-06 13:42:29
+ * @LastEditTime: 2025-11-08 21:21:29
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -370,9 +370,27 @@ router.delete('/:id', (req, res) => {
             return res.status(404).json({ error: '固件不存在' });
         }
 
-        // 只有管理员或上传者可以删除
-        if (user.role !== 'admin' && firmware.uploaded_by !== user.id) {
-            return res.status(403).json({ error: '没有权限删除此固件' });
+        // 权限检查
+        // 1. 管理员可以删除任何固件
+        // 2. 开发者只能删除自己上传的固件
+        // 3. 开发者不能删除已发布(released)或作废(obsolete)状态的固件
+        if (user.role === 'admin') {
+            // 管理员有完全删除权限
+        } else if (user.role === 'developer') {
+            // 检查是否是上传者
+            if (firmware.uploaded_by !== user.id) {
+                return res.status(403).json({ error: '没有权限删除此固件' });
+            }
+            // 检查固件状态
+            if (firmware.status === 'released') {
+                return res.status(403).json({ 
+                    error: '不能删除已发布的固件',
+                    detail: `当前状态: ${firmware.status}`
+                });
+            }
+        } else {
+            // 其他角色无删除权限
+            return res.status(403).json({ error: '没有权限删除固件' });
         }
 
         // 删除文件和文件夹

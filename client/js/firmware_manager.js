@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-06 11:11:30
+ * @LastEditTime: 2025-11-08 21:21:38
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -212,12 +212,23 @@ class FirmwareManager {
         }
 
         // 删除按钮 - 管理员和上传者
-        if (userRole === 'admin' || firmware.uploaded_by === dashboard.currentUser.id) {
+        // 注意：开发者不能删除已发布(released)或作废(obsolete)状态的固件
+        if (userRole === 'admin') {
+            // 管理员可以删除任何固件
             buttons.push(`
                 <button class="action-btn delete-btn" data-action="delete" data-id="${firmware.id}">
                     <i class="fas fa-trash"></i> 删除
                 </button>
             `);
+        } else if (userRole === 'developer' && firmware.uploaded_by === dashboard.currentUser.id) {
+            // 开发者只能删除自己上传的、且状态不是 released 或 obsolete 的固件
+            if (firmware.status !== 'released') {
+                buttons.push(`
+                    <button class="action-btn delete-btn" data-action="delete" data-id="${firmware.id}">
+                        <i class="fas fa-trash"></i> 删除
+                    </button>
+                `);
+            }
         }
 
         // 详情按钮改为放置在状态后方（在 renderFirmwares 中内联渲染），这里不再加入到按钮组中
