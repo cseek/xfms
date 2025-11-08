@@ -199,6 +199,17 @@
 
 /* 模块与项目分页使用底边栏样式 */
 
+.content-area {
+    padding-bottom: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content-area::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 #modules.tab-pane,
 #projects.tab-pane {
     flex: 1 1 auto;

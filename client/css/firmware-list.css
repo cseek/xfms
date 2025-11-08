@@ -219,6 +219,17 @@
 
 /* 固件列表容器和分页器布局 */
 
+.content-area {
+    padding-bottom: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content-area::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 .page.active {
     display: flex;
     flex-direction: column;
