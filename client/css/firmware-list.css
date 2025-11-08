@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-08 21:24:31
+ * @LastEditTime: 2025-11-09 00:25:04
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -85,6 +85,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-height: 283px;
 }
 
 .firmware-card:hover {
