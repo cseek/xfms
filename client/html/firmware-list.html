@@ -40,6 +40,7 @@
                 <div class="page active">
                     <div class="page-header">
                         <div class="filters">
+                            <label class="filter-label">过滤框：</label>
                             <select id="moduleFilter" class="filter-select">
                                 <option value="">所有模块</option>
                             </select>
@@ -51,6 +52,8 @@
                                 <option value="test">测试线</option>
                                 <option value="release">发布线</option>
                             </select>
+                            <label class="filter-label search-label">搜索框：</label>
+                            <input type="text" id="searchInput" class="search-input" placeholder="按关键字搜索">
                         </div>
                         <button id="uploadBtn" class="upload-btn" style="display:none;">
                             <i class="fas fa-upload"></i>

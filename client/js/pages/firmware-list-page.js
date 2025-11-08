@@ -35,18 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const moduleFilter = document.getElementById('moduleFilter');
             const projectFilter = document.getElementById('projectFilter');
             const environmentFilter = document.getElementById('environmentFilter');
+            const searchInput = document.getElementById('searchInput');
 
             const triggerSearch = async () => {
                 await firmwareManager.loadFirmwares({
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
-                    environment: environmentFilter?.value || ''
+                    environment: environmentFilter?.value || '',
+                    search: searchInput?.value.trim() || ''
                 });
             };
 
             moduleFilter?.addEventListener('change', triggerSearch);
             projectFilter?.addEventListener('change', triggerSearch);
             environmentFilter?.addEventListener('change', triggerSearch);
+            
+            // 添加搜索框事件监听器
+            searchInput?.addEventListener('input', () => {
+                // 使用防抖，避免频繁触发搜索
+                clearTimeout(searchInput.debounceTimer);
+                searchInput.debounceTimer = setTimeout(triggerSearch, 300);
+            });
 
             uploadBtn?.addEventListener('click', () => {
                 window.location.href = '/manage/firmware';

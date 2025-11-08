@@ -39,6 +39,39 @@
     align-items: center;
 }
 
+.filter-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #7f8c8d;
+    margin-right: 5px;
+    white-space: nowrap;
+}
+
+.search-label {
+    margin-left: 15px;
+}
+
+.search-input {
+    padding: 10px 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 200px;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.search-input::placeholder {
+    color: #95a5a6;
+    font-style: italic;
+}
+
 .filter-select,
 .upload-btn {
     padding: 10px 15px;

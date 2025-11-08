@@ -105,6 +105,12 @@ router.get('/', (req, res) => {
         params.push(req.query.environment);
     }
 
+    // 搜索过滤 - 在固件描述中查找关键字
+    if (req.query.search) {
+        sql += ' AND f.description LIKE ?';
+        params.push('%' + req.query.search + '%');
+    }
+
     sql += ' ORDER BY f.created_at DESC';
 
     req.db.all(sql, params, (err, rows) => {
