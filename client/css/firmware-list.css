@@ -217,27 +217,39 @@
     transform: translateY(-1px);
 }
 
-#firmware-list .pagination {
+/* 固件列表容器和分页器布局 */
+
+.page.active {
     display: flex;
-    gap: 8px;
-    align-items: center;
-    justify-content: center;
-    margin: 16px auto;
+    flex-direction: column;
+    height: 100%;
 }
 
-#firmware-list .pagination .page-prev,
-#firmware-list .pagination .page-next {
-    padding: 6px 12px;
-    border-radius: 6px;
+.firmware-grid {
+    flex: 1 1 auto;
+    overflow: hidden;
+    padding-bottom: 96px;
+}
+
+.page .pagination {
+    margin: 0 auto;
+    margin-top: auto;
+    width: 100%;
+    padding: 12px 0;
+    background: rgba(245, 246, 250, 0.96);
+    backdrop-filter: blur(6px);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -12px 32px -16px rgba(15, 23, 42, 0.35);
+    z-index: 5;
+}
+
+.page .pagination button {
     border: 1px solid rgba(0, 0, 0, 0.08);
     background: #fff;
-    cursor: pointer;
-}
-
-#firmware-list .pagination .page-prev[disabled],
-#firmware-list .pagination .page-next[disabled] {
-    opacity: 0.5;
-    cursor: default;
 }
 
 .firmware-details {

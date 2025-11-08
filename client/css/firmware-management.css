@@ -197,4 +197,47 @@
     line-height: 1.6;
 }
 
-/* 模块与项目分页使用通用样式，详见 common.css */
+/* 模块与项目分页使用底边栏样式 */
+
+#modules.tab-pane,
+#projects.tab-pane {
+    flex: 1 1 auto;
+    min-height: 100%;
+    position: relative;
+}
+
+#modules.tab-pane.active,
+#projects.tab-pane.active {
+    display: flex;
+    flex-direction: column;
+}
+
+#modulesList,
+#projectsList {
+    flex: 1 1 auto;
+    overflow: hidden;
+    padding-bottom: 96px;
+}
+
+#modules .pagination,
+#projects .pagination {
+    margin: 0 auto;
+    margin-top: auto;
+    width: 100%;
+    padding: 12px 0;
+    background: rgba(245, 246, 250, 0.96);
+    backdrop-filter: blur(6px);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -12px 32px -16px rgba(15, 23, 42, 0.35);
+    z-index: 5;
+}
+
+#modules .pagination button,
+#projects .pagination button {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+}
