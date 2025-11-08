@@ -247,9 +247,19 @@ body {
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
 }
 
 .header-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
 }
@@ -260,7 +270,6 @@ body {
     font-size: 18px;
     color: #7f8c8d;
     cursor: pointer;
-    margin-right: 15px;
     padding: 5px;
     border-radius: 4px;
     transition: all 0.3s ease;
@@ -275,12 +284,15 @@ body {
     font-size: 24px;
     font-weight: 600;
     color: var(--dark-color);
+    margin: 0;
 }
 
 .header-right {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .welcome-text {
