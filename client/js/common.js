@@ -177,7 +177,7 @@ class DashboardApp {
 
         if (pageId.startsWith('system-management') && this.currentUser.role !== 'admin') {
             Utils.showMessage('您没有权限访问系统管理页面', 'warning');
-            window.location.href = '/firmwares';
+            window.location.href = '/uploads';
         }
     }
 

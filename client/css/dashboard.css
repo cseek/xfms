@@ -23,7 +23,7 @@
  */
  
 @import url('./common.css');
-@import url('./firmware-list.css');
+@import url('./upload-list.css');
 @import url('./firmware-management.css');
 @import url('./system-management.css');
 @import url('./about.css');

@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 
                 setTimeout(() => {
-                    window.location.href = '/firmwares';
+                    window.location.href = '/uploads';
                 }, 1000);
             } else {
                 showMessage(data.error || '登录失败，请检查用户和密码', 'error');

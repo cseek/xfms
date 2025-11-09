@@ -411,7 +411,7 @@ class FirmwareManager {
                 await this.loadFirmwares();
                 
                 // 切换到固件列表页面
-                window.location.href = '/firmwares';
+                window.location.href = '/uploads';
             } else {
                 throw new Error(data.error || 'Upload failed');
             }

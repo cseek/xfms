@@ -25,7 +25,7 @@
 class Dashboard {
     constructor() {
         this.currentUser = null;
-        this.currentPage = 'firmware-list';
+        this.currentPage = 'upload-list';
         this.init();
     }
 
@@ -176,7 +176,7 @@ class Dashboard {
 
         // 更新页面标题
         const titles = {
-            'firmware-list': '上传列表',
+            'upload-list': '上传列表',
             'firmware-management': '固件管理',
             'system-management': '系统管理',
             'about': '关于系统'
@@ -218,7 +218,7 @@ class Dashboard {
 
     async loadPageData(pageName) {
         switch (pageName) {
-            case 'firmware-list':
+            case 'upload-list':
                 await firmwareManager.loadFirmwares();
                 break;
             case 'firmware-management':

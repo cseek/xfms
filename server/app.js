@@ -79,8 +79,13 @@ app.get('/tests', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/test-list.html'));
 });
 
+app.get('/uploads', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/upload-list.html'));
+});
+
+// 为了兼容性保留旧路由，重定向到新路由
 app.get('/firmwares', ensureAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/html/firmware-list.html'));
+    res.redirect('/uploads');
 });
 
 app.get('/manage/firmware', ensureAuthenticated, canManageFirmware, (req, res) => {
@@ -96,7 +101,7 @@ app.get('/about', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    res.redirect('/firmwares');
+    res.redirect('/uploads');
 });
 
 // 错误处理中间件
