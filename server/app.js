@@ -71,6 +71,14 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/login.html'));
 });
 
+app.get('/releases', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/release-list.html'));
+});
+
+app.get('/tests', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/test-list.html'));
+});
+
 app.get('/firmwares', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/firmware-list.html'));
 });

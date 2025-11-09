@@ -34,7 +34,54 @@
         </h2>
     </div>
     <ul class="sidebar-menu">
+        <!-- 发布列表 - 所有用户可见 -->
         <li class="has-submenu">
+            <button class="menu-item submenu-toggle" type="button" data-page="release-list">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                </svg>
+                发布列表
+                <span class="submenu-arrow" aria-hidden="true"></span>
+            </button>
+            <ul class="submenu">
+                <li>
+                    <a href="/releases?filter=all" class="menu-item submenu-item" data-page="release-list-all">
+                        ▫️ 所有固件
+                    </a>
+                </li>
+                <li data-requires-role="admin,developer,tester">
+                    <a href="/releases?filter=my-released" class="menu-item submenu-item" data-page="release-list-my-released">
+                        ▫️ 我发布的
+                    </a>
+                </li>
+            </ul>
+        </li>
+        
+        <!-- 测试列表 - 仅管理员、研发人员、测试人员可见 -->
+        <li class="has-submenu" data-requires-role="admin,developer,tester">
+            <button class="menu-item submenu-toggle" type="button" data-page="test-list">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19.5,3.5L18,2L16.5,3.5L15,2L13.5,3.5L12,2L10.5,3.5L9,2L7.5,3.5L6,2L4.5,3.5L3,2V22L4.5,20.5L6,22L7.5,20.5L9,22 L10.5,20.5L12,22L13.5,20.5L15,22L16.5,20.5L18,22L19.5,20.5L21,22V2L19.5,3.5z M19,19.09H5V4.91H19V19.09z M6,15H18V17H6V15z M6,11H18V13H6V11z M6,7H18V9H6V7z" />
+                </svg>
+                测试列表
+                <span class="submenu-arrow" aria-hidden="true"></span>
+            </button>
+            <ul class="submenu">
+                <li>
+                    <a href="/tests?filter=all" class="menu-item submenu-item" data-page="test-list-all">
+                        ▫️ 所有固件
+                    </a>
+                </li>
+                <li>
+                    <a href="/tests?filter=my-tested" class="menu-item submenu-item" data-page="test-list-my-tested">
+                        ▫️ 我测试的
+                    </a>
+                </li>
+            </ul>
+        </li>
+        
+        <!-- 固件列表 - 仅研发人员和管理员可见 -->
+        <li class="has-submenu" data-requires-role="admin,developer">
             <button class="menu-item submenu-toggle" type="button" data-page="firmware-list">
                 <svg viewBox="0 0 24 24">
                     <path d="M3,13h2v-2H3V13z M3,17h2v-2H3V17z M3,9h2V7H3V9z M7,13h14v-2H7V13z M7,17h14v-2H7V17z M7,7v2h14V7H7z" />
@@ -48,14 +95,9 @@
                         ▫️ 所有固件
                     </a>
                 </li>
-                <li data-requires-role="admin,developer">
+                <li>
                     <a href="/firmwares?filter=my-uploaded" class="menu-item submenu-item" data-page="firmware-list-my-uploaded">
                         ▫️ 我上传的
-                    </a>
-                </li>
-                <li data-requires-role="tester">
-                    <a href="/firmwares?filter=my-tested" class="menu-item submenu-item" data-page="firmware-list-my-tested">
-                        ▫️ 我测试的
                     </a>
                 </li>
             </ul>
