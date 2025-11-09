@@ -176,7 +176,7 @@ class Dashboard {
 
         // 更新页面标题
         const titles = {
-            'firmware-list': '固件列表',
+            'firmware-list': '上传列表',
             'firmware-management': '固件管理',
             'system-management': '系统管理',
             'about': '关于系统'

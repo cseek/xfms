@@ -25,7 +25,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     dashboard.init({
         pageId: 'firmware-list',
-        pageTitle: '固件列表',
+        pageTitle: '上传列表',
         onReady: async () => {
             await firmwareManager.loadModulesForSelect();
             await firmwareManager.loadProjectsForSelect();

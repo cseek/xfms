@@ -28,7 +28,7 @@ const session = require('express-session');
 
 const config = require('./config');
 const { attachDatabase, closeDatabase } = require('./utils/database');
-const { ensureAuthenticated } = require('./middleware/auth');
+const { ensureAuthenticated, canManageFirmware } = require('./middleware/auth');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -83,7 +83,7 @@ app.get('/firmwares', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/firmware-list.html'));
 });
 
-app.get('/manage/firmware', ensureAuthenticated, (req, res) => {
+app.get('/manage/firmware', ensureAuthenticated, canManageFirmware, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/firmware-management.html'));
 });
 

@@ -64,6 +64,18 @@ const canUploadFirmware = (req, res, next) => {
 };
 
 /**
+ * 确保用户有管理固件的权限（管理员或开发者）- 用于页面访问
+ */
+const canManageFirmware = (req, res, next) => {
+    const user = req.session.user;
+    if (user && (user.role === 'admin' || user.role === 'developer')) {
+        next();
+    } else {
+        res.status(403).send('<h1>403 禁止访问</h1><p>您没有权限访问此页面。只有管理员和开发者可以访问固件管理功能。</p><a href="/releases">返回首页</a>');
+    }
+};
+
+/**
  * 确保用户有测试权限（管理员或测试人员）
  */
 const canTestFirmware = (req, res, next) => {
@@ -80,5 +92,6 @@ module.exports = {
     requireAuth,
     adminRequired,
     canUploadFirmware,
+    canManageFirmware,
     canTestFirmware
 };
