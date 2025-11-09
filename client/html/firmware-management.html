@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 06:52:02
+ * @LastEditTime: 2025-11-09 14:16:31
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -42,39 +42,41 @@
                 <div class="page active">
                     <div class="tab-content">
                         <div id="upload" class="tab-pane">
-                            <div class="upload-card">
-                                <div class="upload-card__header">
-                                    <div>
-                                        <p class="upload-card__subtitle">请认真填写固件基础信息并上传文件，如有问题可咨询相关人员。</p>
-                                    </div>
-                                </div>
-                                <form id="uploadForm" class="upload-form">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="moduleSelect">模块名 *</label>
-                                            <select id="moduleSelect" name="module_id" required>
-                                                <option value="">请选择模块</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="projectSelect">项目名 *</label>
-                                            <select id="projectSelect" name="project_id" required>
-                                                <option value="">请选择项目</option>
-                                            </select>
+                            <div class="upload-split-layout">
+                                <!-- 左侧：上传表单 -->
+                                <div class="upload-card">
+                                    <div class="upload-card__header">
+                                        <div>
+                                            <p class="upload-card__subtitle">请认真填写固件基础信息并上传文件</p>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="version">版本号 *</label>
-                                        <input type="text" id="version" name="version" required placeholder="例如: v1.5.1"
-                                            pattern="^v\d+\.\d+\.\d+$">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="description">固件描述</label>
-                                        <textarea id="description" name="description" rows="3"
-                                            placeholder="请输入固件描述..."></textarea>
-                                    </div>
+                                    <form id="uploadForm" class="upload-form">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="moduleSelect">📦 模块名 *</label>
+                                                <select id="moduleSelect" name="module_id" required>
+                                                    <option value="">请选择模块</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="projectSelect">🎯 项目名 *</label>
+                                                <select id="projectSelect" name="project_id" required>
+                                                    <option value="">请选择项目</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="version">🔢 版本号 *</label>
+                                            <input type="text" id="version" name="version" required placeholder="例如: v1.5.1"
+                                                pattern="^v\d+\.\d+\.\d+$">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="description">📝 固件描述</label>
+                                            <textarea id="description" name="description" rows="3"
+                                                placeholder="例如：&#10;1. 修复蓝牙连接不稳定问题;&#10;2. 新增低功耗模式。"></textarea>
+                                        </div>
                                         <div class="form-group form-group--file">
-                                            <label for="firmwareFile">固件文件 *</label>
+                                            <label for="firmwareFile">📄 固件文件 *</label>
                                             <div class="file-picker" data-role="file-picker">
                                                 <input type="file" id="firmwareFile" name="firmware"
                                                     accept=".bin,.hex,.img,.zip,.tar.gz,.pkg,.deb,.app,.exe,.msi,.dmg,.rpm,.xpk,.apk"
@@ -84,14 +86,39 @@
                                                     <span class="file-picker__name" data-role="file-name">尚未选择文件</span>
                                                 </label>
                                             </div>
+                                        </div>
+                                        <div class="form-group form-group--submit">
+                                            <button type="submit" class="submit-btn">
+                                                <i class="fas fa-upload"></i>
+                                                上传
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- 右侧：说明和建议 -->
+                                <div class="upload-guide">
+                                    <div class="guide-section guide-section--tips">
+                                        <h3 class="guide-title guide-title--tips">
+                                            <svg viewBox="0 0 24 24" fill="none" class="guide-icon">
+                                                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            温馨提示
+                                        </h3>
+                                        <ul class="guide-tips-list">
+                                            <li>🟢 没有想填写的模块名？请联系管理员添加</li>
+                                            <li>🟢 没有想填写的项目名？请联系管理员添加</li>
+                                            <li>🟢 版本号请遵循 "v主版本.次版本.修订版本" 格式</li>
+                                            <li>🟢 固件描述建议采用编号列表形式，便于阅读</li>
+                                            <li>🟢 文件上传过程中请勿关闭或刷新页面</li>
+                                            <li>🟢 请在描述中详细说明变更内容</li>
+                                            <li>🟢 固件文件请确保完整、正确</li>
+                                            <li>🟢 支持的文件格式：.tar.gz .bin .hex .img .zip .apk .pkg .xpk 等</li>
+                                            <li>🟢 上传后请及时通知相关测试人员进行验证</li>
+                                            <li>🟢 如有其他疑问请联系系统管理员</li>
+                                        </ul>
                                     </div>
-                                    <div class="form-group form-group--submit">
-                                        <button type="submit" class="submit-btn">
-                                            <i class="fas fa-upload"></i>
-                                            上传
-                                        </button>
-                                    </div>
-                                </form>
+                                </div>
                             </div>
                         </div>
                         <div id="modules" class="tab-pane">
