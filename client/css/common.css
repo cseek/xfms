@@ -39,7 +39,7 @@ body {
     --success-color: #4CAF50;
     --warning-color: #ff9800;
     --danger-color: #f44336;
-    --dark-color: #2c3e50;
+    --dark-color: #1a252f;
     --light-color: #ecf0f1;
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
@@ -60,7 +60,7 @@ body {
 
 .sidebar {
     width: var(--sidebar-width);
-    background: linear-gradient(135deg, var(--dark-color) 0%, #34495e 100%);
+    background: linear-gradient(135deg, #1a252f 0%, #283747 100%);
     color: #fff;
     transition: all 0.3s ease;
     display: flex;
