@@ -453,16 +453,11 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 12px;
     backdrop-filter: blur(10px);
 }
 
 .message::before {
-    content: '';
-    width: 20px;
-    height: 20px;
-    background-size: contain;
-    background-repeat: no-repeat;
+    display: none;
 }
 
 .message.success {
