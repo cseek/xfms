@@ -21,14 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const moduleFilter = document.getElementById('moduleFilter');
             const projectFilter = document.getElementById('projectFilter');
-            const environmentFilter = document.getElementById('environmentFilter');
             const searchInput = document.getElementById('searchInput');
 
             const triggerSearch = async () => {
                 const filters = {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
-                    environment: environmentFilter?.value || '',
                     search: searchInput?.value.trim() || ''
                 };
                 
@@ -42,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             moduleFilter?.addEventListener('change', triggerSearch);
             projectFilter?.addEventListener('change', triggerSearch);
-            environmentFilter?.addEventListener('change', triggerSearch);
             
             // 添加搜索框事件监听器
             searchInput?.addEventListener('input', () => {

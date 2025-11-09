@@ -39,6 +39,13 @@
     align-items: center;
 }
 
+.search-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: auto;
+}
+
 .filter-label {
     font-size: 14px;
     font-weight: 500;
@@ -48,7 +55,7 @@
 }
 
 .search-label {
-    margin-left: 15px;
+    margin-left: 0;
 }
 
 .search-input {
