@@ -117,14 +117,9 @@ class FirmwareManager {
                 <div class="firmware-header">
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
-                        <div style="display:inline-flex; align-items:center; gap:8px;">
-                            <div class="version-status ${firmware.status || ''}">
-                                <span class="version-text">${firmware.version}</span>
-                                <span class="status-text">${this.getStatusDisplayName(firmware.status)}</span>
-                            </div>
-                            <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
-                                <i class="fas fa-info-circle"></i> 详情
-                            </button>
+                        <div class="version-status ${firmware.status || ''}">
+                            <span class="version-text">${firmware.version}</span>
+                            <span class="status-text">${this.getStatusDisplayName(firmware.status)}</span>
                         </div>
                     </div>
                 </div>
@@ -155,6 +150,9 @@ class FirmwareManager {
                             ${this.renderActionButtons(firmware)}
                         </div>
                     </div>
+                    <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
+                        <i class="fas fa-info-circle"></i> 详情
+                    </button>
                 </div>
             </div>
         `).join('');
