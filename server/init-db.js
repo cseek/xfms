@@ -81,7 +81,7 @@ db.serialize(() => {
         file_path TEXT NOT NULL,
         file_size INTEGER,
         md5 TEXT,
-        status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'testing', 'passed', 'failed', 'released', 'obsolete')),
+        status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'assigned', 'released', 'rejected')),
         environment TEXT DEFAULT 'test' CHECK(environment IN ('test', 'release')),
         uploaded_by INTEGER NOT NULL,
         test_report_path TEXT,

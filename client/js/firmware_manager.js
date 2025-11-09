@@ -789,12 +789,10 @@ class FirmwareManager {
 
     getStatusDisplayName(status) {
         const statusMap = {
-            'pending': '待测试',
-            'testing': '测试中',
-            'passed': '测试通过',
-            'failed': '测试失败',
+            'pending': '待委派',
+            'assigned': '待发布',
             'released': '已发布',
-            'obsolete': '已作废'
+            'rejected': '已驳回'
         };
         return statusMap[status] || status;
     }

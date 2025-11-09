@@ -192,11 +192,9 @@
 }
 
 .version-status.pending { background-color: #6c757d; }
-.version-status.testing { background-color: #17a2b8; }
-.version-status.passed { background-color: #28a745; }
-.version-status.failed { background-color: #dc3545; }
+.version-status.assigned { background-color: #17a2b8; }
 .version-status.released { background-color: #20c997; }
-.version-status.obsolete { background-color: #000; }
+.version-status.rejected { background-color: #dc3545; }
 
 .version-status .version-text {
     display: inline-block;
