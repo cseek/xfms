@@ -91,6 +91,7 @@ body {
     height: 1em;
     margin-right: 10px;
     fill: currentColor;
+    stroke: currentColor;
 }
 
 .logout-btn svg {
