@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const filters = {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
-                    search: searchInput?.value.trim() || ''
+                    search: searchInput?.value.trim() || '',
+                    status: 'assigned' // 测试列表只显示待发布状态的固件
                 };
                 
                 // 如果有URL筛选参数，添加到filters中
@@ -57,15 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadTestsByFilter(filterType) {
     const currentUser = dashboard.currentUser;
     
+    // 测试列表只显示待发布状态的固件
+    const baseFilters = { status: 'assigned' };
+    
     if (!filterType || filterType === 'all') {
-        // 所有固件
-        await firmwareManager.loadFirmwares();
+        // 所有待发布固件
+        await firmwareManager.loadFirmwares(baseFilters);
     } else if (filterType === 'my-tested') {
-        // 我测试的
+        // 我测试的待发布固件
         await firmwareManager.loadFirmwares({
+            ...baseFilters,
             tested_by: currentUser.username
         });
     } else {
-        await firmwareManager.loadFirmwares();
+        await firmwareManager.loadFirmwares(baseFilters);
     }
 }

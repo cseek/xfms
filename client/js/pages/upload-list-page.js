@@ -48,7 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const filters = {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
-                    search: searchInput?.value.trim() || ''
+                    search: searchInput?.value.trim() || '',
+                    status: 'pending' // 上传列表只显示待委派状态的固件
                 };
                 
                 // 如果有URL筛选参数，添加到filters中
@@ -76,28 +77,33 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadFirmwaresByFilter(filterType) {
     const currentUser = dashboard.currentUser;
     
+    // 上传列表只显示待委派状态的固件
+    const baseFilters = { status: 'pending' };
+    
     if (!filterType || filterType === 'all') {
-        // 所有固件
-        await firmwareManager.loadFirmwares();
+        // 所有待委派固件
+        await firmwareManager.loadFirmwares(baseFilters);
     } else if (filterType === 'my-uploaded') {
-        // 我上传的（仅管理员和开发者）
+        // 我上传的待委派固件（仅管理员和开发者）
         if (currentUser.role === 'admin' || currentUser.role === 'developer') {
             await firmwareManager.loadFirmwares({
+                ...baseFilters,
                 uploaded_by: currentUser.username
             });
         } else {
-            await firmwareManager.loadFirmwares();
+            await firmwareManager.loadFirmwares(baseFilters);
         }
     } else if (filterType === 'my-tested') {
         // 我测试的（仅测试人员）
         if (currentUser.role === 'tester') {
             await firmwareManager.loadFirmwares({
+                ...baseFilters,
                 tested_by: currentUser.username
             });
         } else {
-            await firmwareManager.loadFirmwares();
+            await firmwareManager.loadFirmwares(baseFilters);
         }
     } else {
-        await firmwareManager.loadFirmwares();
+        await firmwareManager.loadFirmwares(baseFilters);
     }
 }
