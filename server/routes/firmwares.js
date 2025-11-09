@@ -26,6 +26,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs-extra');
+const crypto = require('crypto');
 const config = require('../config');
 const { requireAuth, canUploadFirmware, canTestFirmware } = require('../middleware/auth');
 const { cleanupUploadedFile, isValidVersionFormat } = require('../utils/fileUtils');
@@ -76,6 +77,26 @@ const uploadTestReport = multer({
         fileSize: config.upload.testReportMaxSize
     }
 });
+
+// 计算文件MD5
+function calculateFileMD5(filePath) {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash('md5');
+        const stream = fs.createReadStream(filePath);
+        
+        stream.on('data', (data) => {
+            hash.update(data);
+        });
+        
+        stream.on('end', () => {
+            resolve(hash.digest('hex'));
+        });
+        
+        stream.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
 
 // 获取固件列表（支持服务端分页）
 router.get('/', (req, res) => {
@@ -244,38 +265,48 @@ router.post('/upload', canUploadFirmware, uploadFirmware.single('firmware'), (re
                 return res.status(400).json({ error: '项目不存在' });
             }
 
-            // 插入固件记录
-            const insertSql = `
-                INSERT INTO firmwares 
-                (module_id, project_id, version, description, additional_info, file_path, file_size, uploaded_by, environment, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'test', 'pending')
-            `;
-            const fileSize = req.file.size;
+            // 计算文件MD5
+            calculateFileMD5(req.file.path)
+                .then(md5Hash => {
+                    // 插入固件记录
+                    const insertSql = `
+                        INSERT INTO firmwares 
+                        (module_id, project_id, version, description, additional_info, file_path, file_size, md5, uploaded_by, environment, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'test', 'pending')
+                    `;
+                    const fileSize = req.file.size;
 
-            req.db.run(insertSql, [module_id, project_id, version, description, additional_info, req.file.path, fileSize, user.id], function(err) {
-                if (err) {
+                    req.db.run(insertSql, [module_id, project_id, version, description, additional_info, req.file.path, fileSize, md5Hash, user.id], function(err) {
+                        if (err) {
+                            cleanupUploadedFile(req.file);
+                            console.error('Database error:', err);
+                            return res.status(500).json({ error: '数据库错误' });
+                        }
+
+                        // 记录历史
+                        const historySql = `
+                            INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
+                            VALUES (?, ?, 'upload', ?, ?)
+                        `;
+                        const notes = `上传固件，文件: ${req.file.originalname}, MD5: ${md5Hash}`;
+                        req.db.run(historySql, [this.lastID, version, user.id, notes], function(err) {
+                            if (err) {
+                                console.error('Failed to record history:', err);
+                            }
+                        });
+
+                        res.json({
+                            message: '固件上传成功',
+                            firmwareId: this.lastID,
+                            md5: md5Hash
+                        });
+                    });
+                })
+                .catch(err => {
                     cleanupUploadedFile(req.file);
-                    console.error('Database error:', err);
-                    return res.status(500).json({ error: '数据库错误' });
-                }
-
-                // 记录历史
-                const historySql = `
-                    INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
-                    VALUES (?, ?, 'upload', ?, ?)
-                `;
-                const notes = `上传固件，文件: ${req.file.originalname}`;
-                req.db.run(historySql, [this.lastID, version, user.id, notes], function(err) {
-                    if (err) {
-                        console.error('Failed to record history:', err);
-                    }
+                    console.error('Error calculating MD5:', err);
+                    return res.status(500).json({ error: '计算MD5失败' });
                 });
-
-                res.json({
-                    message: '固件上传成功',
-                    firmwareId: this.lastID
-                });
-            });
         });
     });
 });

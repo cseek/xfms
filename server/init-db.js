@@ -80,6 +80,7 @@ db.serialize(() => {
         additional_info TEXT,
         file_path TEXT NOT NULL,
         file_size INTEGER,
+        md5 TEXT,
         status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'testing', 'passed', 'failed', 'released', 'obsolete')),
         environment TEXT DEFAULT 'test' CHECK(environment IN ('test', 'release')),
         uploaded_by INTEGER NOT NULL,
@@ -126,6 +127,15 @@ db.serialize(() => {
             ('Smart Home Hub', 'Central control unit for smart home'),
             ('IoT Sensor Node', 'Remote sensor monitoring device'),
             ('Wearable Device', 'Smart wearable technology')`);
+
+    // 为现有数据库添加md5字段（如果不存在）
+    db.run(`ALTER TABLE firmwares ADD COLUMN md5 TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding md5 column:', err);
+        } else if (!err) {
+            console.log('MD5 column added to firmwares table');
+        }
+    });
 
     console.log('Database initialized successfully');
 });

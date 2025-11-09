@@ -134,16 +134,16 @@ class FirmwareManager {
                         <span>上传人员: ${firmware.uploader_name || '未知'}</span>
                     </div>
                     <div class="meta-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
-                    </div>
-                    <div class="meta-item">
                         <i class="fas fa-database"></i>
                         <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>
                     </div>
                     <div class="meta-item">
-                        <i class="fas fa-file-alt"></i>
-                        <span class="meta-truncated">固件描述: ${ (firmware.description && String(firmware.description).trim()) ? this.truncateAndEscape(firmware.description, 80) : '无' }</span>
+                        <i class="fas fa-shield-alt"></i>
+                        <span class="meta-truncated">MD5校验: ${firmware.md5 ? firmware.md5 : '计算中...'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
                     </div>
                 </div>
                 <div class="firmware-actions">

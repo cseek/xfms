@@ -420,6 +420,7 @@ class ModalManager {
                 <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
                 <div class="detail-row"><strong>版本：</strong> ${firmware.version || '-'}</div>
                 <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
+                <div class="detail-row"><strong>MD5校验：</strong> ${firmware.md5 ? `<code style="font-family:monospace;background:#f5f5f5;padding:2px 6px;border-radius:3px;">${firmware.md5}</code>` : '暂无'}</div>
                 <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
                 <div class="detail-row"><strong>环境：</strong> ${firmware.environment || '-'}</div>
                 <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
