@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-08 21:21:38
+ * @LastEditTime: 2025-11-09 15:49:14
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -139,7 +139,7 @@ class FirmwareManager {
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-shield-alt"></i>
-                        <span class="meta-truncated">MD5校验: ${firmware.md5 ? firmware.md5 : '计算中...'}</span>
+                        <span class="meta-truncated">md5校验: ${firmware.md5 ? firmware.md5 : '计算中...'}</span>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-calendar"></i>
