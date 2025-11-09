@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-09 00:25:04
+ * @LastEditTime: 2025-11-09 18:34:15
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -110,7 +110,7 @@
 
 .firmware-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 20px;
     align-content: start;
@@ -212,24 +212,24 @@
 
 .firmware-meta {
     margin-bottom: 15px;
-    flex: 1;
-    overflow: hidden;
+    flex: 0 1 auto;
     min-height: 0;
 }
 
 .meta-item {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-size: 13px;
+    line-height: 1.5;
     color: #7f8c8d;
-    overflow: hidden;
 }
 
 .meta-item i {
     margin-right: 8px;
     width: 16px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .meta-truncated {
@@ -247,6 +247,7 @@
     flex-wrap: wrap;
     flex-shrink: 0;
     margin-top: auto;
+    padding-top: 100px;
 }
 
 /* 操作菜单样式 */
@@ -483,15 +484,6 @@
 
 #modalBody .btn-submit:hover {
     opacity: 0.95;
-}
-
-@media (max-width: 1400px) {
-    .firmware-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: auto;
-        height: auto;
-        max-height: calc(100% - 80px);
-    }
 }
 
 @media (max-width: 1024px) {
