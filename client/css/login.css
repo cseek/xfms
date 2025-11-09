@@ -451,6 +451,8 @@ body {
     max-width: 400px;
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
     gap: 12px;
     backdrop-filter: blur(10px);
 }
@@ -476,7 +478,8 @@ body {
 }
 
 .message.info {
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+    color: #2c3e50;
 }
 
 @keyframes messageSlideIn {
