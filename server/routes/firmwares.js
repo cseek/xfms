@@ -149,15 +149,19 @@ router.get('/', (req, res) => {
         params.push(req.query.uploaded_by);
     }
 
-    // 按测试者筛选 - 只能看到自己测试过的固件
+    // 按测试者筛选 - 包括委派给当前用户的固件和已经测试过的固件
     if (req.query.tested_by) {
-        whereClause += ` AND f.id IN (
-            SELECT DISTINCT fh.firmware_id 
-            FROM firmware_history fh
-            JOIN users tu ON fh.performed_by = tu.id
-            WHERE tu.username = ? 
-            AND fh.action IN ('update_status', 'upload_test_report')
+        whereClause += ` AND (
+            f.assigned_to IN (SELECT id FROM users WHERE username = ?)
+            OR f.id IN (
+                SELECT DISTINCT fh.firmware_id 
+                FROM firmware_history fh
+                JOIN users tu ON fh.performed_by = tu.id
+                WHERE tu.username = ? 
+                AND fh.action IN ('update_status', 'upload_test_report')
+            )
         )`;
+        params.push(req.query.tested_by);
         params.push(req.query.tested_by);
     }
 
@@ -393,6 +397,77 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
             });
 
             res.json({ message: '状态更新成功' });
+        });
+    });
+});
+
+// 委派固件给测试人员 - 允许开发者和管理员委派
+router.post('/:id/assign', canUploadFirmware, (req, res) => {
+    const user = req.session.user;
+    const firmwareId = req.params.id;
+    const { assigned_to, assign_note } = req.body;
+
+    if (!assigned_to) {
+        return res.status(400).json({ error: '请选择委派对象' });
+    }
+
+    // 验证被委派人是否为测试人员
+    const checkUserSql = 'SELECT id, username, role FROM users WHERE id = ?';
+    req.db.get(checkUserSql, [assigned_to], (err, tester) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+
+        if (!tester) {
+            return res.status(404).json({ error: '测试人员不存在' });
+        }
+
+        if (tester.role !== 'tester') {
+            return res.status(400).json({ error: '只能委派给测试人员' });
+        }
+
+        // 获取固件信息
+        const getFirmwareSql = 'SELECT * FROM firmwares WHERE id = ?';
+        req.db.get(getFirmwareSql, [firmwareId], (err, firmware) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            if (!firmware) {
+                return res.status(404).json({ error: '固件不存在' });
+            }
+
+            // 更新固件状态为 assigned (待发布)，并记录委派信息
+            const updateSql = `
+                UPDATE firmwares 
+                SET status = 'assigned', assigned_to = ?, assign_note = ?, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = ?
+            `;
+            req.db.run(updateSql, [assigned_to, assign_note || null, firmwareId], function(err) {
+                if (err) {
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: '数据库错误' });
+                }
+
+                // 记录历史
+                const historySql = `
+                    INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
+                    VALUES (?, ?, ?, ?, ?)
+                `;
+                const notes = `固件委派给测试人员: ${tester.username}${assign_note ? ', 说明: ' + assign_note : ''}`;
+                req.db.run(historySql, [firmwareId, firmware.version, 'assign', user.id, notes], function(err) {
+                    if (err) {
+                        console.error('Failed to record history:', err);
+                    }
+                });
+
+                res.json({ 
+                    message: '固件委派成功',
+                    assigned_to: tester.username
+                });
+            });
         });
     });
 });

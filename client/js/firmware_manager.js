@@ -355,8 +355,18 @@ class FirmwareManager {
                 // 使用 modal 显示完整信息
                 modalManager.showFirmwareDetails(firmware);
                 break;
+            case 'assign':
+                // 委派固件
+                modalManager.showAssignFirmwareModal(firmwareId);
+                break;
             case 'release':
                 await this.updateFirmwareStatus(firmwareId, 'released');
+                break;
+            case 'reject':
+                // 驳回固件
+                if (confirm('确定要驳回这个固件吗？')) {
+                    await this.updateFirmwareStatus(firmwareId, 'rejected');
+                }
                 break;
             case 'obsolete':
                 await this.updateFirmwareStatus(firmwareId, 'obsolete');

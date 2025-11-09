@@ -137,6 +137,39 @@ db.serialize(() => {
         }
     });
 
+    // 添加委派相关字段
+    db.run(`ALTER TABLE firmwares ADD COLUMN assigned_to INTEGER REFERENCES users(id)`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding assigned_to column:', err);
+        } else if (!err) {
+            console.log('assigned_to column added to firmwares table');
+        }
+    });
+
+    db.run(`ALTER TABLE firmwares ADD COLUMN assign_note TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding assign_note column:', err);
+        } else if (!err) {
+            console.log('assign_note column added to firmwares table');
+        }
+    });
+
+    db.run(`ALTER TABLE firmwares ADD COLUMN released_by INTEGER REFERENCES users(id)`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding released_by column:', err);
+        } else if (!err) {
+            console.log('released_by column added to firmwares table');
+        }
+    });
+
+    db.run(`ALTER TABLE firmwares ADD COLUMN released_at DATETIME`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding released_at column:', err);
+        } else if (!err) {
+            console.log('released_at column added to firmwares table');
+        }
+    });
+
     console.log('Database initialized successfully');
 });
 

@@ -311,6 +311,90 @@ class ModalManager {
         });
     }
 
+    async showAssignFirmwareModal(firmwareId) {
+        try {
+            // 获取测试人员列表
+            const response = await fetch('/api/users');
+            if (!response.ok) throw new Error('获取测试人员列表失败');
+            
+            const users = await response.json();
+            const testers = users.filter(user => user.role === 'tester');
+            
+            if (testers.length === 0) {
+                Utils.showMessage('没有可用的测试人员', 'error');
+                return;
+            }
+            
+            const testersOptions = testers.map(tester => 
+                `<option value="${tester.id}">${tester.username} (${tester.email || '无邮箱'})</option>`
+            ).join('');
+            
+            const content = `
+                <form id="assignFirmwareForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="assignedTester">委派给测试人员 *</label>
+                        <select id="assignedTester" name="assigned_to" required>
+                            <option value="">请选择测试人员</option>
+                            ${testersOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignNote">委派说明</label>
+                        <textarea id="assignNote" name="assign_note" rows="3" placeholder="选填：委派说明或测试要求"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
+                        <button type="submit" class="btn-submit">确认委派</button>
+                    </div>
+                </form>
+            `;
+            
+            this.showModal('委派固件', content);
+            
+            document.getElementById('assignFirmwareForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.assignFirmware(firmwareId);
+            });
+        } catch (error) {
+            console.error('Error showing assign modal:', error);
+            Utils.showMessage('显示委派对话框失败', 'error');
+        }
+    }
+
+    async assignFirmware(firmwareId) {
+        const form = document.getElementById('assignFirmwareForm');
+        const formData = new FormData(form);
+        const assignedTo = formData.get('assigned_to');
+        const assignNote = formData.get('assign_note');
+        
+        try {
+            const response = await fetch(`/api/firmwares/${firmwareId}/assign`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    assigned_to: parseInt(assignedTo),
+                    assign_note: assignNote 
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || '委派失败');
+            }
+            
+            Utils.showMessage('固件委派成功', 'success');
+            this.hideModal();
+            
+            // 重新加载固件列表
+            if (window.firmwareManager) {
+                window.firmwareManager.loadFirmwares();
+            }
+        } catch (error) {
+            console.error('Error assigning firmware:', error);
+            Utils.showMessage(error.message || '固件委派失败', 'error');
+        }
+    }
+
     async addModule() {
         await this.submitForm('/api/modules', 'addModuleForm', '模块添加成功');
     }
