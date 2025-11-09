@@ -147,7 +147,14 @@ class FirmwareManager {
                     </div>
                 </div>
                 <div class="firmware-actions">
-                    ${this.renderActionButtons(firmware)}
+                    <div class="action-menu-wrapper">
+                        <button class="action-menu-btn" data-action="toggle-menu" data-id="${firmware.id}">
+                            <i class="fas fa-ellipsis-v"></i> 操作
+                        </button>
+                        <div class="action-menu" data-menu-id="${firmware.id}">
+                            ${this.renderActionButtons(firmware)}
+                        </div>
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -200,8 +207,8 @@ class FirmwareManager {
 
         // 下载按钮 - 所有用户可见
         buttons.push(`
-            <button class="action-btn download-btn" data-action="download" data-id="${firmware.id}">
-                <i class="fas fa-download"></i> 下载
+            <button class="action-menu-item" data-action="download" data-id="${firmware.id}">
+                <i class="fas fa-download"></i> 下载固件
             </button>
         `);
 
@@ -210,13 +217,13 @@ class FirmwareManager {
             if (userRole === 'tester' || userRole === 'admin') {
                 if (firmware.status === 'pending' || firmware.status === 'testing') {
                     buttons.push(`
-                        <button class="action-btn release-btn" data-action="release" data-id="${firmware.id}">
-                            <i class="fas fa-check"></i> 发布
+                        <button class="action-menu-item release-item" data-action="release" data-id="${firmware.id}">
+                            <i class="fas fa-check"></i> 发布固件
                         </button>
                     `);
                     buttons.push(`
-                        <button class="action-btn obsolete-btn" data-action="obsolete" data-id="${firmware.id}">
-                            <i class="fas fa-times"></i> 作废
+                        <button class="action-menu-item obsolete-item" data-action="obsolete" data-id="${firmware.id}">
+                            <i class="fas fa-times"></i> 作废固件
                         </button>
                     `);
                 }
@@ -228,16 +235,16 @@ class FirmwareManager {
         if (userRole === 'admin') {
             // 管理员可以删除任何固件
             buttons.push(`
-                <button class="action-btn delete-btn" data-action="delete" data-id="${firmware.id}">
-                    <i class="fas fa-trash"></i> 删除
+                <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
+                    <i class="fas fa-trash"></i> 删除固件
                 </button>
             `);
         } else if (userRole === 'developer' && firmware.uploaded_by === dashboard.currentUser.id) {
             // 开发者只能删除自己上传的、且状态不是 released 或 obsolete 的固件
             if (firmware.status !== 'released') {
                 buttons.push(`
-                    <button class="action-btn delete-btn" data-action="delete" data-id="${firmware.id}">
-                        <i class="fas fa-trash"></i> 删除
+                    <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
+                        <i class="fas fa-trash"></i> 删除固件
                     </button>
                 `);
             }
@@ -249,14 +256,54 @@ class FirmwareManager {
     }
 
     attachFirmwareEventListeners() {
+        // 菜单切换按钮
+        document.querySelectorAll('.action-menu-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const firmwareId = btn.getAttribute('data-id');
+                const menu = document.querySelector(`.action-menu[data-menu-id="${firmwareId}"]`);
+                
+                // 关闭所有其他菜单
+                document.querySelectorAll('.action-menu.active').forEach(m => {
+                    if (m !== menu) m.classList.remove('active');
+                });
+                
+                // 切换当前菜单
+                menu.classList.toggle('active');
+            });
+        });
+
+        // 菜单项点击事件
         document.querySelectorAll('.firmware-card [data-action]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 // use currentTarget to avoid clicks on inner <i> or text nodes
                 const target = e.currentTarget;
                 const action = target.getAttribute('data-action');
+                
+                // 如果是菜单切换按钮，不执行操作
+                if (action === 'toggle-menu') {
+                    return;
+                }
+                
                 const firmwareId = target.getAttribute('data-id');
+                
+                // 关闭菜单
+                const menu = target.closest('.action-menu');
+                if (menu) {
+                    menu.classList.remove('active');
+                }
+                
                 this.handleFirmwareAction(action, firmwareId);
             });
+        });
+
+        // 点击外部关闭所有菜单
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-menu-wrapper')) {
+                document.querySelectorAll('.action-menu.active').forEach(m => {
+                    m.classList.remove('active');
+                });
+            }
         });
     }
 
