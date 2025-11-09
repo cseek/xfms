@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-09
+ * @LastEditTime: 2025-11-09 12:28:03
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -60,6 +60,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const togglePasswordBtn = document.querySelector('.toggle-password');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const registerLink = document.getElementById('registerLink');
+    
+    // 注册用户点击事件
+    if (registerLink) {
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('请联系管理员注册用户', 'info');
+        });
+    }
+    
+    // 忘记密码点击事件
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('请联系管理员找回密码', 'info');
+        });
+    }
     
     // 密码显示/隐藏功能
     if (togglePasswordBtn) {

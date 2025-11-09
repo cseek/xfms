@@ -305,6 +305,46 @@ body {
     height: 20px;
 }
 
+/* 忘记密码和注册用户链接 */
+.forgot-password-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    margin-top: -8px;
+}
+
+.register-link,
+.forgot-password-link {
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.register-link:hover,
+.forgot-password-link:hover {
+    color: var(--accent-hover);
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.register-link:hover {
+    transform: translateX(2px);
+}
+
+.forgot-password-link:hover {
+    transform: translateX(-2px);
+}
+
+.register-link:active,
+.forgot-password-link:active {
+    transform: scale(0.98);
+}
+
 /* 登录按钮 */
 .login-btn {
     width: 100%;
