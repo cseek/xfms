@@ -1,6 +1,0 @@
-
-> firmware-management-system@1.0.0 start
-> node server/app.js
-
-Server running on http://localhost:3000
-SIGTERM signal received: closing HTTP server
