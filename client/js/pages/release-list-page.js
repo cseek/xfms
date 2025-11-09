@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pageId: 'release-list',
         pageTitle: '发布列表',
         onReady: async () => {
+            // 设置当前页面ID
+            firmwareManager.setPageId('release-list');
+            
             await firmwareManager.loadModulesForSelect();
             await firmwareManager.loadProjectsForSelect();
             

@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pageId: 'upload-list',
         pageTitle: '上传列表',
         onReady: async () => {
+            // 设置当前页面ID
+            firmwareManager.setPageId('upload-list');
+            
             await firmwareManager.loadModulesForSelect();
             await firmwareManager.loadProjectsForSelect();
             

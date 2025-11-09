@@ -39,6 +39,12 @@ class FirmwareManager {
         this.modulesPage = 1;
         this.projectsPage = 1;
         this.currentFilters = {}; // 保存当前的过滤条件
+        this.currentPageId = null; // 当前页面ID (upload-list, test-list, release-list)
+    }
+
+    // 设置当前页面ID
+    setPageId(pageId) {
+        this.currentPageId = pageId;
     }
 
     // 简单的 HTML 转义，防止插入不安全的内容
@@ -200,60 +206,86 @@ class FirmwareManager {
     renderActionButtons(firmware) {
         const buttons = [];
         const userRole = dashboard.currentUser.role;
+        const pageId = this.currentPageId;
 
-        // 测试报告相关按钮已移至详情页（详情页中会根据权限显示“获取/下载测试报告”或“提交测试报告”）
-
-        // 下载按钮 - 所有用户可见
+        // 下载按钮 - 所有页面都有
         buttons.push(`
             <button class="action-menu-item" data-action="download" data-id="${firmware.id}">
                 <i class="fas fa-download"></i> 下载固件
             </button>
         `);
 
-        // 测试流程按钮
-        if (firmware.environment === 'test') {
-            if (userRole === 'tester' || userRole === 'admin') {
-                if (firmware.status === 'pending' || firmware.status === 'testing') {
-                    buttons.push(`
-                        <button class="action-menu-item release-item" data-action="release" data-id="${firmware.id}">
-                            <i class="fas fa-check"></i> 发布固件
-                        </button>
-                    `);
-                    buttons.push(`
-                        <button class="action-menu-item obsolete-item" data-action="obsolete" data-id="${firmware.id}">
-                            <i class="fas fa-times"></i> 作废固件
-                        </button>
-                    `);
-                }
-            }
-        }
-
-        // 删除按钮 - 管理员和上传者
-        // 注意：开发者不能删除已发布(released)或作废(obsolete)状态的固件
-        if (userRole === 'admin') {
-            // 管理员可以删除任何固件
+        // 根据页面显示不同的操作按钮
+        if (pageId === 'upload-list') {
+            // 上传列表: 下载固件、委派固件、删除固件
             buttons.push(`
-                <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
-                    <i class="fas fa-trash"></i> 删除固件
+                <button class="action-menu-item" data-action="assign" data-id="${firmware.id}">
+                    <i class="fas fa-user-check"></i> 委派固件
                 </button>
             `);
-        } else if (userRole === 'developer' && firmware.uploaded_by === dashboard.currentUser.id) {
-            // 开发者只能删除自己上传的、且状态不是 released 或 obsolete 的固件
-            if (firmware.status !== 'released') {
+
+            // 删除按钮 - 管理员或上传者
+            if (userRole === 'admin' || firmware.uploaded_by === dashboard.currentUser.id) {
                 buttons.push(`
                     <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
                         <i class="fas fa-trash"></i> 删除固件
                     </button>
                 `);
             }
-        }
+        } else if (pageId === 'test-list') {
+            // 测试列表: 下载固件、发布固件、驳回固件
+            buttons.push(`
+                <button class="action-menu-item release-item" data-action="release" data-id="${firmware.id}">
+                    <i class="fas fa-check"></i> 发布固件
+                </button>
+            `);
+            buttons.push(`
+                <button class="action-menu-item reject-item" data-action="reject" data-id="${firmware.id}">
+                    <i class="fas fa-ban"></i> 驳回固件
+                </button>
+            `);
+        } else if (pageId === 'release-list') {
+            // 发布列表: 只有下载固件 (已经在上面添加了)
+        } else {
+            // 其他页面保留原有逻辑
+            if (firmware.environment === 'test') {
+                if (userRole === 'tester' || userRole === 'admin') {
+                    if (firmware.status === 'pending' || firmware.status === 'testing') {
+                        buttons.push(`
+                            <button class="action-menu-item release-item" data-action="release" data-id="${firmware.id}">
+                                <i class="fas fa-check"></i> 发布固件
+                            </button>
+                        `);
+                        buttons.push(`
+                            <button class="action-menu-item obsolete-item" data-action="obsolete" data-id="${firmware.id}">
+                                <i class="fas fa-times"></i> 作废固件
+                            </button>
+                        `);
+                    }
+                }
+            }
 
-        // 详情按钮改为放置在状态后方（在 renderFirmwares 中内联渲染），这里不再加入到按钮组中
+            if (userRole === 'admin') {
+                buttons.push(`
+                    <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
+                        <i class="fas fa-trash"></i> 删除固件
+                    </button>
+                `);
+            } else if (userRole === 'developer' && firmware.uploaded_by === dashboard.currentUser.id) {
+                if (firmware.status !== 'released') {
+                    buttons.push(`
+                        <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
+                            <i class="fas fa-trash"></i> 删除固件
+                        </button>
+                    `);
+                }
+            }
+        }
 
         return buttons.join('');
     }
 
-    attachFirmwareEventListeners() {
+ attachFirmwareEventListeners() {
         // 菜单切换按钮
         document.querySelectorAll('.action-menu-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
