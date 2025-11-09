@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // 根据筛选类型加载固件
             await loadFirmwaresByFilter(filterType);
 
-            const uploadBtn = document.getElementById('uploadBtn');
             const moduleFilter = document.getElementById('moduleFilter');
             const projectFilter = document.getElementById('projectFilter');
             const environmentFilter = document.getElementById('environmentFilter');
@@ -68,10 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 使用防抖，避免频繁触发搜索
                 clearTimeout(searchInput.debounceTimer);
                 searchInput.debounceTimer = setTimeout(triggerSearch, 300);
-            });
-
-            uploadBtn?.addEventListener('click', () => {
-                window.location.href = '/manage/firmware';
             });
         }
     });

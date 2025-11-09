@@ -231,11 +231,6 @@ class DashboardApp {
                 item.style.display = requiredRoles.includes(role) ? '' : 'none';
             });
         }
-
-        const uploadBtn = document.getElementById('uploadBtn');
-        if (uploadBtn) {
-            uploadBtn.style.display = (role === 'admin' || role === 'developer') ? 'block' : 'none';
-        }
     }
 
     highlightActiveNav(pageId) {
