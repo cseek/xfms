@@ -103,6 +103,24 @@ router.get('/', (req, res) => {
         params.push(req.query.environment);
     }
 
+    // 按上传者筛选 - 只能看到自己上传的固件
+    if (req.query.uploaded_by) {
+        whereClause += ' AND u.username = ?';
+        params.push(req.query.uploaded_by);
+    }
+
+    // 按测试者筛选 - 只能看到自己测试过的固件
+    if (req.query.tested_by) {
+        whereClause += ` AND f.id IN (
+            SELECT DISTINCT fh.firmware_id 
+            FROM firmware_history fh
+            JOIN users tu ON fh.performed_by = tu.id
+            WHERE tu.username = ? 
+            AND fh.action IN ('update_status', 'upload_test_report')
+        )`;
+        params.push(req.query.tested_by);
+    }
+
     // 搜索过滤 - 在固件描述中查找关键字
     if (req.query.search) {
         whereClause += ' AND f.description LIKE ?';

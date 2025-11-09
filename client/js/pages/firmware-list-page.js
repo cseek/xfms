@@ -29,7 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
         onReady: async () => {
             await firmwareManager.loadModulesForSelect();
             await firmwareManager.loadProjectsForSelect();
-            await firmwareManager.loadFirmwares();
+            
+            // 获取URL参数中的筛选条件
+            const urlParams = new URLSearchParams(window.location.search);
+            const filterType = urlParams.get('filter');
+            
+            // 根据筛选类型加载固件
+            await loadFirmwaresByFilter(filterType);
 
             const uploadBtn = document.getElementById('uploadBtn');
             const moduleFilter = document.getElementById('moduleFilter');
@@ -38,12 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
 
             const triggerSearch = async () => {
-                await firmwareManager.loadFirmwares({
+                const filters = {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
                     environment: environmentFilter?.value || '',
                     search: searchInput?.value.trim() || ''
-                });
+                };
+                
+                // 如果有URL筛选参数，添加到filters中
+                if (filterType) {
+                    filters.filterType = filterType;
+                }
+                
+                await firmwareManager.loadFirmwares(filters);
             };
 
             moduleFilter?.addEventListener('change', triggerSearch);
@@ -63,3 +76,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// 根据筛选类型加载固件
+async function loadFirmwaresByFilter(filterType) {
+    const currentUser = dashboard.currentUser;
+    
+    if (!filterType || filterType === 'all') {
+        // 所有固件
+        await firmwareManager.loadFirmwares();
+    } else if (filterType === 'my-uploaded') {
+        // 我上传的（仅管理员和开发者）
+        if (currentUser.role === 'admin' || currentUser.role === 'developer') {
+            await firmwareManager.loadFirmwares({
+                uploaded_by: currentUser.username
+            });
+        } else {
+            await firmwareManager.loadFirmwares();
+        }
+    } else if (filterType === 'my-tested') {
+        // 我测试的（仅测试人员）
+        if (currentUser.role === 'tester') {
+            await firmwareManager.loadFirmwares({
+                tested_by: currentUser.username
+            });
+        } else {
+            await firmwareManager.loadFirmwares();
+        }
+    } else {
+        await firmwareManager.loadFirmwares();
+    }
+}
