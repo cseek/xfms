@@ -43,7 +43,7 @@ npm start
 访问 http://localhost:3000
 
 默认管理员账号：
-- 用户名: `admin`
+- 用户: `admin`
 - 密码: `admin`
 
 **⚠️ 重要**: 首次登录后请立即修改管理员密码！

@@ -44,7 +44,7 @@ router.post('/', adminRequired, (req, res) => {
     const { username, password, role, email } = req.body;
 
     if (!username || !password || !role) {
-        return res.status(400).json({ error: '用户名、密码和角色不能为空' });
+        return res.status(400).json({ error: '用户、密码和角色不能为空' });
     }
 
     const allowedRoles = ['developer', 'tester', 'user'];
@@ -58,7 +58,7 @@ router.post('/', adminRequired, (req, res) => {
     req.db.run(sql, [username, hashedPassword, role, email], function(err) {
         if (err) {
             if (err.message.includes('UNIQUE constraint failed')) {
-                return res.status(400).json({ error: '用户名已存在' });
+                return res.status(400).json({ error: '用户已存在' });
             }
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });

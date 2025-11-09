@@ -101,7 +101,7 @@ class UserManager {
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>用户名</th>
+                            <th>用户</th>
                             <th>角色</th>
                             <th>邮箱</th>
                             <th>创建时间</th>

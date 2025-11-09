@@ -187,7 +187,7 @@ class ModalManager {
         const content = `
             <form id="addUserForm" class="modal-form">
                 <div class="form-group">
-                    <label for="userUsername">用户名 *</label>
+                    <label for="userUsername">用户 *</label>
                     <input type="text" id="userUsername" name="username" required>
                 </div>
                 <div class="form-group">
@@ -254,9 +254,9 @@ class ModalManager {
         const content = `
             <form id="editUserForm" class="modal-form">
                 <div class="form-group">
-                    <label for="editUserUsername">用户名</label>
+                    <label for="editUserUsername">用户</label>
                     <input type="text" id="editUserUsername" value="${user.username}" disabled>
-                    <small>用户名不可修改</small>
+                    <small>用户不可修改</small>
                 </div>
                 <div class="form-group">
                     <label for="editUserPassword">新密码</label>

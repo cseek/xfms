@@ -30,7 +30,7 @@ router.post('/login', (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).json({ error: '用户名和密码不能为空' });
+        return res.status(400).json({ error: '用户和密码不能为空' });
     }
 
     const sql = 'SELECT * FROM users WHERE username = ?';
@@ -41,12 +41,12 @@ router.post('/login', (req, res) => {
         }
 
         if (!user) {
-            return res.status(401).json({ error: '用户名或密码错误' });
+            return res.status(401).json({ error: '用户或密码错误' });
         }
 
         const passwordIsValid = bcrypt.compareSync(password, user.password);
         if (!passwordIsValid) {
-            return res.status(401).json({ error: '用户名或密码错误' });
+            return res.status(401).json({ error: '用户或密码错误' });
         }
 
         // 设置session

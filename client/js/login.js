@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = '/firmwares';
                 }, 1000);
             } else {
-                showMessage(data.error || '登录失败，请检查用户名和密码', 'error');
+                showMessage(data.error || '登录失败，请检查用户和密码', 'error');
                 
                 // 抖动效果
                 loginBtn.style.animation = 'shake 0.4s';
