@@ -92,19 +92,6 @@ db.serialize(() => {
         FOREIGN KEY(uploaded_by) REFERENCES users(id)
     )`);
 
-    // 固件历史表
-    db.run(`CREATE TABLE IF NOT EXISTS firmware_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        firmware_id INTEGER NOT NULL,
-        version TEXT NOT NULL,
-        action TEXT NOT NULL,
-        performed_by INTEGER NOT NULL,
-        notes TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY(firmware_id) REFERENCES firmwares(id),
-        FOREIGN KEY(performed_by) REFERENCES users(id)
-    )`);
-
     // 插入默认管理员用户
     const hashedPassword = bcrypt.hashSync('admin', 10);
     db.run(`INSERT OR IGNORE INTO users (username, password, role, email) 
