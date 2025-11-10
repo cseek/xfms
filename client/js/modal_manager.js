@@ -645,67 +645,149 @@ class ModalManager {
         // 获取当前页面ID
         const currentPageId = firmwareManager.currentPageId;
         
-        // 基础信息(所有页面都显示)
+        // 状态徽章样式
+        const statusBadge = {
+            '待委派': { class: 'status-pending', text: '待委派' },
+            '待发布': { class: 'status-testing', text: '待发布' },
+            '已发布': { class: 'status-released', text: '已发布' },
+            '已驳回': { class: 'status-rejected', text: '已驳回' }
+        };
+        const badge = statusBadge[firmware.status] || { class: 'status-pending', text: firmware.status };
+        
         let content = `
-            <div class="firmware-details">
-                <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
-                <div class="detail-row"><strong>版本：</strong> ${firmware.version_name || '-'}</div>
-                <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
-                <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
-                <div class="detail-row"><strong>md5校验：</strong> ${firmware.md5 ? `<code style="font-family:monospace;background:#f5f5f5;padding:2px 6px;border-radius:3px;">${firmware.md5}</code>` : '暂无'}</div>
-                <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
+            <div class="firmware-details-modern">
+                <!-- 头部信息卡片 -->
+                <div class="details-card header-card">
+                    <div class="card-header-row">
+                        <div class="firmware-version-info">
+                            <h3 class="version-title">${firmware.version_name || '未知版本'}</h3>
+                            <div class="project-path">${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
+                        </div>
+                        <span class="status-badge ${badge.class}">${badge.text}</span>
+                    </div>
+                </div>
+
+                <!-- 基本信息卡片 -->
+                <div class="details-card">
+                    <div class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        基本信息
+                    </div>
+                    <div class="info-table">
+                        <div class="info-row">
+                            <span class="info-label">文件名称</span>
+                            <span class="info-value">${fileName}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">文件大小</span>
+                            <span class="info-value">${firmware.file_size ? Utils.formatFileSize(firmware.file_size) : '-'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">上传人员</span>
+                            <span class="info-value">${firmware.uploader_name || '-'}</span>
+                        </div>
         `;
         
-        // 测试人员 - 测试列表、发布列表和驳回列表显示
+        // 测试人员
         if ((currentPageId === 'test-list' || currentPageId === 'release-list' || currentPageId === 'rejected-list') && firmware.tester_name) {
-            content += `<div class="detail-row"><strong>测试人员：</strong> ${firmware.tester_name}</div>`;
+            content += `
+                        <div class="info-row">
+                            <span class="info-label">测试人员</span>
+                            <span class="info-value">${firmware.tester_name}</span>
+                        </div>
+            `;
         }
         
-        // 上传时间
-        content += `<div class="detail-row"><strong>上传时间：</strong> ${firmware.uploaded_at ? new Date(firmware.uploaded_at).toLocaleString('zh-CN') : '-'}</div>`;
+        content += `
+                        <div class="info-row">
+                            <span class="info-label">上传时间</span>
+                            <span class="info-value">${firmware.uploaded_at ? new Date(firmware.uploaded_at).toLocaleString('zh-CN') : '-'}</span>
+                        </div>
+        `;
         
-        // 测试报告 - 上传列表不显示
-        if (currentPageId !== 'upload-list') {
-            content += `<div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'}</div>`;
+        // MD5校验
+        if (firmware.md5) {
+            content += `
+                        <div class="info-row">
+                            <span class="info-label">MD5 校验</span>
+                            <span class="info-value code-text">${firmware.md5}</span>
+                        </div>
+            `;
         }
         
-        // 委派说明 - 测试列表显示
+        content += `
+                    </div>
+                </div>
+        `;
+        
+        // 测试报告
+        if (currentPageId !== 'upload-list' && testReportName) {
+            content += `
+                <div class="details-card">
+                    <div class="card-title">
+                        <i class="fas fa-file-alt"></i>
+                        测试报告
+                    </div>
+                    <a href="/api/firmwares/${firmware.id}/download-test-report" class="file-download-btn">
+                        <i class="fas fa-download"></i>
+                        <span>${testReportName}</span>
+                    </a>
+                </div>
+            `;
+        }
+        
+        // 委派说明
         if (currentPageId === 'test-list' && firmware.assign_note) {
             content += `
-                <hr />
-                <div class="detail-row"><strong>委派说明：</strong></div>
-                <div class="detail-block">${this.escapeHtml(firmware.assign_note).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+                <div class="details-card">
+                    <div class="card-title">
+                        <i class="fas fa-comment-dots"></i>
+                        委派说明
+                    </div>
+                    <div class="text-content">${this.escapeHtml(firmware.assign_note).replace(/\r\n|\r|\n/g, '<br/>') || '<span class="empty-text">无</span>'}</div>
+                </div>
             `;
         }
         
-        // 驳回原因 - 驳回列表显示
+        // 驳回原因
         if (currentPageId === 'rejected-list' && firmware.reject_reason) {
             content += `
-                <hr />
-                <div class="detail-row"><strong>驳回原因：</strong></div>
-                <div class="detail-block" style="color: #f44336;">${this.escapeHtml(firmware.reject_reason).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+                <div class="details-card alert-card">
+                    <div class="card-title">
+                        <i class="fas fa-exclamation-circle"></i>
+                        驳回原因
+                    </div>
+                    <div class="text-content alert-text">${this.escapeHtml(firmware.reject_reason).replace(/\r\n|\r|\n/g, '<br/>') || '<span class="empty-text">无</span>'}</div>
+                </div>
             `;
         }
         
-        // 测后说明 - 发布列表显示
+        // 测后说明
         if (currentPageId === 'release-list' && firmware.test_notes) {
             content += `
-                <hr />
-                <div class="detail-row"><strong>测后说明：</strong></div>
-                <div class="detail-block">${this.escapeHtml(firmware.test_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+                <div class="details-card">
+                    <div class="card-title">
+                        <i class="fas fa-clipboard-check"></i>
+                        测后说明
+                    </div>
+                    <div class="text-content">${this.escapeHtml(firmware.test_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<span class="empty-text">无</span>'}</div>
+                </div>
             `;
         }
         
-        // 固件描述(所有页面都显示)
+        // 固件描述
         content += `
-                <hr />
-                <div class="detail-row"><strong>固件描述：</strong></div>
-                <div class="detail-block">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
-                
+                <div class="details-card">
+                    <div class="card-title">
+                        <i class="fas fa-align-left"></i>
+                        固件描述
+                    </div>
+                    <div class="text-content">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<span class="empty-text">暂无描述</span>'}</div>
+                </div>
             </div>
         `;
 
-        this.showModal(`固件详情 - ${firmware.version_name || ''}`, content);
+        this.showModal(`固件详情`, content);
     }
 }
 
