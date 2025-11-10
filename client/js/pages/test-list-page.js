@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     status: 'assigned' // 测试列表只显示待发布状态的固件
                 };
                 
-                // 如果有URL筛选参数，添加到filters中
+                // 如果有URL筛选参数,添加到filters中
                 if (filterType === 'my-tested') {
                     filters.tested_by = dashboard.currentUser.username;
                 }
