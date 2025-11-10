@@ -124,10 +124,17 @@ router.get('/', (req, res) => {
         params.push(req.query.environment);
     }
 
-    // 按状态筛选
+    // 按状态筛选 - 支持多个状态用逗号分隔
     if (req.query.status) {
-        whereClause += ' AND f.status = ?';
-        params.push(req.query.status);
+        const statuses = req.query.status.split(',').map(s => s.trim());
+        if (statuses.length === 1) {
+            whereClause += ' AND f.status = ?';
+            params.push(statuses[0]);
+        } else {
+            const placeholders = statuses.map(() => '?').join(',');
+            whereClause += ` AND f.status IN (${placeholders})`;
+            params.push(...statuses);
+        }
     }
 
     // 按发布者筛选 - 只能看到自己发布的固件
@@ -347,9 +354,9 @@ router.get('/:id/download', requireAuth, (req, res) => {
 router.put('/:id/status', canTestFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { status, release_notes } = req.body;
+    const { status, release_notes, reject_reason } = req.body;
 
-    const allowedStatus = ['testing', 'passed', 'failed', 'released', 'obsolete'];
+    const allowedStatus = ['testing', 'passed', 'failed', 'released', 'rejected', 'obsolete'];
     if (!allowedStatus.includes(status)) {
         return res.status(400).json({ error: '状态不合法' });
     }
@@ -380,6 +387,18 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
                 params.push(release_notes);
             }
         }
+        
+        // 如果状态是 rejected，清除委派信息，并保存驳回原因
+        if (status === 'rejected') {
+            // 保持状态为 rejected，清除委派信息
+            updateSql += ', assigned_to = NULL, assign_note = NULL';
+            
+            // 如果有驳回原因，保存到 reject_reason 字段
+            if (reject_reason) {
+                updateSql += ', reject_reason = ?';
+                params.push(reject_reason);
+            }
+        }
 
         updateSql += ' WHERE id = ?';
         params.push(firmwareId);
@@ -398,6 +417,9 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
             let historyNotes = `状态变更为: ${status}`;
             if (status === 'released' && release_notes) {
                 historyNotes += `\n发布说明: ${release_notes}`;
+            }
+            if (status === 'rejected' && reject_reason) {
+                historyNotes += `\n驳回原因: ${reject_reason}`;
             }
             req.db.run(historySql, [firmwareId, firmware.version, 'status_change', user.id, historyNotes], function(err) {
                 if (err) {

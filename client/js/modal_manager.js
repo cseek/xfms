@@ -432,7 +432,7 @@ class ModalManager {
         submitBtn.disabled = true;
 
         try {
-            // 如果有测试报告文件，先上传测试报告
+            // 如果有测试报告文件,先上传测试报告
             if (testReportFile && testReportFile.size > 0) {
                 const testReportFormData = new FormData();
                 testReportFormData.append('test_report', testReportFile);
@@ -471,6 +471,67 @@ class ModalManager {
         } catch (error) {
             console.error('Error releasing firmware:', error);
             Utils.showMessage(error.message || '固件发布失败', 'error');
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    showRejectModal(firmwareId) {
+        const content = `
+            <form id="rejectFirmwareForm" class="modal-form">
+                <div class="form-group">
+                    <label for="rejectReason">驳回原因 *</label>
+                    <textarea id="rejectReason" name="reject_reason" rows="4" placeholder="请填写驳回原因..." required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
+                    <button type="submit" class="btn-submit">确认驳回</button>
+                </div>
+            </form>
+        `;
+
+        this.showModal('驳回固件', content);
+
+        document.getElementById('rejectFirmwareForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.rejectFirmware(firmwareId);
+        });
+    }
+
+    async rejectFirmware(firmwareId) {
+        const form = document.getElementById('rejectFirmwareForm');
+        const formData = new FormData(form);
+        const rejectReason = formData.get('reject_reason');
+
+        const submitBtn = form.querySelector('.btn-submit');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '驳回中...';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/firmwares/${firmwareId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    status: 'rejected',
+                    reject_reason: rejectReason
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || '固件驳回失败');
+            }
+
+            Utils.showMessage('固件驳回成功', 'success');
+            this.hideModal();
+
+            // 跳转到测试列表-所有固件
+            window.location.href = '/tests?filter=all';
+        } catch (error) {
+            console.error('Error rejecting firmware:', error);
+            Utils.showMessage(error.message || '固件驳回失败', 'error');
         } finally {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -580,6 +641,10 @@ class ModalManager {
     showFirmwareDetails(firmware) {
         const fileName = firmware.file_path ? firmware.file_path.split('/').pop() : '未知文件';
         const testReportName = firmware.test_report_path ? firmware.test_report_path.split('/').pop() : null;
+        
+        // 获取当前页面ID,判断是否显示驳回原因
+        const currentPageId = firmwareManager.currentPageId;
+        const shouldShowRejectReason = currentPageId !== 'test-list' && firmware.reject_reason;
 
         const content = `
             <div class="firmware-details">
@@ -592,6 +657,11 @@ class ModalManager {
                 <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
                 <div class="detail-row"><strong>上传时间：</strong> ${firmware.created_at ? new Date(firmware.created_at).toLocaleString('zh-CN') : '-'}</div>
                 <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'}</div>
+                ${shouldShowRejectReason ? `
+                    <hr />
+                    <div class="detail-row"><strong>驳回原因：</strong></div>
+                    <div class="detail-block" style="color: #f44336;">${this.escapeHtml(firmware.reject_reason).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+                ` : ''}
                 ${firmware.release_notes ? `
                     <hr />
                     <div class="detail-row"><strong>测后说明：</strong></div>

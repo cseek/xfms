@@ -79,7 +79,7 @@ app.get('/tests', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/test-list.html'));
 });
 
-app.get('/uploads', ensureAuthenticated, (req, res) => {
+app.get('/uploads', ensureAuthenticated, canManageFirmware, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/upload-list.html'));
 });
 
@@ -100,8 +100,14 @@ app.get('/about', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/about.html'));
 });
 
-app.get('/dashboard', (req, res) => {
-    res.redirect('/uploads');
+app.get('/dashboard', ensureAuthenticated, (req, res) => {
+    // 根据用户角色重定向到合适的页面
+    const user = req.session.user;
+    if (user.role === 'tester') {
+        res.redirect('/tests');
+    } else {
+        res.redirect('/uploads');
+    }
 });
 
 // 错误处理中间件

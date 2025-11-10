@@ -217,12 +217,15 @@ class FirmwareManager {
 
         // 根据页面显示不同的操作按钮
         if (pageId === 'upload-list') {
-            // 上传列表: 下载固件、委派固件、删除固件
-            buttons.push(`
-                <button class="action-menu-item" data-action="assign" data-id="${firmware.id}">
-                    <i class="fas fa-user-check"></i> 委派固件
-                </button>
-            `);
+            // 上传列表: 下载固件、委派固件(仅pending状态)、删除固件
+            // 只有待委派状态的固件才显示委派按钮
+            if (firmware.status === 'pending') {
+                buttons.push(`
+                    <button class="action-menu-item" data-action="assign" data-id="${firmware.id}">
+                        <i class="fas fa-user-check"></i> 委派固件
+                    </button>
+                `);
+            }
 
             // 删除按钮 - 管理员或上传者
             if (userRole === 'admin' || firmware.uploaded_by === dashboard.currentUser.id) {
@@ -369,9 +372,7 @@ class FirmwareManager {
                 break;
             case 'reject':
                 // 驳回固件
-                if (confirm('确定要驳回这个固件吗？')) {
-                    await this.updateFirmwareStatus(firmwareId, 'rejected');
-                }
+                modalManager.showRejectModal(firmwareId);
                 break;
             case 'obsolete':
                 await this.updateFirmwareStatus(firmwareId, 'obsolete');

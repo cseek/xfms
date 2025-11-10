@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
                     search: searchInput?.value.trim() || '',
-                    status: 'pending' // 上传列表只显示待委派状态的固件
+                    status: 'pending,rejected' // 上传列表显示待委派和已驳回状态的固件
                 };
                 
                 // 如果有URL筛选参数，添加到filters中
@@ -77,14 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadFirmwaresByFilter(filterType) {
     const currentUser = dashboard.currentUser;
     
-    // 上传列表只显示待委派状态的固件
-    const baseFilters = { status: 'pending' };
+    // 上传列表显示待委派和已驳回状态的固件
+    const baseFilters = { status: 'pending,rejected' };
     
     if (!filterType || filterType === 'all') {
-        // 所有待委派固件
+        // 所有待委派和已驳回固件
         await firmwareManager.loadFirmwares(baseFilters);
     } else if (filterType === 'my-uploaded') {
-        // 我上传的待委派固件（仅管理员和开发者）
+        // 我上传的待委派和已驳回固件（仅管理员和开发者）
         if (currentUser.role === 'admin' || currentUser.role === 'developer') {
             await firmwareManager.loadFirmwares({
                 ...baseFilters,
