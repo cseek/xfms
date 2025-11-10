@@ -23,7 +23,7 @@
  */
 
 const express = require('express');
-const { adminRequired } = require('../middleware/auth');
+const { adminRequired, canManageProject } = require('../middleware/auth');
 const router = express.Router();
 
 // 获取所有项目
@@ -43,8 +43,8 @@ router.get('/', (req, res) => {
     });
 });
 
-// 创建项目（仅管理员）
-router.post('/', adminRequired, (req, res) => {
+// 创建项目(管理员或开发者)
+router.post('/', canManageProject, (req, res) => {
     console.log('收到创建项目请求:', req.body);
     
     const { name, description } = req.body;
@@ -80,8 +80,9 @@ router.post('/', adminRequired, (req, res) => {
     });
 });
 
-// 更新项目（仅管理员）
-router.put('/:id', adminRequired, (req, res) => {
+// 更新项目(管理员或开发者,开发者只能更新自己创建的项目)
+router.put('/:id', canManageProject, (req, res) => {
+    const user = req.session.user;
     const projectId = req.params.id;
     const { name, description } = req.body;
 
@@ -89,52 +90,81 @@ router.put('/:id', adminRequired, (req, res) => {
         return res.status(400).json({ error: '项目名不能为空' });
     }
 
-    const sql = 'UPDATE projects SET name = ?, description = ? WHERE id = ?';
-    req.db.run(sql, [name, description, projectId], function(err) {
+    // 获取项目信息
+    const getProjectSql = 'SELECT * FROM projects WHERE id = ?';
+    req.db.get(getProjectSql, [projectId], (err, project) => {
         if (err) {
-            if (err.message.includes('UNIQUE constraint failed')) {
-                return res.status(400).json({ error: '项目名已存在' });
-            }
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
 
-        if (this.changes === 0) {
+        if (!project) {
             return res.status(404).json({ error: '项目不存在' });
         }
 
-        res.json({ message: '项目更新成功' });
+        // 开发者只能更新自己创建的项目
+        if (user.role === 'developer' && project.created_by !== user.id) {
+            return res.status(403).json({ error: '您只能更新自己创建的项目' });
+        }
+
+        const sql = 'UPDATE projects SET name = ?, description = ? WHERE id = ?';
+        req.db.run(sql, [name, description, projectId], function(err) {
+            if (err) {
+                if (err.message.includes('UNIQUE constraint failed')) {
+                    return res.status(400).json({ error: '项目名已存在' });
+                }
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            res.json({ message: '项目更新成功' });
+        });
     });
 });
 
-// 删除项目（仅管理员）
-router.delete('/:id', adminRequired, (req, res) => {
+// 删除项目(管理员或开发者,开发者只能删除自己创建的项目)
+router.delete('/:id', canManageProject, (req, res) => {
+    const user = req.session.user;
     const projectId = req.params.id;
 
-    // 检查是否有固件使用此项目
-    const checkSql = 'SELECT COUNT(*) as count FROM firmwares WHERE project_id = ?';
-    req.db.get(checkSql, [projectId], (err, result) => {
+    // 获取项目信息
+    const getProjectSql = 'SELECT * FROM projects WHERE id = ?';
+    req.db.get(getProjectSql, [projectId], (err, project) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
 
-        if (result.count > 0) {
-            return res.status(400).json({ error: '该项目下存在固件，无法删除' });
+        if (!project) {
+            return res.status(404).json({ error: '项目不存在' });
         }
 
-        const sql = 'DELETE FROM projects WHERE id = ?';
-        req.db.run(sql, [projectId], function(err) {
+        // 开发者只能删除自己创建的项目
+        if (user.role === 'developer' && project.created_by !== user.id) {
+            return res.status(403).json({ error: '您只能删除自己创建的项目' });
+        }
+
+        // 检查是否有固件使用此项目
+        const checkSql = 'SELECT COUNT(*) as count FROM firmwares WHERE project_id = ?';
+        req.db.get(checkSql, [projectId], (err, result) => {
             if (err) {
                 console.error('Database error:', err);
                 return res.status(500).json({ error: '数据库错误' });
             }
 
-            if (this.changes === 0) {
-                return res.status(404).json({ error: '项目不存在' });
+            if (result.count > 0) {
+                return res.status(400).json({ error: '该项目下存在固件，无法删除' });
             }
 
-            res.json({ message: '项目删除成功' });
+            const sql = 'DELETE FROM projects WHERE id = ?';
+            req.db.run(sql, [projectId], function(err) {
+                if (err) {
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: '数据库错误' });
+                }
+
+                res.json({ message: '项目删除成功' });
+            });
         });
     });
 });

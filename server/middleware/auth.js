@@ -87,11 +87,66 @@ const canTestFirmware = (req, res, next) => {
     }
 };
 
+/**
+ * 确保用户有委派固件的权限（管理员或开发者）
+ * 注意：开发者只能委派自己上传的固件，需要在具体路由中进一步检查
+ */
+const canAssignFirmware = (req, res, next) => {
+    const user = req.session.user;
+    if (user && (user.role === 'admin' || user.role === 'developer')) {
+        next();
+    } else {
+        res.status(403).json({ error: '没有权限委派固件' });
+    }
+};
+
+/**
+ * 确保用户有发布/驳回固件的权限(管理员或测试人员)
+ */
+const canPublishFirmware = (req, res, next) => {
+    const user = req.session.user;
+    if (user && (user.role === 'admin' || user.role === 'tester')) {
+        next();
+    } else {
+        res.status(403).json({ error: '没有权限发布或驳回固件' });
+    }
+};
+
+/**
+ * 确保用户有管理模块的权限(管理员或开发者)
+ * 注意:开发者只能管理自己创建的模块,需要在具体路由中进一步检查
+ */
+const canManageModule = (req, res, next) => {
+    const user = req.session.user;
+    if (user && (user.role === 'admin' || user.role === 'developer')) {
+        next();
+    } else {
+        res.status(403).json({ error: '没有权限管理模块' });
+    }
+};
+
+/**
+ * 确保用户有管理项目的权限(管理员或开发者)
+ * 注意:开发者只能管理自己创建的项目,需要在具体路由中进一步检查
+ */
+const canManageProject = (req, res, next) => {
+    const user = req.session.user;
+    if (user && (user.role === 'admin' || user.role === 'developer')) {
+        next();
+    } else {
+        res.status(403).json({ error: '没有权限管理项目' });
+    }
+};
+
 module.exports = {
     ensureAuthenticated,
     requireAuth,
     adminRequired,
     canUploadFirmware,
     canManageFirmware,
-    canTestFirmware
+    canTestFirmware,
+    canAssignFirmware,
+    canPublishFirmware,
+    canManageModule,
+    canManageProject
 };

@@ -11,7 +11,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const crypto = require('crypto');
 const config = require('../config');
-const { requireAuth, canUploadFirmware, canTestFirmware } = require('../middleware/auth');
+const { requireAuth, canUploadFirmware, canTestFirmware, canAssignFirmware, canPublishFirmware } = require('../middleware/auth');
 const { cleanupUploadedFile, isValidVersionFormat } = require('../utils/file_utils');
 const router = express.Router();
 
@@ -341,7 +341,8 @@ router.get('/:id/download', requireAuth, (req, res) => {
 });
 
 // 更新固件状态
-router.put('/:id/status', canTestFirmware, (req, res) => {
+// 更新固件状态(发布/驳回)
+router.put('/:id/status', canPublishFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
     const { status, test_notes, release_notes, reject_reason } = req.body;
@@ -402,29 +403,25 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
 });
 
 // 委派固件
-router.post('/:id/assign', canUploadFirmware, (req, res) => {
+router.post('/:id/assign', canAssignFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
     const { assigned_to, assign_note } = req.body;
 
     if (!assigned_to) {
-        return res.status(400).json({ error: '测试人员ID不能为空' });
+        return res.status(400).json({ error: '请指定委派的测试人员' });
     }
 
-    // 检查测试人员是否存在且角色正确
-    const getTesterSql = 'SELECT * FROM users WHERE id = ?';
-    req.db.get(getTesterSql, [assigned_to], (err, tester) => {
+    // 检查被委派人是否为测试人员
+    const getUserSql = 'SELECT * FROM users WHERE id = ? AND role = "tester"';
+    req.db.get(getUserSql, [assigned_to], (err, tester) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
 
         if (!tester) {
-            return res.status(404).json({ error: '测试人员不存在' });
-        }
-
-        if (tester.role !== 'tester') {
-            return res.status(400).json({ error: '只能委派给测试人员' });
+            return res.status(400).json({ error: '被委派的用户不是测试人员' });
         }
 
         // 获取固件信息
@@ -437,6 +434,11 @@ router.post('/:id/assign', canUploadFirmware, (req, res) => {
 
             if (!firmware) {
                 return res.status(404).json({ error: '固件不存在' });
+            }
+
+            // 开发者只能委派自己上传的固件
+            if (user.role === 'developer' && firmware.uploaded_by !== user.id) {
+                return res.status(403).json({ error: '您只能委派自己上传的固件' });
             }
 
             // 更新固件状态为待发布,并记录测试人员和委派说明
