@@ -245,7 +245,12 @@ class FirmwareManager {
                 </button>
             `);
         } else if (pageId === 'release-list') {
-            // 发布列表: 只有下载固件 (已经在上面添加了)
+            // 发布列表: 下载固件、下载测试报告
+            buttons.push(`
+                <button class="action-menu-item" data-action="download-test-report" data-id="${firmware.id}">
+                    <i class="fas fa-file-download"></i> 下载报告
+                </button>
+            `);
         } else {
             // 其他页面保留原有逻辑
             if (firmware.environment === 'test') {
@@ -360,7 +365,7 @@ class FirmwareManager {
                 modalManager.showAssignFirmwareModal(firmwareId);
                 break;
             case 'release':
-                await this.updateFirmwareStatus(firmwareId, 'released');
+                modalManager.showReleaseModal(firmwareId);
                 break;
             case 'reject':
                 // 驳回固件
@@ -413,6 +418,13 @@ class FirmwareManager {
     async downloadTestReport(firmwareId) {
         try {
             const response = await fetch(`/api/firmwares/${firmwareId}/download-test-report`);
+            
+            // 如果返回404，说明没有测试报告
+            if (response.status === 404) {
+                Utils.showMessage('暂无测试报告', 'warning');
+                return;
+            }
+            
             if (!response.ok) throw new Error('Test report download failed');
 
             // 从 Content-Disposition 头中获取原始文件名

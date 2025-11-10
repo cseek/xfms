@@ -347,7 +347,7 @@ router.get('/:id/download', requireAuth, (req, res) => {
 router.put('/:id/status', canTestFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { status } = req.body;
+    const { status, release_notes } = req.body;
 
     const allowedStatus = ['testing', 'passed', 'failed', 'released', 'obsolete'];
     if (!allowedStatus.includes(status)) {
@@ -369,10 +369,16 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
         let updateSql = 'UPDATE firmwares SET status = ?, updated_at = CURRENT_TIMESTAMP';
         let params = [status];
 
-        // 如果状态是 released，则环境改为 release
+        // 如果状态是 released，则环境改为 release，并记录发布信息
         if (status === 'released') {
-            updateSql += ', environment = ?';
-            params.push('release');
+            updateSql += ', environment = ?, released_by = ?, released_at = CURRENT_TIMESTAMP';
+            params.push('release', user.id);
+            
+            // 如果有发布说明，也保存
+            if (release_notes) {
+                updateSql += ', release_notes = ?';
+                params.push(release_notes);
+            }
         }
 
         updateSql += ' WHERE id = ?';
@@ -389,8 +395,11 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
                 INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
                 VALUES (?, ?, ?, ?, ?)
             `;
-            const notes = `状态变更为: ${status}`;
-            req.db.run(historySql, [firmwareId, firmware.version, 'status_change', user.id, notes], function(err) {
+            let historyNotes = `状态变更为: ${status}`;
+            if (status === 'released' && release_notes) {
+                historyNotes += `\n发布说明: ${release_notes}`;
+            }
+            req.db.run(historySql, [firmwareId, firmware.version, 'status_change', user.id, historyNotes], function(err) {
                 if (err) {
                     console.error('Failed to record history:', err);
                 }

@@ -395,6 +395,92 @@ class ModalManager {
         }
     }
 
+    showReleaseModal(firmwareId) {
+        const content = `
+            <form id="releaseFirmwareForm" class="modal-form">
+                <div class="form-group">
+                    <label for="releaseNotes">测后说明 *</label>
+                    <textarea id="releaseNotes" name="release_notes" rows="4" placeholder="请填写测后说明..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testReportFile">测试报告文件（可选）</label>
+                    <input type="file" id="testReportFile" name="test_report" accept=".pdf,.doc,.docx,.txt,.zip">
+                    <small style="color: #666; margin-top: 4px; display: block;">如果有测试报告，请在此上传</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
+                    <button type="submit" class="btn-submit">确认发布</button>
+                </div>
+            </form>
+        `;
+
+        this.showModal('发布固件', content);
+
+        document.getElementById('releaseFirmwareForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.releaseFirmware(firmwareId);
+        });
+    }
+
+    async releaseFirmware(firmwareId) {
+        const form = document.getElementById('releaseFirmwareForm');
+        const formData = new FormData(form);
+        const releaseNotes = formData.get('release_notes');
+        const testReportFile = formData.get('test_report');
+
+        const submitBtn = form.querySelector('.btn-submit');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = '发布中...';
+        submitBtn.disabled = true;
+
+        try {
+            // 如果有测试报告文件，先上传测试报告
+            if (testReportFile && testReportFile.size > 0) {
+                const testReportFormData = new FormData();
+                testReportFormData.append('test_report', testReportFile);
+
+                const uploadResponse = await fetch(`/api/firmwares/${firmwareId}/test-report`, {
+                    method: 'POST',
+                    body: testReportFormData
+                });
+
+                if (!uploadResponse.ok) {
+                    const error = await uploadResponse.json();
+                    throw new Error(error.error || '测试报告上传失败');
+                }
+            }
+
+            // 然后更新固件状态为已发布
+            const releaseResponse = await fetch(`/api/firmwares/${firmwareId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    status: 'released',
+                    release_notes: releaseNotes
+                })
+            });
+
+            if (!releaseResponse.ok) {
+                const error = await releaseResponse.json();
+                throw new Error(error.error || '固件发布失败');
+            }
+
+            Utils.showMessage('固件发布成功', 'success');
+            this.hideModal();
+
+            // 重新加载固件列表
+            if (window.firmwareManager) {
+                await window.firmwareManager.loadFirmwares(window.firmwareManager.currentFilters || {});
+            }
+        } catch (error) {
+            console.error('Error releasing firmware:', error);
+            Utils.showMessage(error.message || '固件发布失败', 'error');
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
     async addModule() {
         await this.submitForm('/api/modules', 'addModuleForm', '模块添加成功');
     }
@@ -509,7 +595,12 @@ class ModalManager {
                 <div class="detail-row"><strong>环境：</strong> ${firmware.environment || '-'}</div>
                 <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
                 <div class="detail-row"><strong>上传时间：</strong> ${firmware.created_at ? new Date(firmware.created_at).toLocaleString('zh-CN') : '-'}</div>
-                <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'} ${!testReportName && dashboard && dashboard.currentUser && dashboard.currentUser.role === 'tester' ? `<button type="button" class="btn-submit" onclick="modalManager.showUploadTestReportModal(${firmware.id})" style="margin-left:8px; padding:6px 8px;">上传测试报告</button>` : ''}</div>
+                <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'}</div>
+                ${firmware.release_notes ? `
+                    <hr />
+                    <div class="detail-row"><strong>测后说明：</strong></div>
+                    <div class="detail-block">${this.escapeHtml(firmware.release_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+                ` : ''}
                 <hr />
                 <div class="detail-row"><strong>固件描述：</strong></div>
                 <div class="detail-block">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
