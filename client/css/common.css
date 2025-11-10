@@ -593,6 +593,30 @@ body {
     transition: opacity 0.3s ease;
 }
 
+/* 模块管理渐变色 - 蓝紫色 */
+#modules .management-item::before {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+#modules .management-item:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+}
+
+/* 项目管理渐变色 - 青绿色 */
+#projects .management-item::before {
+    background: linear-gradient(90deg, #14b8a6, #0d9488);
+}
+
+#projects .management-item:hover {
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.15);
+    border-color: #14b8a6;
+}
+
+#projects .management-item-creator {
+    color: #14b8a6;
+}
+
 .management-item:hover::before {
     opacity: 1;
 }
