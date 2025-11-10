@@ -491,10 +491,7 @@ class FirmwareManager {
             if (response.ok) {
                 Utils.showMessage('固件上传成功', 'success');
                 form.reset();
-                await this.loadFirmwares();
-                
-                // 切换到固件列表页面
-                window.location.href = '/uploads';
+                // 不跳转，停留在当前页面
             } else {
                 throw new Error(data.error || 'Upload failed');
             }

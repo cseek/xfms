@@ -88,6 +88,16 @@
                                             </div>
                                         </div>
                                         <div class="form-group form-group--submit">
+                                            <!-- 上传进度条 -->
+                                            <div id="uploadProgress" class="upload-progress" style="display: none;">
+                                                <div class="upload-progress__bar">
+                                                    <div id="uploadProgressFill" class="upload-progress__fill"></div>
+                                                </div>
+                                                <div class="upload-progress__text">
+                                                    <span id="uploadProgressPercent">0%</span>
+                                                    <span id="uploadProgressStatus">正在上传...</span>
+                                                </div>
+                                            </div>
                                             <button type="submit" class="submit-btn">
                                                 <i class="fas fa-upload"></i>
                                                 上传
