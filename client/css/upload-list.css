@@ -353,6 +353,19 @@
     color: #e74c3c;
 }
 
+/* 禁用状态的按钮 */
+.action-menu-item.disabled,
+.action-menu-item:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.action-menu-item.disabled:hover,
+.action-menu-item:disabled:hover {
+    background: transparent;
+}
+
 /* 保留旧的按钮样式以防其他地方使用 */
 .action-btn {
     padding: 8px 12px;

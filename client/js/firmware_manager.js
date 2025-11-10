@@ -237,13 +237,19 @@ class FirmwareManager {
             }
         } else if (pageId === 'test-list') {
             // 测试列表: 下载固件、发布固件、驳回固件
+            // 检查是否委派给当前用户(测试人员需要检查权限)
+            const isAssignedToMe = userRole === 'admin' || firmware.assigned_to === dashboard.currentUser.id;
+            const disabledClass = !isAssignedToMe ? 'disabled' : '';
+            const disabledAttr = !isAssignedToMe ? 'disabled' : '';
+            const title = !isAssignedToMe ? 'title="此固件未委派给您"' : '';
+            
             buttons.push(`
-                <button class="action-menu-item release-item" data-action="release" data-id="${firmware.id}">
+                <button class="action-menu-item release-item ${disabledClass}" data-action="release" data-id="${firmware.id}" ${disabledAttr} ${title}>
                     <i class="fas fa-check"></i> 发布固件
                 </button>
             `);
             buttons.push(`
-                <button class="action-menu-item reject-item" data-action="reject" data-id="${firmware.id}">
+                <button class="action-menu-item reject-item ${disabledClass}" data-action="reject" data-id="${firmware.id}" ${disabledAttr} ${title}>
                     <i class="fas fa-ban"></i> 驳回固件
                 </button>
             `);
