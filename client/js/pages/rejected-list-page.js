@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
         onReady: async () => {
             firmwareManager.setPageId('rejected-list');
             
+            // 加载模块和项目下拉选项
+            await firmwareManager.loadModulesForSelect();
+            await firmwareManager.loadProjectsForSelect();
+            
             // 加载已驳回状态的固件
             await loadRejectedFirmwares();
 
@@ -20,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const triggerSearch = async () => {
                 const filters = {
-                    module_name: moduleFilter?.value.trim() || '',
-                    project_name: projectFilter?.value.trim() || '',
+                    module_id: moduleFilter?.value || '',
+                    project_id: projectFilter?.value || '',
                     search: searchInput?.value.trim() || '',
                     status: '已驳回'
                 };
@@ -29,15 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 await firmwareManager.loadFirmwares(filters);
             };
 
-            moduleFilter?.addEventListener('input', () => {
-                clearTimeout(moduleFilter.debounceTimer);
-                moduleFilter.debounceTimer = setTimeout(triggerSearch, 300);
-            });
-            
-            projectFilter?.addEventListener('input', () => {
-                clearTimeout(projectFilter.debounceTimer);
-                projectFilter.debounceTimer = setTimeout(triggerSearch, 300);
-            });
+            moduleFilter?.addEventListener('change', triggerSearch);
+            projectFilter?.addEventListener('change', triggerSearch);
             
             searchInput?.addEventListener('input', () => {
                 clearTimeout(searchInput.debounceTimer);

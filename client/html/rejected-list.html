@@ -22,17 +22,21 @@
                 <div class="page active">
                     <div class="page-header">
                         <div class="filters">
-                            <label class="filter-label">模块：</label>
-                            <input type="text" id="moduleFilter" class="filter-input" placeholder="输入模块名">
-                            <label class="filter-label">项目：</label>
-                            <input type="text" id="projectFilter" class="filter-input" placeholder="输入项目名">
+                            <label class="filter-label">过滤框：</label>
+                            <select id="moduleFilter" class="filter-select">
+                                <option value="">所有模块</option>
+                            </select>
+                            <select id="projectFilter" class="filter-select">
+                                <option value="">所有项目</option>
+                            </select>
                         </div>
                         <div class="search-box">
-                            <label class="filter-label search-label">搜索：</label>
+                            <label class="filter-label search-label">搜索框：</label>
                             <input type="text" id="searchInput" class="search-input" placeholder="按关键字搜索">
                         </div>
                     </div>
-                    <div class="firmware-grid" id="firmwareGrid"></div>
+                    <div id="firmwareGrid" class="firmware-grid"></div>
+                    <div id="pagination" class="pagination"></div>
                 </div>
             </div>
         </main>

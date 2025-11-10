@@ -157,6 +157,14 @@ db.serialize(() => {
         }
     });
 
+    db.run(`ALTER TABLE firmwares ADD COLUMN reject_reason TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding reject_reason column:', err);
+        } else if (!err) {
+            console.log('reject_reason column added to firmwares table');
+        }
+    });
+
     console.log('Database initialized successfully');
 });
 
