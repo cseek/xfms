@@ -171,12 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 
                 setTimeout(() => {
-                    // 根据用户角色跳转到不同页面
-                    if (data.user && data.user.role === 'tester') {
-                        window.location.href = '/tests';
-                    } else {
-                        window.location.href = '/uploads';
-                    }
+                    // 登录成功后跳转到关于系统页面
+                    window.location.href = '/about';
                 }, 1000);
             } else {
                 showMessage(data.error || '登录失败，请检查用户和密码', 'error');
