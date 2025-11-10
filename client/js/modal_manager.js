@@ -466,10 +466,8 @@ class ModalManager {
             Utils.showMessage('固件发布成功', 'success');
             this.hideModal();
 
-            // 重新加载固件列表
-            if (window.firmwareManager) {
-                await window.firmwareManager.loadFirmwares(window.firmwareManager.currentFilters || {});
-            }
+            // 跳转到测试列表-所有固件
+            window.location.href = '/tests?filter=all';
         } catch (error) {
             console.error('Error releasing firmware:', error);
             Utils.showMessage(error.message || '固件发布失败', 'error');
