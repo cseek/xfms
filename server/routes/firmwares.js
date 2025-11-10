@@ -183,8 +183,75 @@ router.get('/', (req, res) => {
                 return res.status(500).json({ error: '数据库错误' });
             }
             
+            // 根据不同状态过滤返回字段
+            const filteredData = rows.map(row => {
+                const baseData = {
+                    id: row.id,
+                    module_id: row.module_id,
+                    project_id: row.project_id,
+                    version: row.version,
+                    version_name: row.version_name,
+                    module_name: row.module_name,
+                    project_name: row.project_name,
+                    description: row.description,
+                    file_path: row.file_path,
+                    file_size: row.file_size,
+                    md5: row.md5,
+                    status: row.status,
+                    uploaded_by: row.uploaded_by,
+                    uploader_name: row.uploader_name,
+                    created_at: row.created_at,
+                    uploaded_at: row.uploaded_at,
+                    updated_at: row.updated_at
+                };
+
+                // 待委派 - 只返回基础字段
+                if (row.status === '待委派') {
+                    return baseData;
+                }
+
+                // 待发布 - 添加测试人员和委派说明
+                if (row.status === '待发布') {
+                    return {
+                        ...baseData,
+                        assigned_to: row.assigned_to,
+                        tester_name: row.tester_name,
+                        assign_note: row.assign_note,
+                        test_report_path: row.test_report_path
+                    };
+                }
+
+                // 已发布 - 添加测试人员、测后说明、发布信息
+                if (row.status === '已发布') {
+                    return {
+                        ...baseData,
+                        assigned_to: row.assigned_to,
+                        tester_name: row.tester_name,
+                        test_notes: row.test_notes,
+                        test_report_path: row.test_report_path,
+                        released_by: row.released_by,
+                        releaser_name: row.releaser_name,
+                        released_at: row.released_at
+                    };
+                }
+
+                // 已驳回 - 添加驳回原因、测试人员和测试报告
+                if (row.status === '已驳回') {
+                    return {
+                        ...baseData,
+                        assigned_to: row.assigned_to,
+                        tester_name: row.tester_name,
+                        reject_reason: row.reject_reason,
+                        test_report_path: row.test_report_path
+                    };
+                }
+
+                // 默认返回所有字段(兼容未知状态)
+                return row;
+            });
+            
             res.json({
-                data: rows,
+                data: filteredData,
                 pagination: {
                     page: page,
                     pageSize: pageSize,
@@ -277,7 +344,7 @@ router.get('/:id/download', requireAuth, (req, res) => {
 router.put('/:id/status', canTestFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { status, test_notes, reject_reason } = req.body;
+    const { status, test_notes, release_notes, reject_reason } = req.body;
 
     const allowedStatus = ['待委派', '待发布', '已发布', '已驳回'];
     if (!allowedStatus.includes(status)) {
@@ -304,9 +371,11 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
             updateSql += ', released_by = ?, released_at = CURRENT_TIMESTAMP';
             params.push(user.id);
             
-            if (test_notes) {
+            // 支持 test_notes 和 release_notes 两种参数名
+            const notes = test_notes || release_notes;
+            if (notes) {
                 updateSql += ', test_notes = ?';
-                params.push(test_notes);
+                params.push(notes);
             }
         }
         
@@ -338,7 +407,7 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
 router.post('/:id/assign', canUploadFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { assigned_to } = req.body;
+    const { assigned_to, assign_note } = req.body;
 
     if (!assigned_to) {
         return res.status(400).json({ error: '测试人员ID不能为空' });
@@ -372,13 +441,21 @@ router.post('/:id/assign', canUploadFirmware, (req, res) => {
                 return res.status(404).json({ error: '固件不存在' });
             }
 
-            // 更新固件状态为待发布,并记录测试人员
-            const updateSql = `
+            // 更新固件状态为待发布,并记录测试人员和委派说明
+            let updateSql = `
                 UPDATE firmwares 
-                SET status = '待发布', assigned_to = ?
-                WHERE id = ?
-            `;
-            req.db.run(updateSql, [assigned_to, firmwareId], function(err) {
+                SET status = '待发布', assigned_to = ?`;
+            let params = [assigned_to];
+            
+            if (assign_note) {
+                updateSql += ', assign_note = ?';
+                params.push(assign_note);
+            }
+            
+            updateSql += ' WHERE id = ?';
+            params.push(firmwareId);
+            
+            req.db.run(updateSql, params, function(err) {
                 if (err) {
                     console.error('Database error:', err);
                     return res.status(500).json({ error: '数据库错误' });

@@ -164,6 +164,14 @@ db.serialize(() => {
         }
     });
 
+    db.run(`ALTER TABLE firmwares ADD COLUMN test_notes TEXT`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding test_notes column:', err);
+        } else if (!err) {
+            console.log('test_notes column added to firmwares table');
+        }
+    });
+
     console.log('Database initialized successfully');
 });
 

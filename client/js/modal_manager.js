@@ -642,30 +642,62 @@ class ModalManager {
         const fileName = firmware.file_path ? firmware.file_path.split('/').pop() : '未知文件';
         const testReportName = firmware.test_report_path ? firmware.test_report_path.split('/').pop() : null;
         
-        // 获取当前页面ID,判断是否显示驳回原因
+        // 获取当前页面ID
         const currentPageId = firmwareManager.currentPageId;
-        const shouldShowRejectReason = currentPageId !== 'test-list' && firmware.reject_reason;
-
-        const content = `
+        
+        // 基础信息(所有页面都显示)
+        let content = `
             <div class="firmware-details">
                 <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
                 <div class="detail-row"><strong>版本：</strong> ${firmware.version_name || '-'}</div>
+                <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
                 <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
                 <div class="detail-row"><strong>md5校验：</strong> ${firmware.md5 ? `<code style="font-family:monospace;background:#f5f5f5;padding:2px 6px;border-radius:3px;">${firmware.md5}</code>` : '暂无'}</div>
-                <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
                 <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
-                <div class="detail-row"><strong>上传时间：</strong> ${firmware.uploaded_at ? new Date(firmware.uploaded_at).toLocaleString('zh-CN') : '-'}</div>
-                <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'}</div>
-                ${shouldShowRejectReason ? `
-                    <hr />
-                    <div class="detail-row"><strong>驳回原因：</strong></div>
-                    <div class="detail-block" style="color: #f44336;">${this.escapeHtml(firmware.reject_reason).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
-                ` : ''}
-                ${firmware.test_notes ? `
-                    <hr />
-                    <div class="detail-row"><strong>测后说明：</strong></div>
-                    <div class="detail-block">${this.escapeHtml(firmware.test_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
-                ` : ''}
+        `;
+        
+        // 测试人员 - 测试列表、发布列表和驳回列表显示
+        if ((currentPageId === 'test-list' || currentPageId === 'release-list' || currentPageId === 'rejected-list') && firmware.tester_name) {
+            content += `<div class="detail-row"><strong>测试人员：</strong> ${firmware.tester_name}</div>`;
+        }
+        
+        // 上传时间
+        content += `<div class="detail-row"><strong>上传时间：</strong> ${firmware.uploaded_at ? new Date(firmware.uploaded_at).toLocaleString('zh-CN') : '-'}</div>`;
+        
+        // 测试报告 - 上传列表不显示
+        if (currentPageId !== 'upload-list') {
+            content += `<div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'}</div>`;
+        }
+        
+        // 委派说明 - 测试列表显示
+        if (currentPageId === 'test-list' && firmware.assign_note) {
+            content += `
+                <hr />
+                <div class="detail-row"><strong>委派说明：</strong></div>
+                <div class="detail-block">${this.escapeHtml(firmware.assign_note).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+            `;
+        }
+        
+        // 驳回原因 - 驳回列表显示
+        if (currentPageId === 'rejected-list' && firmware.reject_reason) {
+            content += `
+                <hr />
+                <div class="detail-row"><strong>驳回原因：</strong></div>
+                <div class="detail-block" style="color: #f44336;">${this.escapeHtml(firmware.reject_reason).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+            `;
+        }
+        
+        // 测后说明 - 发布列表显示
+        if (currentPageId === 'release-list' && firmware.test_notes) {
+            content += `
+                <hr />
+                <div class="detail-row"><strong>测后说明：</strong></div>
+                <div class="detail-block">${this.escapeHtml(firmware.test_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+            `;
+        }
+        
+        // 固件描述(所有页面都显示)
+        content += `
                 <hr />
                 <div class="detail-row"><strong>固件描述：</strong></div>
                 <div class="detail-block">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<em>无</em>'}</div>
