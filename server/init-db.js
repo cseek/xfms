@@ -101,18 +101,34 @@ db.serialize(() => {
         } else {
             console.log('Admin user created successfully');
         }
+        
+        // 获取admin用户的ID
+        db.get(`SELECT id FROM users WHERE username = 'admin'`, [], (err, adminUser) => {
+            if (err) {
+                console.error('Error getting admin user:', err);
+                return;
+            }
+            
+            const adminId = adminUser ? adminUser.id : 1;
+            
+            // 插入一些示例模块和项目，关联到admin用户
+            db.run(`INSERT OR IGNORE INTO modules (name, description, created_by) VALUES 
+                    ('WiFi Module', 'Wireless communication module', ?),
+                    ('BLE Module', 'Bluetooth Low Energy module', ?),
+                    ('GPS Module', 'Global Positioning System module', ?)`, 
+                    [adminId, adminId, adminId], (err) => {
+                if (err) console.error('Error creating default modules:', err);
+            });
+
+            db.run(`INSERT OR IGNORE INTO projects (name, description, created_by) VALUES 
+                    ('Smart Home Hub', 'Central control unit for smart home', ?),
+                    ('IoT Sensor Node', 'Remote sensor monitoring device', ?),
+                    ('Wearable Device', 'Smart wearable technology', ?)`,
+                    [adminId, adminId, adminId], (err) => {
+                if (err) console.error('Error creating default projects:', err);
+            });
+        });
     });
-
-    // 插入一些示例模块和项目
-    db.run(`INSERT OR IGNORE INTO modules (name, description) VALUES 
-            ('WiFi Module', 'Wireless communication module'),
-            ('BLE Module', 'Bluetooth Low Energy module'),
-            ('GPS Module', 'Global Positioning System module')`);
-
-    db.run(`INSERT OR IGNORE INTO projects (name, description) VALUES 
-            ('Smart Home Hub', 'Central control unit for smart home'),
-            ('IoT Sensor Node', 'Remote sensor monitoring device'),
-            ('Wearable Device', 'Smart wearable technology')`);
 
     // 为现有数据库添加md5字段（如果不存在）
     db.run(`ALTER TABLE firmwares ADD COLUMN md5 TEXT`, (err) => {
@@ -170,15 +186,16 @@ db.serialize(() => {
         } else if (!err) {
             console.log('test_notes column added to firmwares table');
         }
+        
+        // 所有操作完成后关闭数据库
+        db.close((err) => {
+            if (err) {
+                console.error('Error closing database:', err);
+            } else {
+                console.log('Database connection closed');
+            }
+        });
     });
 
     console.log('Database initialized successfully');
-});
-
-db.close((err) => {
-    if (err) {
-        console.error('Error closing database:', err);
-    } else {
-        console.log('Database connection closed');
-    }
 });

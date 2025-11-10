@@ -28,7 +28,12 @@ const router = express.Router();
 
 // 获取所有项目
 router.get('/', (req, res) => {
-    const sql = 'SELECT * FROM projects ORDER BY name';
+    const sql = `
+        SELECT p.*, u.username as creator_name 
+        FROM projects p 
+        LEFT JOIN users u ON p.created_by = u.id 
+        ORDER BY p.name
+    `;
     req.db.all(sql, [], (err, rows) => {
         if (err) {
             console.error('Database error:', err);

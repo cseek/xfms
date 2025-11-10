@@ -28,7 +28,12 @@ const router = express.Router();
 
 // 获取所有模块
 router.get('/', (req, res) => {
-    const sql = 'SELECT * FROM modules ORDER BY name';
+    const sql = `
+        SELECT m.*, u.username as creator_name 
+        FROM modules m 
+        LEFT JOIN users u ON m.created_by = u.id 
+        ORDER BY m.name
+    `;
     req.db.all(sql, [], (err, rows) => {
         if (err) {
             console.error('Database error:', err);

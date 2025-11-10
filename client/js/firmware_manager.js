@@ -601,10 +601,22 @@ class FirmwareManager {
 
         list.innerHTML = pageItems.map(module => `
             <div class="management-item">
-                <div>
-                    <strong>${module.name}</strong>
-                    ${module.description ? `<p>${module.description}</p>` : ''}
-                    <small>创建时间: ${Utils.formatDate(module.created_at)}</small>
+                <div class="management-item-header">
+                    <div class="management-item-icon">📦</div>
+                    <div class="management-item-info">
+                        <h3 class="management-item-title">${this.escapeHtml(module.name)}</h3>
+                        ${module.description ? `<p class="management-item-description">${this.escapeHtml(module.description)}</p>` : '<p class="management-item-description" style="color: #cbd5e1;">暂无描述</p>'}
+                    </div>
+                </div>
+                <div class="management-item-meta">
+                    <div class="management-item-meta-row">
+                        <span class="icon">👤</span>
+                        <span>创建人: <span class="management-item-creator">${module.creator_name || '未知'}</span></span>
+                    </div>
+                    <div class="management-item-meta-row">
+                        <span class="icon">🕒</span>
+                        <span>${Utils.formatDate(module.created_at)}</span>
+                    </div>
                 </div>
                 <div class="item-actions">
                     <button class="edit-btn" data-id="${module.id}">编辑</button>
@@ -675,10 +687,22 @@ class FirmwareManager {
 
         list.innerHTML = pageItems.map(project => `
             <div class="management-item">
-                <div>
-                    <strong>${project.name}</strong>
-                    ${project.description ? `<p>${project.description}</p>` : ''}
-                    <small>创建时间: ${Utils.formatDate(project.created_at)}</small>
+                <div class="management-item-header">
+                    <div class="management-item-icon">🎯</div>
+                    <div class="management-item-info">
+                        <h3 class="management-item-title">${this.escapeHtml(project.name)}</h3>
+                        ${project.description ? `<p class="management-item-description">${this.escapeHtml(project.description)}</p>` : '<p class="management-item-description" style="color: #cbd5e1;">暂无描述</p>'}
+                    </div>
+                </div>
+                <div class="management-item-meta">
+                    <div class="management-item-meta-row">
+                        <span class="icon">👤</span>
+                        <span>创建人: <span class="management-item-creator">${project.creator_name || '未知'}</span></span>
+                    </div>
+                    <div class="management-item-meta-row">
+                        <span class="icon">🕒</span>
+                        <span>${Utils.formatDate(project.created_at)}</span>
+                    </div>
                 </div>
                 <div class="item-actions">
                     <button class="edit-btn" data-id="${project.id}">编辑</button>
