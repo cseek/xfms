@@ -251,12 +251,10 @@ class Dashboard {
     async searchFirmwares() {
         const moduleFilter = document.getElementById('moduleFilter').value;
         const projectFilter = document.getElementById('projectFilter').value;
-        const environmentFilter = document.getElementById('environmentFilter').value;
         
         await firmwareManager.loadFirmwares({
             module_id: moduleFilter,
-            project_id: projectFilter,
-            environment: environmentFilter
+            project_id: projectFilter
         });
     }
 

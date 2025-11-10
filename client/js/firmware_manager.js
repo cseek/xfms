@@ -256,23 +256,6 @@ class FirmwareManager {
             `);
         } else {
             // 其他页面保留原有逻辑
-            if (firmware.environment === 'test') {
-                if (userRole === 'tester' || userRole === 'admin') {
-                    if (firmware.status === 'pending' || firmware.status === 'testing') {
-                        buttons.push(`
-                            <button class="action-menu-item release-item" data-action="release" data-id="${firmware.id}">
-                                <i class="fas fa-check"></i> 发布固件
-                            </button>
-                        `);
-                        buttons.push(`
-                            <button class="action-menu-item obsolete-item" data-action="obsolete" data-id="${firmware.id}">
-                                <i class="fas fa-times"></i> 作废固件
-                            </button>
-                        `);
-                    }
-                }
-            }
-
             if (userRole === 'admin') {
                 buttons.push(`
                     <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
