@@ -99,24 +99,27 @@
 | file_path | TEXT | NOT NULL | 文件存储路径 |
 | file_size | INTEGER | - | 文件大小（字节） |
 | md5 | TEXT | - | MD5校验值 |
-| status | TEXT | DEFAULT 'pending', CHECK | 状态 (pending/assigned/released/rejected) |
-| environment | TEXT | DEFAULT 'test', CHECK | 环境 (test/release) |
+| status | TEXT | DEFAULT '待委派', CHECK | 状态 (待委派/待发布/已发布/已驳回) |
 | uploaded_by | INTEGER | NOT NULL, FOREIGN KEY → users(id) | 上传者ID |
 | assigned_to | INTEGER | FOREIGN KEY → users(id) | 委派给的测试人员ID |
 | assign_note | TEXT | - | 委派说明 |
 | test_report_path | TEXT | - | 测试报告路径 |
+| test_notes | TEXT | - | 测后说明 |
 | released_by | INTEGER | FOREIGN KEY → users(id) | 发布者ID |
 | released_at | DATETIME | - | 发布时间 |
-| release_notes | TEXT | - | 发布说明 |
 | reject_reason | TEXT | - | 驳回原因 |
-| created_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
+| created_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 创建时间（同时作为上传时间） |
 | updated_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 更新时间 |
 
 **状态说明**:
-- `pending`: 待委派（刚上传）
-- `assigned`: 已委派/待发布（分配给测试人员）
-- `released`: 已发布（正式发布到生产环境）
-- `rejected`: 已驳回（测试未通过被驳回）
+- `待委派`: 待委派（刚上传，等待分配测试人员）
+- `待发布`: 待发布（已分配给测试人员，等待测试和发布）
+- `已发布`: 已发布（测试通过并正式发布）
+- `已驳回`: 已驳回（测试未通过被驳回）
+
+**字段别名说明**（用于前端显示）:
+- `version` → `version_name`: 版本号
+- `created_at` → `uploaded_at`: 上传时间
 
 **示例数据**:
 ```json
@@ -130,51 +133,17 @@
   "file_path": "/uploads/firmwares/firmware-1762681863254-868607222/app.bin",
   "file_size": 1048576,
   "md5": "5d41402abc4b2a76b9719d911017c592",
-  "status": "assigned",
-  "environment": "test",
+  "status": "待发布",
   "uploaded_by": 5,
   "assigned_to": 3,
   "assign_note": "请重点测试网络连接稳定性",
   "test_report_path": "/uploads/test-reports/test-report-1762682000000-123456789/report.pdf",
+  "test_notes": "测试通过，网络连接稳定",
   "released_by": null,
   "released_at": null,
-  "release_notes": null,
   "reject_reason": null,
   "created_at": "2025-11-10 10:30:00",
   "updated_at": "2025-11-10 11:00:00"
-}
-```
-
----
-
-#### 5. firmware_history (固件历史表)
-
-| 字段名 | 类型 | 约束 | 说明 |
-|--------|------|------|------|
-| id | INTEGER | PRIMARY KEY, AUTOINCREMENT | 历史记录ID |
-| firmware_id | INTEGER | NOT NULL, FOREIGN KEY → firmwares(id) | 固件ID |
-| version | TEXT | NOT NULL | 版本号 |
-| action | TEXT | NOT NULL | 操作类型 (upload/assign/update_status/upload_test_report) |
-| performed_by | INTEGER | NOT NULL, FOREIGN KEY → users(id) | 操作者ID |
-| notes | TEXT | - | 操作备注 |
-| created_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 操作时间 |
-
-**操作类型说明**:
-- `upload`: 上传固件
-- `assign`: 委派固件
-- `update_status`: 更新状态
-- `upload_test_report`: 上传测试报告
-
-**示例数据**:
-```json
-{
-  "id": 1,
-  "firmware_id": 1,
-  "version": "v1.2.3",
-  "action": "upload",
-  "performed_by": 5,
-  "notes": "上传固件，文件: app.bin, MD5: 5d41402abc4b2a76b9719d911017c592",
-  "created_at": "2025-11-10 10:30:00"
 }
 ```
 
@@ -192,26 +161,28 @@
   "module_id": 2,
   "project_id": 3,
   "version": "v1.2.3",
+  "version_name": "v1.2.3",
   "description": "修复了连接稳定性问题",
   "additional_info": "增加了错误重试机制",
   "file_path": "/uploads/firmwares/firmware-1762681863254-868607222/app.bin",
   "file_size": 1048576,
   "md5": "5d41402abc4b2a76b9719d911017c592",
-  "status": "assigned",
-  "environment": "test",
+  "status": "待发布",
   "uploaded_by": 5,
   "assigned_to": 3,
   "assign_note": "请重点测试网络连接稳定性",
   "test_report_path": "/uploads/test-reports/test-report-1762682000000-123456789/report.pdf",
+  "test_notes": null,
   "released_by": null,
   "released_at": null,
-  "release_notes": null,
   "reject_reason": null,
   "created_at": "2025-11-10 10:30:00",
+  "uploaded_at": "2025-11-10 10:30:00",
   "updated_at": "2025-11-10 11:00:00",
   "module_name": "WiFi Module",
   "project_name": "Smart Home Hub",
-  "uploader_name": "developer1"
+  "uploader_name": "developer1",
+  "tester_name": "tester1"
 }
 ```
 
@@ -1125,58 +1096,147 @@ Base URL: `/api/firmwares`
   pageSize?: number,        // 可选，每页数量，默认8
   module_id?: number,       // 可选，模块ID
   project_id?: number,      // 可选，项目ID
-  environment?: string,     // 可选，环境 (test/release)
   status?: string,          // 可选，状态，支持多个用逗号分隔
   uploaded_by?: string,     // 可选，上传者用户名
-  tested_by?: string,       // 可选，测试者用户名
+  assigned_to?: string,     // 可选，测试者用户名
   released_by?: string,     // 可选，发布者用户名
   search?: string           // 可选，搜索关键词（在描述中查找）
 }
 ```
 
 **状态值说明**:
-- `pending`: 待委派
-- `assigned`: 已委派/待发布
-- `testing`: 测试中
-- `passed`: 测试通过
-- `failed`: 测试失败
-- `released`: 已发布
-- `rejected`: 已驳回
-- `obsolete`: 已作废
+- `待委派`: 待委派
+- `待发布`: 已委派/待发布
+- `已发布`: 已发布
+- `已驳回`: 已驳回
 
 **请求示例**:
 ```
-GET /api/firmwares?page=1&pageSize=6&status=pending,rejected&module_id=2&search=修复
+GET /api/firmwares?page=1&pageSize=6&status=待委派,已驳回&module_id=2&search=修复
 ```
 
 **成功响应数据结构** (200):
+
+根据固件状态返回不同的字段：
+
+**待委派固件** (status = "待委派"):
 ```typescript
 {
   data: Array<{
     id: number,                    // 固件ID
     module_id: number,             // 模块ID
     project_id: number,            // 项目ID
-    version: string,               // 版本号 (vX.Y.Z)
+    version_name: string,          // 版本号 (vX.Y.Z) [别名 version]
     description: string,           // 固件描述
     additional_info: string,       // 附加信息
     file_path: string,             // 文件路径
     file_size: number,             // 文件大小（字节）
     md5: string,                   // MD5校验值
     uploaded_by: number,           // 上传者ID
-    status: string,                // 状态
-    environment: string,           // 环境
-    assigned_to: number | null,    // 委派给的测试人员ID
-    assign_note: string | null,    // 委派说明
-    test_report_path: string | null, // 测试报告路径
-    released_by: number | null,    // 发布者ID
-    released_at: string | null,    // 发布时间
-    release_notes: string | null,  // 发布说明
-    reject_reason: string | null,  // 驳回原因
-    created_at: string,            // 创建时间
+    status: "待委派",              // 状态
+    uploaded_at: string,           // 上传时间 [别名 created_at]
     updated_at: string,            // 更新时间
     module_name: string,           // 模块名称（关联查询）
     project_name: string,          // 项目名称（关联查询）
     uploader_name: string          // 上传者用户名（关联查询）
+  }>,
+  pagination: {
+    page: number,
+    pageSize: number,
+    total: number,
+    totalPages: number
+  }
+}
+```
+
+**待发布固件** (status = "待发布"):
+```typescript
+{
+  data: Array<{
+    id: number,                    // 固件ID
+    module_id: number,             // 模块ID
+    project_id: number,            // 项目ID
+    version_name: string,          // 版本号
+    description: string,           // 固件描述
+    additional_info: string,       // 附加信息
+    file_path: string,             // 文件路径
+    file_size: number,             // 文件大小（字节）
+    md5: string,                   // MD5校验值
+    uploaded_by: number,           // 上传者ID
+    status: "待发布",              // 状态
+    assigned_to: number,           // 委派给的测试人员ID
+    assign_note: string,           // 委派说明
+    test_report_path: string | null, // 测试报告路径
+    uploaded_at: string,           // 上传时间
+    updated_at: string,            // 更新时间
+    module_name: string,           // 模块名称
+    project_name: string,          // 项目名称
+    uploader_name: string,         // 上传者用户名
+    tester_name: string            // 测试者用户名（关联查询）
+  }>,
+  pagination: { ... }
+}
+```
+
+**已发布固件** (status = "已发布"):
+```typescript
+{
+  data: Array<{
+    id: number,                    // 固件ID
+    module_id: number,             // 模块ID
+    project_id: number,            // 项目ID
+    version_name: string,          // 版本号
+    description: string,           // 固件描述
+    additional_info: string,       // 附加信息
+    file_path: string,             // 文件路径
+    file_size: number,             // 文件大小（字节）
+    md5: string,                   // MD5校验值
+    uploaded_by: number,           // 上传者ID
+    status: "已发布",              // 状态
+    assigned_to: number,           // 测试者ID
+    test_notes: string,            // 测后说明
+    test_report_path: string | null, // 测试报告路径
+    released_by: number,           // 发布者ID
+    released_at: string,           // 发布时间
+    uploaded_at: string,           // 上传时间
+    updated_at: string,            // 更新时间
+    module_name: string,           // 模块名称
+    project_name: string,          // 项目名称
+    uploader_name: string,         // 上传者用户名
+    tester_name: string            // 测试者用户名
+  }>,
+  pagination: { ... }
+}
+```
+
+**已驳回固件** (status = "已驳回"):
+```typescript
+{
+  data: Array<{
+    id: number,                    // 固件ID
+    module_id: number,             // 模块ID
+    project_id: number,            // 项目ID
+    version_name: string,          // 版本号
+    description: string,           // 固件描述
+    additional_info: string,       // 附加信息
+    file_path: string,             // 文件路径
+    file_size: number,             // 文件大小（字节）
+    md5: string,                   // MD5校验值
+    uploaded_by: number,           // 上传者ID
+    status: "已驳回",              // 状态
+    assigned_to: number,           // 测试者ID
+    reject_reason: string,         // 驳回原因
+    test_report_path: string | null, // 测试报告路径
+    uploaded_at: string,           // 上传时间
+    updated_at: string,            // 更新时间
+    module_name: string,           // 模块名称
+    project_name: string,          // 项目名称
+    uploader_name: string,         // 上传者用户名
+    tester_name: string            // 测试者用户名
+  }>,
+  pagination: { ... }
+}
+```
   }>,
   pagination: {
     page: number,                  // 当前页码
@@ -1187,7 +1247,7 @@ GET /api/firmwares?page=1&pageSize=6&status=pending,rejected&module_id=2&search=
 }
 ```
 
-**成功响应示例**:
+**成功响应示例 (待委派固件)**:
 ```json
 {
   "data": [
@@ -1195,23 +1255,15 @@ GET /api/firmwares?page=1&pageSize=6&status=pending,rejected&module_id=2&search=
       "id": 1,
       "module_id": 2,
       "project_id": 3,
-      "version": "v1.2.3",
+      "version_name": "v1.2.3",
       "description": "修复了连接稳定性问题",
       "additional_info": "增加了错误重试机制",
       "file_path": "/uploads/firmwares/firmware-1762681863254-868607222/app.bin",
       "file_size": 1048576,
       "md5": "5d41402abc4b2a76b9719d911017c592",
       "uploaded_by": 5,
-      "status": "pending",
-      "environment": "test",
-      "assigned_to": null,
-      "assign_note": null,
-      "test_report_path": null,
-      "released_by": null,
-      "released_at": null,
-      "release_notes": null,
-      "reject_reason": null,
-      "created_at": "2025-11-10 10:30:00",
+      "status": "待委派",
+      "uploaded_at": "2025-11-10 10:30:00",
       "updated_at": "2025-11-10 10:30:00",
       "module_name": "WiFi Module",
       "project_name": "Smart Home Hub",
@@ -1363,31 +1415,32 @@ Content-Type: multipart/form-data
 **请求体数据结构**:
 ```typescript
 {
-  status: string,          // 必填，新状态 (testing/passed/failed/released/rejected/obsolete)
-  release_notes?: string,  // 可选，发布说明（当status为released时）
-  reject_reason?: string   // 可选，驳回原因（当status为rejected时）
+  status: string,          // 必填，新状态 (待发布/已发布/已驳回)
+  test_notes?: string,     // 可选，测后说明（当status为已发布时）
+  release_notes?: string,  // 可选，测后说明的别名（当status为已发布时）
+  reject_reason?: string   // 可选，驳回原因（当status为已驳回时）
 }
 ```
 
 **请求示例 - 发布固件**:
 ```json
 {
-  "status": "released",
-  "release_notes": "正式发布版本，修复了所有已知问题"
+  "status": "已发布",
+  "test_notes": "测试通过，所有功能正常"
 }
 ```
 
 **请求示例 - 驳回固件**:
 ```json
 {
-  "status": "rejected",
+  "status": "已驳回",
   "reject_reason": "测试未通过，存在严重bug"
 }
 ```
 
 **状态转换逻辑**:
-- `released`: 环境改为release，记录发布者和发布时间
-- `rejected`: 清除委派信息，保存驳回原因，状态保持为rejected
+- `已发布`: 记录发布者和发布时间，保存测后说明
+- `已驳回`: 保持assigned_to值（不清除），保存驳回原因
 
 **成功响应数据结构** (200):
 ```typescript
@@ -1642,7 +1695,7 @@ Content-Type: multipart/form-data
   ```json
   {
     "error": "不能删除已发布的固件",
-    "detail": "当前状态: released"
+    "detail": "当前状态: 已发布"
   }
   ```
   ```json
@@ -1709,14 +1762,23 @@ Content-Type: multipart/form-data
 ### 固件工作流程
 
 ```
-上传 (pending) 
+上传 (待委派) 
     ↓
-委派 (assigned) 
+委派 (待发布) 
     ↓
-测试 (testing/passed/failed)
-    ↓
-发布 (released) / 驳回 (rejected)
+发布 (已发布) / 驳回 (已驳回)
 ```
+
+### 状态值映射
+
+系统内部使用中文状态值：
+
+| 状态显示 | 数据库值 | 说明 |
+|---------|---------|------|
+| 待委派 | 待委派 | 固件已上传，等待委派给测试人员 |
+| 待发布 | 待发布 | 固件已委派，等待测试和发布 |
+| 已发布 | 已发布 | 固件已通过测试并发布 |
+| 已驳回 | 已驳回 | 固件测试未通过被驳回 |
 
 ### 分页查询说明
 
