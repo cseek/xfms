@@ -453,7 +453,7 @@ class ModalManager {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    status: 'released',
+                    status: '已发布',
                     release_notes: releaseNotes
                 })
             });
@@ -514,7 +514,7 @@ class ModalManager {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    status: 'rejected',
+                    status: '已驳回',
                     reject_reason: rejectReason
                 })
             });
@@ -649,23 +649,23 @@ class ModalManager {
         const content = `
             <div class="firmware-details">
                 <div class="detail-row"><strong>模块 / 项目：</strong> ${firmware.module_name || '-'} / ${firmware.project_name || '-'}</div>
-                <div class="detail-row"><strong>版本：</strong> ${firmware.version || '-'}</div>
+                <div class="detail-row"><strong>版本：</strong> ${firmware.version_name || '-'}</div>
                 <div class="detail-row"><strong>文件：</strong> ${fileName} ${firmware.file_size ? '(' + Utils.formatFileSize(firmware.file_size) + ')' : ''}</div>
                 <div class="detail-row"><strong>md5校验：</strong> ${firmware.md5 ? `<code style="font-family:monospace;background:#f5f5f5;padding:2px 6px;border-radius:3px;">${firmware.md5}</code>` : '暂无'}</div>
                 <div class="detail-row"><strong>状态：</strong> ${firmware.status || '-'}</div>
                 <div class="detail-row"><strong>环境：</strong> ${firmware.environment || '-'}</div>
                 <div class="detail-row"><strong>上传人员：</strong> ${firmware.uploader_name || '-'}</div>
-                <div class="detail-row"><strong>上传时间：</strong> ${firmware.created_at ? new Date(firmware.created_at).toLocaleString('zh-CN') : '-'}</div>
+                <div class="detail-row"><strong>上传时间：</strong> ${firmware.uploaded_at ? new Date(firmware.uploaded_at).toLocaleString('zh-CN') : '-'}</div>
                 <div class="detail-row"><strong>测试报告：</strong> ${testReportName ? `<a href="/api/firmwares/${firmware.id}/download-test-report" style="text-decoration:none;">${testReportName}</a>` : '<em>暂无测试报告</em>'}</div>
                 ${shouldShowRejectReason ? `
                     <hr />
                     <div class="detail-row"><strong>驳回原因：</strong></div>
                     <div class="detail-block" style="color: #f44336;">${this.escapeHtml(firmware.reject_reason).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
                 ` : ''}
-                ${firmware.release_notes ? `
+                ${firmware.test_notes ? `
                     <hr />
                     <div class="detail-row"><strong>测后说明：</strong></div>
-                    <div class="detail-block">${this.escapeHtml(firmware.release_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
+                    <div class="detail-block">${this.escapeHtml(firmware.test_notes).replace(/\r\n|\r|\n/g, '<br/>') || '<em>无</em>'}</div>
                 ` : ''}
                 <hr />
                 <div class="detail-row"><strong>固件描述：</strong></div>
@@ -674,7 +674,7 @@ class ModalManager {
             </div>
         `;
 
-        this.showModal(`固件详情 - ${firmware.version || ''}`, content);
+        this.showModal(`固件详情 - ${firmware.version_name || ''}`, content);
     }
 }
 

@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-06 11:10:35
+ * @LastEditTime: 2025-11-10 22:21:22
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -32,7 +32,7 @@ const { ensureAuthenticated, canManageFirmware } = require('./middleware/auth');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-const firmwareRoutes = require('./routes/firmwares');
+const firmwareRoutes = require('./routes/firmwares'); // 使用默认路由
 const moduleRoutes = require('./routes/modules');
 const projectRoutes = require('./routes/projects');
 
@@ -75,12 +75,40 @@ app.get('/releases', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/release-list.html'));
 });
 
+app.get('/firmwares/release-list', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/release-list.html'));
+});
+
 app.get('/tests', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/test-list.html'));
+});
+
+app.get('/firmwares/test-list', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/test-list.html'));
 });
 
 app.get('/uploads', ensureAuthenticated, canManageFirmware, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/upload-list.html'));
+});
+
+app.get('/firmwares/upload-list', ensureAuthenticated, canManageFirmware, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/upload-list.html'));
+});
+
+app.get('/rejected', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/rejected-list.html'));
+});
+
+app.get('/firmwares/rejected-list', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/rejected-list.html'));
+});
+
+app.get('/my-related', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/my-related.html'));
+});
+
+app.get('/firmwares/my-related', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/html/my-related.html'));
 });
 
 // 为了兼容性保留旧路由，重定向到新路由

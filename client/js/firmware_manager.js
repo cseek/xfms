@@ -124,7 +124,7 @@ class FirmwareManager {
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
                         <div class="version-status ${firmware.status || ''}">
-                            <span class="version-text">${firmware.version}</span>
+                            <span class="version-text">${firmware.version_name}</span>
                             <span class="status-text">${this.getStatusDisplayName(firmware.status)}</span>
                         </div>
                     </div>
@@ -144,7 +144,7 @@ class FirmwareManager {
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-calendar"></i>
-                        <span>上传时间: ${Utils.formatDate(firmware.created_at)}</span>
+                        <span>上传时间: ${Utils.formatDate(firmware.uploaded_at)}</span>
                     </div>
                 </div>
                 <div class="firmware-actions">
@@ -219,7 +219,7 @@ class FirmwareManager {
         if (pageId === 'upload-list') {
             // 上传列表: 下载固件、委派固件(仅pending状态)、删除固件
             // 只有待委派状态的固件才显示委派按钮
-            if (firmware.status === 'pending') {
+            if (firmware.status === '待委派') {
                 buttons.push(`
                     <button class="action-menu-item" data-action="assign" data-id="${firmware.id}">
                         <i class="fas fa-user-check"></i> 委派固件
@@ -280,7 +280,7 @@ class FirmwareManager {
                     </button>
                 `);
             } else if (userRole === 'developer' && firmware.uploaded_by === dashboard.currentUser.id) {
-                if (firmware.status !== 'released') {
+                if (firmware.status !== '已发布') {
                     buttons.push(`
                         <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
                             <i class="fas fa-trash"></i> 删除固件

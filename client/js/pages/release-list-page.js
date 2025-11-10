@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
                     search: searchInput?.value.trim() || '',
-                    status: 'released' // 只显示已发布的固件
+                    status: '已发布' // 只显示已发布的固件
                 };
                 
                 // 如果有URL筛选参数，添加到filters中
@@ -60,19 +60,19 @@ async function loadReleasesByFilter(filterType) {
     
     if (!filterType || filterType === 'all') {
         // 所有已发布的固件
-        await firmwareManager.loadFirmwares({ status: 'released' });
+        await firmwareManager.loadFirmwares({ status: '已发布' });
     } else if (filterType === 'my-released') {
         // 我发布的（管理员、开发者、测试人员可见）
         if (currentUser.role === 'admin' || currentUser.role === 'developer' || currentUser.role === 'tester') {
             await firmwareManager.loadFirmwares({
-                status: 'released',
+                status: '已发布',
                 released_by: currentUser.username
             });
         } else {
             // 普通用户只能看到所有已发布的固件
-            await firmwareManager.loadFirmwares({ status: 'released' });
+            await firmwareManager.loadFirmwares({ status: '已发布' });
         }
     } else {
-        await firmwareManager.loadFirmwares({ status: 'released' });
+        await firmwareManager.loadFirmwares({ status: '已发布' });
     }
 }

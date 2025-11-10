@@ -1,25 +1,8 @@
 /*
  * @Author: aurson jassimxiong@gmail.com
- * @Date: 2025-09-14 17:33:37
- * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-08 21:21:29
- * @Description:
- *        ___ ___ _________ ___  ___ 
- *       / _ `/ // / __(_-</ _ \/ _ \
- *       \_,_/\_,_/_/ /___/\___/_//_/
- *      
- * Copyright (c) 2025 by Aurson, All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @Date: 2025-11-10
+ * @LastEditTime: 2025-11-10 22:02:01
+ * @Description: 重构后的固件路由 - 适配新数据库结构
  */
 
 const express = require('express');
@@ -29,13 +12,12 @@ const fs = require('fs-extra');
 const crypto = require('crypto');
 const config = require('../config');
 const { requireAuth, canUploadFirmware, canTestFirmware } = require('../middleware/auth');
-const { cleanupUploadedFile, isValidVersionFormat } = require('../utils/fileUtils');
+const { cleanupUploadedFile, isValidVersionFormat } = require('../utils/file_utils');
 const router = express.Router();
 
 // 配置 multer 用于固件文件上传
 const firmwareStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // 生成唯一文件夹名
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const folderName = 'firmware-' + uniqueSuffix;
         const dir = path.join(__dirname, '../../uploads/firmwares', folderName);
@@ -43,22 +25,18 @@ const firmwareStorage = multer.diskStorage({
         cb(null, dir);
     },
     filename: function (req, file, cb) {
-        // 保留原始文件名
         cb(null, file.originalname);
     }
 });
 
 const uploadFirmware = multer({ 
     storage: firmwareStorage,
-    limits: {
-        fileSize: config.upload.firmwareMaxSize
-    }
+    limits: { fileSize: config.upload.firmwareMaxSize }
 });
 
 // 配置 multer 用于测试报告上传
 const testReportStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // 生成唯一文件夹名
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const folderName = 'test-report-' + uniqueSuffix;
         const dir = path.join(__dirname, '../../uploads/test-reports', folderName);
@@ -66,16 +44,13 @@ const testReportStorage = multer.diskStorage({
         cb(null, dir);
     },
     filename: function (req, file, cb) {
-        // 保留原始文件名
         cb(null, file.originalname);
     }
 });
 
 const uploadTestReport = multer({ 
     storage: testReportStorage,
-    limits: {
-        fileSize: config.upload.testReportMaxSize
-    }
+    limits: { fileSize: config.upload.testReportMaxSize }
 });
 
 // 计算文件MD5
@@ -83,45 +58,31 @@ function calculateFileMD5(filePath) {
     return new Promise((resolve, reject) => {
         const hash = crypto.createHash('md5');
         const stream = fs.createReadStream(filePath);
-        
-        stream.on('data', (data) => {
-            hash.update(data);
-        });
-        
-        stream.on('end', () => {
-            resolve(hash.digest('hex'));
-        });
-        
-        stream.on('error', (err) => {
-            reject(err);
-        });
+        stream.on('data', (data) => hash.update(data));
+        stream.on('end', () => resolve(hash.digest('hex')));
+        stream.on('error', (err) => reject(err));
     });
 }
 
 // 获取固件列表（支持服务端分页）
 router.get('/', (req, res) => {
-    // 分页参数
     const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.pageSize) || 8; // 默认每页8条
+    const pageSize = parseInt(req.query.pageSize) || 8;
     const offset = (page - 1) * pageSize;
 
     let whereClause = 'WHERE 1=1';
     let params = [];
 
-    // 过滤条件
-    if (req.query.module_id) {
-        whereClause += ' AND f.module_id = ?';
-        params.push(req.query.module_id);
+    // 按模块名筛选
+    if (req.query.module_name) {
+        whereClause += ' AND f.module_name = ?';
+        params.push(req.query.module_name);
     }
 
-    if (req.query.project_id) {
-        whereClause += ' AND f.project_id = ?';
-        params.push(req.query.project_id);
-    }
-
-    if (req.query.environment) {
-        whereClause += ' AND f.environment = ?';
-        params.push(req.query.environment);
+    // 按项目名筛选
+    if (req.query.project_name) {
+        whereClause += ' AND f.project_name = ?';
+        params.push(req.query.project_name);
     }
 
     // 按状态筛选 - 支持多个状态用逗号分隔
@@ -137,39 +98,22 @@ router.get('/', (req, res) => {
         }
     }
 
-    // 按发布者筛选 - 只能看到自己发布的固件
+    // 按发布者筛选
     if (req.query.released_by) {
-        whereClause += ` AND f.id IN (
-            SELECT DISTINCT fh.firmware_id 
-            FROM firmware_history fh
-            JOIN users ru ON fh.performed_by = ru.id
-            WHERE ru.username = ? 
-            AND fh.action = 'update_status'
-            AND fh.new_value = 'released'
-        )`;
+        whereClause += ' AND ru.username = ?';
         params.push(req.query.released_by);
     }
 
-    // 按上传者筛选 - 只能看到自己上传的固件
+    // 按上传者筛选
     if (req.query.uploaded_by) {
-        whereClause += ' AND u.username = ?';
+        whereClause += ' AND uu.username = ?';
         params.push(req.query.uploaded_by);
     }
 
-    // 按测试者筛选 - 包括委派给当前用户的固件和已经测试过的固件
+    // 按测试者筛选
     if (req.query.tested_by) {
-        whereClause += ` AND (
-            f.assigned_to IN (SELECT id FROM users WHERE username = ?)
-            OR f.id IN (
-                SELECT DISTINCT fh.firmware_id 
-                FROM firmware_history fh
-                JOIN users tu ON fh.performed_by = tu.id
-                WHERE tu.username = ? 
-                AND fh.action IN ('update_status', 'upload_test_report')
-            )
-        )`;
-        params.push(req.query.tested_by);
-        params.push(req.query.tested_by);
+        whereClause += ' AND (tu.username = ? OR f.tested_by IN (SELECT id FROM users WHERE username = ?))';
+        params.push(req.query.tested_by, req.query.tested_by);
     }
 
     // 搜索过滤 - 在固件描述中查找关键字
@@ -178,13 +122,25 @@ router.get('/', (req, res) => {
         params.push('%' + req.query.search + '%');
     }
 
+    // 和我相关的筛选
+    if (req.query.my_related && req.session.user) {
+        const username = req.session.user.username;
+        whereClause += ` AND (
+            (f.status = '待委派' AND uu.username = ?) OR
+            (f.status = '已驳回' AND ru.username = ?) OR
+            (f.status = '待发布' AND tu.username = ?) OR
+            (f.status = '已发布' AND ru.username = ?)
+        )`;
+        params.push(username, username, username, username);
+    }
+
     // 先查询总数
     const countSql = `
         SELECT COUNT(*) as total
         FROM firmwares f
-        LEFT JOIN modules m ON f.module_id = m.id
-        LEFT JOIN projects p ON f.project_id = p.id
-        LEFT JOIN users u ON f.uploaded_by = u.id
+        LEFT JOIN users uu ON f.uploaded_by = uu.id
+        LEFT JOIN users tu ON f.tested_by = tu.id
+        LEFT JOIN users ru ON f.released_by = ru.id
         ${whereClause}
     `;
 
@@ -199,13 +155,17 @@ router.get('/', (req, res) => {
 
         // 查询分页数据
         const dataSql = `
-            SELECT f.*, m.name as module_name, p.name as project_name, u.username as uploader_name
+            SELECT 
+                f.*,
+                uu.username as uploader_name,
+                tu.username as tester_name,
+                ru.username as releaser_name
             FROM firmwares f
-            LEFT JOIN modules m ON f.module_id = m.id
-            LEFT JOIN projects p ON f.project_id = p.id
-            LEFT JOIN users u ON f.uploaded_by = u.id
+            LEFT JOIN users uu ON f.uploaded_by = uu.id
+            LEFT JOIN users tu ON f.tested_by = tu.id
+            LEFT JOIN users ru ON f.released_by = ru.id
             ${whereClause}
-            ORDER BY f.created_at DESC
+            ORDER BY f.uploaded_at DESC
             LIMIT ? OFFSET ?
         `;
 
@@ -217,7 +177,6 @@ router.get('/', (req, res) => {
                 return res.status(500).json({ error: '数据库错误' });
             }
             
-            // 返回分页信息和数据
             res.json({
                 data: rows,
                 pagination: {
@@ -234,11 +193,11 @@ router.get('/', (req, res) => {
 // 上传固件
 router.post('/upload', canUploadFirmware, uploadFirmware.single('firmware'), (req, res) => {
     const user = req.session.user;
-    const { module_id, project_id, version, description, additional_info } = req.body;
+    const { module_id, project_id, version, description } = req.body;
 
     if (!module_id || !project_id || !version) {
         cleanupUploadedFile(req.file);
-        return res.status(400).json({ error: '模块、项目和版本号不能为空' });
+        return res.status(400).json({ error: '模块、项目和版本不能为空' });
     }
 
     // 验证版本号格式
@@ -251,78 +210,59 @@ router.post('/upload', canUploadFirmware, uploadFirmware.single('firmware'), (re
         return res.status(400).json({ error: '固件文件不能为空' });
     }
 
-    // 检查模块和项目是否存在
-    req.db.get('SELECT COUNT(*) as module_count FROM modules WHERE id = ?', [module_id], (err, moduleResult) => {
-        if (err) {
-            cleanupUploadedFile(req.file);
-            console.error('Database error:', err);
-            return res.status(500).json({ error: '数据库错误' });
-        }
-
-        if (moduleResult.module_count === 0) {
-            cleanupUploadedFile(req.file);
-            return res.status(400).json({ error: '模块不存在' });
-        }
-
-        req.db.get('SELECT COUNT(*) as project_count FROM projects WHERE id = ?', [project_id], (err, projectResult) => {
-            if (err) {
-                cleanupUploadedFile(req.file);
-                console.error('Database error:', err);
-                return res.status(500).json({ error: '数据库错误' });
-            }
-
-            if (projectResult.project_count === 0) {
-                cleanupUploadedFile(req.file);
-                return res.status(400).json({ error: '项目不存在' });
-            }
-
-            // 计算文件MD5
-            calculateFileMD5(req.file.path)
-                .then(md5Hash => {
-                    // 插入固件记录
-                    const insertSql = `
-                        INSERT INTO firmwares 
-                        (module_id, project_id, version, description, additional_info, file_path, file_size, md5, uploaded_by, environment, status)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'test', 'pending')
-                    `;
-                    const fileSize = req.file.size;
-
-                    req.db.run(insertSql, [module_id, project_id, version, description, additional_info, req.file.path, fileSize, md5Hash, user.id], function(err) {
-                        if (err) {
-                            cleanupUploadedFile(req.file);
-                            console.error('Database error:', err);
-                            return res.status(500).json({ error: '数据库错误' });
-                        }
-
-                        // 记录历史
-                        const historySql = `
-                            INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
-                            VALUES (?, ?, 'upload', ?, ?)
-                        `;
-                        const notes = `上传固件，文件: ${req.file.originalname}, MD5: ${md5Hash}`;
-                        req.db.run(historySql, [this.lastID, version, user.id, notes], function(err) {
-                            if (err) {
-                                console.error('Failed to record history:', err);
-                            }
-                        });
-
-                        res.json({
-                            message: '固件上传成功',
-                            firmwareId: this.lastID,
-                            md5: md5Hash
-                        });
-                    });
-                })
-                .catch(err => {
-                    cleanupUploadedFile(req.file);
-                    console.error('Error calculating MD5:', err);
-                    return res.status(500).json({ error: '计算MD5失败' });
-                });
+    // 先查询模块名和项目名
+    const getModuleName = new Promise((resolve, reject) => {
+        req.db.get('SELECT name FROM modules WHERE id = ?', [module_id], (err, row) => {
+            if (err) reject(err);
+            else if (!row) reject(new Error('模块不存在'));
+            else resolve(row.name);
         });
     });
+
+    const getProjectName = new Promise((resolve, reject) => {
+        req.db.get('SELECT name FROM projects WHERE id = ?', [project_id], (err, row) => {
+            if (err) reject(err);
+            else if (!row) reject(new Error('项目不存在'));
+            else resolve(row.name);
+        });
+    });
+
+    Promise.all([getModuleName, getProjectName])
+        .then(([module_name, project_name]) => {
+            // 计算文件MD5
+            return calculateFileMD5(req.file.path)
+                .then(md5Hash => ({ module_name, project_name, md5Hash }));
+        })
+        .then(({ module_name, project_name, md5Hash }) => {
+            const insertSql = `
+                INSERT INTO firmwares 
+                (module_name, project_name, version_name, description, file_path, file_size, md5, uploaded_by, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, '待委派')
+            `;
+            const fileSize = req.file.size;
+
+            req.db.run(insertSql, [module_name, project_name, version, description, req.file.path, fileSize, md5Hash, user.id], function(err) {
+                if (err) {
+                    cleanupUploadedFile(req.file);
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: '数据库错误' });
+                }
+
+                res.json({
+                    message: '固件上传成功',
+                    firmwareId: this.lastID,
+                    md5: md5Hash
+                });
+            });
+        })
+        .catch(err => {
+            cleanupUploadedFile(req.file);
+            console.error('Error:', err);
+            return res.status(500).json({ error: err.message || '上传失败' });
+        });
 });
 
-// 下载固件（所有已登录用户都可以下载）
+// 下载固件
 router.get('/:id/download', requireAuth, (req, res) => {
     const firmwareId = req.params.id;
 
@@ -342,9 +282,7 @@ router.get('/:id/download', requireAuth, (req, res) => {
             return res.status(404).json({ error: '固件文件不存在' });
         }
 
-        // 获取原始文件名
         const fileName = path.basename(filePath);
-        // 设置 Content-Disposition 头，指定文件名
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.download(filePath, fileName);
     });
@@ -354,9 +292,9 @@ router.get('/:id/download', requireAuth, (req, res) => {
 router.put('/:id/status', canTestFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { status, release_notes, reject_reason } = req.body;
+    const { status, test_notes, reject_reason } = req.body;
 
-    const allowedStatus = ['testing', 'passed', 'failed', 'released', 'rejected', 'obsolete'];
+    const allowedStatus = ['待委派', '待发布', '已发布', '已驳回'];
     if (!allowedStatus.includes(status)) {
         return res.status(400).json({ error: '状态不合法' });
     }
@@ -373,27 +311,24 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
             return res.status(404).json({ error: '固件不存在' });
         }
 
-        let updateSql = 'UPDATE firmwares SET status = ?, updated_at = CURRENT_TIMESTAMP';
+        let updateSql = 'UPDATE firmwares SET status = ?';
         let params = [status];
 
-        // 如果状态是 released，则环境改为 release，并记录发布信息
-        if (status === 'released') {
-            updateSql += ', environment = ?, released_by = ?, released_at = CURRENT_TIMESTAMP';
-            params.push('release', user.id);
+        // 如果状态是已发布，记录发布信息
+        if (status === '已发布') {
+            updateSql += ', released_by = ?, released_at = CURRENT_TIMESTAMP';
+            params.push(user.id);
             
-            // 如果有发布说明，也保存
-            if (release_notes) {
-                updateSql += ', release_notes = ?';
-                params.push(release_notes);
+            if (test_notes) {
+                updateSql += ', test_notes = ?';
+                params.push(test_notes);
             }
         }
         
-        // 如果状态是 rejected，清除委派信息，并保存驳回原因
-        if (status === 'rejected') {
-            // 保持状态为 rejected，清除委派信息
-            updateSql += ', assigned_to = NULL, assign_note = NULL';
+        // 如果状态是已驳回，清除测试人员信息，保存驳回原因
+        if (status === '已驳回') {
+            updateSql += ', tested_by = NULL';
             
-            // 如果有驳回原因，保存到 reject_reason 字段
             if (reject_reason) {
                 updateSql += ', reject_reason = ?';
                 params.push(reject_reason);
@@ -409,42 +344,24 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
                 return res.status(500).json({ error: '数据库错误' });
             }
 
-            // 记录历史
-            const historySql = `
-                INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
-                VALUES (?, ?, ?, ?, ?)
-            `;
-            let historyNotes = `状态变更为: ${status}`;
-            if (status === 'released' && release_notes) {
-                historyNotes += `\n发布说明: ${release_notes}`;
-            }
-            if (status === 'rejected' && reject_reason) {
-                historyNotes += `\n驳回原因: ${reject_reason}`;
-            }
-            req.db.run(historySql, [firmwareId, firmware.version, 'status_change', user.id, historyNotes], function(err) {
-                if (err) {
-                    console.error('Failed to record history:', err);
-                }
-            });
-
-            res.json({ message: '状态更新成功' });
+            res.json({ message: '固件状态更新成功' });
         });
     });
 });
 
-// 委派固件给测试人员 - 允许开发者和管理员委派
+// 委派固件
 router.post('/:id/assign', canUploadFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { assigned_to, assign_note } = req.body;
+    const { tested_by } = req.body;
 
-    if (!assigned_to) {
-        return res.status(400).json({ error: '请选择委派对象' });
+    if (!tested_by) {
+        return res.status(400).json({ error: '测试人员ID不能为空' });
     }
 
-    // 验证被委派人是否为测试人员
-    const checkUserSql = 'SELECT id, username, role FROM users WHERE id = ?';
-    req.db.get(checkUserSql, [assigned_to], (err, tester) => {
+    // 检查测试人员是否存在且角色正确
+    const getTesterSql = 'SELECT * FROM users WHERE id = ?';
+    req.db.get(getTesterSql, [tested_by], (err, tester) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
@@ -470,33 +387,21 @@ router.post('/:id/assign', canUploadFirmware, (req, res) => {
                 return res.status(404).json({ error: '固件不存在' });
             }
 
-            // 更新固件状态为 assigned (待发布)，并记录委派信息
+            // 更新固件状态为待发布，并记录测试人员
             const updateSql = `
                 UPDATE firmwares 
-                SET status = 'assigned', assigned_to = ?, assign_note = ?, updated_at = CURRENT_TIMESTAMP 
+                SET status = '待发布', tested_by = ?
                 WHERE id = ?
             `;
-            req.db.run(updateSql, [assigned_to, assign_note || null, firmwareId], function(err) {
+            req.db.run(updateSql, [tested_by, firmwareId], function(err) {
                 if (err) {
                     console.error('Database error:', err);
                     return res.status(500).json({ error: '数据库错误' });
                 }
 
-                // 记录历史
-                const historySql = `
-                    INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
-                    VALUES (?, ?, ?, ?, ?)
-                `;
-                const notes = `固件委派给测试人员: ${tester.username}${assign_note ? ', 说明: ' + assign_note : ''}`;
-                req.db.run(historySql, [firmwareId, firmware.version, 'assign', user.id, notes], function(err) {
-                    if (err) {
-                        console.error('Failed to record history:', err);
-                    }
-                });
-
                 res.json({ 
                     message: '固件委派成功',
-                    assigned_to: tester.username
+                    tested_by: tester.username
                 });
             });
         });
@@ -505,7 +410,6 @@ router.post('/:id/assign', canUploadFirmware, (req, res) => {
 
 // 上传测试报告
 router.post('/:id/test-report', canTestFirmware, uploadTestReport.single('test_report'), (req, res) => {
-    const user = req.session.user;
     const firmwareId = req.params.id;
 
     if (!req.file) {
@@ -525,23 +429,11 @@ router.post('/:id/test-report', canTestFirmware, uploadTestReport.single('test_r
             return res.status(404).json({ error: '固件不存在' });
         }
 
-        // 记录历史
-        const historySql = `
-            INSERT INTO firmware_history (firmware_id, version, action, performed_by, notes)
-            SELECT id, version, 'upload_test_report', ?, ? FROM firmwares WHERE id = ?
-        `;
-        const notes = `上传测试报告: ${req.file.originalname}`;
-        req.db.run(historySql, [user.id, notes, firmwareId], function(err) {
-            if (err) {
-                console.error('Failed to record history:', err);
-            }
-        });
-
         res.json({ message: '测试报告上传成功' });
     });
 });
 
-// 下载测试报告（所有已登录用户都可以下载）
+// 下载测试报告
 router.get('/:id/download-test-report', requireAuth, (req, res) => {
     const firmwareId = req.params.id;
 
@@ -561,9 +453,7 @@ router.get('/:id/download-test-report', requireAuth, (req, res) => {
             return res.status(404).json({ error: '测试报告文件不存在' });
         }
 
-        // 获取原始文件名
         const fileName = path.basename(filePath);
-        // 设置 Content-Disposition 头，指定文件名
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.download(filePath, fileName);
     });
@@ -591,36 +481,30 @@ router.delete('/:id', (req, res) => {
         }
 
         // 权限检查
-        // 1. 管理员可以删除任何固件
-        // 2. 开发者只能删除自己上传的固件
-        // 3. 开发者不能删除已发布(released)或作废(obsolete)状态的固件
         if (user.role === 'admin') {
             // 管理员有完全删除权限
         } else if (user.role === 'developer') {
-            // 检查是否是上传者
             if (firmware.uploaded_by !== user.id) {
                 return res.status(403).json({ error: '没有权限删除此固件' });
             }
-            // 检查固件状态
-            if (firmware.status === 'released') {
+            if (firmware.status === '已发布') {
                 return res.status(403).json({ 
                     error: '不能删除已发布的固件',
                     detail: `当前状态: ${firmware.status}`
                 });
             }
         } else {
-            // 其他角色无删除权限
             return res.status(403).json({ error: '没有权限删除固件' });
         }
 
         // 删除文件和文件夹
         if (fs.existsSync(firmware.file_path)) {
             const fileDir = path.dirname(firmware.file_path);
-            fs.removeSync(fileDir); // 删除整个文件夹
+            fs.removeSync(fileDir);
         }
         if (firmware.test_report_path && fs.existsSync(firmware.test_report_path)) {
             const testReportDir = path.dirname(firmware.test_report_path);
-            fs.removeSync(testReportDir); // 删除整个文件夹
+            fs.removeSync(testReportDir);
         }
 
         // 删除数据库记录
@@ -630,14 +514,6 @@ router.delete('/:id', (req, res) => {
                 console.error('Database error:', err);
                 return res.status(500).json({ error: '数据库错误' });
             }
-
-            // 删除历史记录
-            const deleteHistorySql = 'DELETE FROM firmware_history WHERE firmware_id = ?';
-            req.db.run(deleteHistorySql, [firmwareId], function(err) {
-                if (err) {
-                    console.error('Failed to delete history:', err);
-                }
-            });
 
             res.json({ message: '固件删除成功' });
         });

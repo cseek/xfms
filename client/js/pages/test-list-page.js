@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
                     search: searchInput?.value.trim() || '',
-                    status: 'assigned' // 测试列表只显示待发布状态的固件
+                    status: '待发布' // 测试列表只显示待发布状态的固件
                 };
                 
                 // 如果有URL筛选参数,添加到filters中
@@ -59,7 +59,7 @@ async function loadTestsByFilter(filterType) {
     const currentUser = dashboard.currentUser;
     
     // 测试列表只显示待发布状态的固件
-    const baseFilters = { status: 'assigned' };
+    const baseFilters = { status: '待发布' };
     
     if (!filterType || filterType === 'all') {
         // 所有待发布固件

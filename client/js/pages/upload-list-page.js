@@ -27,18 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
         pageId: 'upload-list',
         pageTitle: '上传列表',
         onReady: async () => {
-            // 设置当前页面ID
             firmwareManager.setPageId('upload-list');
             
             await firmwareManager.loadModulesForSelect();
             await firmwareManager.loadProjectsForSelect();
             
-            // 获取URL参数中的筛选条件
-            const urlParams = new URLSearchParams(window.location.search);
-            const filterType = urlParams.get('filter');
-            
-            // 根据筛选类型加载固件
-            await loadFirmwaresByFilter(filterType);
+            // 加载待委派状态的固件
+            await loadUploadFirmwares();
 
             const moduleFilter = document.getElementById('moduleFilter');
             const projectFilter = document.getElementById('projectFilter');
@@ -49,13 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     module_id: moduleFilter?.value || '',
                     project_id: projectFilter?.value || '',
                     search: searchInput?.value.trim() || '',
-                    status: 'pending,rejected' // 上传列表显示待委派和已驳回状态的固件
+                    status: '待委派'
                 };
-                
-                // 如果有URL筛选参数，添加到filters中
-                if (filterType) {
-                    filters.filterType = filterType;
-                }
                 
                 await firmwareManager.loadFirmwares(filters);
             };
@@ -63,9 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             moduleFilter?.addEventListener('change', triggerSearch);
             projectFilter?.addEventListener('change', triggerSearch);
             
-            // 添加搜索框事件监听器
             searchInput?.addEventListener('input', () => {
-                // 使用防抖，避免频繁触发搜索
                 clearTimeout(searchInput.debounceTimer);
                 searchInput.debounceTimer = setTimeout(triggerSearch, 300);
             });
@@ -73,37 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 根据筛选类型加载固件
-async function loadFirmwaresByFilter(filterType) {
-    const currentUser = dashboard.currentUser;
+async function loadUploadFirmwares() {
+    const filters = {
+        status: '待委派'
+    };
     
-    // 上传列表显示待委派和已驳回状态的固件
-    const baseFilters = { status: 'pending,rejected' };
-    
-    if (!filterType || filterType === 'all') {
-        // 所有待委派和已驳回固件
-        await firmwareManager.loadFirmwares(baseFilters);
-    } else if (filterType === 'my-uploaded') {
-        // 我上传的待委派和已驳回固件（仅管理员和开发者）
-        if (currentUser.role === 'admin' || currentUser.role === 'developer') {
-            await firmwareManager.loadFirmwares({
-                ...baseFilters,
-                uploaded_by: currentUser.username
-            });
-        } else {
-            await firmwareManager.loadFirmwares(baseFilters);
-        }
-    } else if (filterType === 'my-tested') {
-        // 我测试的（仅测试人员）
-        if (currentUser.role === 'tester') {
-            await firmwareManager.loadFirmwares({
-                ...baseFilters,
-                tested_by: currentUser.username
-            });
-        } else {
-            await firmwareManager.loadFirmwares(baseFilters);
-        }
-    } else {
-        await firmwareManager.loadFirmwares(baseFilters);
-    }
+    await firmwareManager.loadFirmwares(filters);
 }

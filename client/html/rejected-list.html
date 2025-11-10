@@ -1,0 +1,53 @@
+<!--
+ * @Author: aurson jassimxiong@gmail.com
+ * @Date: 2025-11-10
+ * @Description: 驳回列表页面
+-->
+ 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>固件管理系统 - 驳回列表</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/upload-list.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div id="sidebarContainer"></div>
+        <main class="main-content">
+            <div id="headerContainer"></div>
+            <div class="content-area">
+                <div class="page active">
+                    <div class="page-header">
+                        <div class="filters">
+                            <label class="filter-label">模块：</label>
+                            <input type="text" id="moduleFilter" class="filter-input" placeholder="输入模块名">
+                            <label class="filter-label">项目：</label>
+                            <input type="text" id="projectFilter" class="filter-input" placeholder="输入项目名">
+                        </div>
+                        <div class="search-box">
+                            <label class="filter-label search-label">搜索：</label>
+                            <input type="text" id="searchInput" class="search-input" placeholder="按关键字搜索">
+                        </div>
+                    </div>
+                    <div class="firmware-grid" id="firmwareGrid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script src="../js/firmware_manager.js"></script>
+    <script src="../js/modal_manager.js"></script>
+    <script src="../js/pages/rejected-list-page.js"></script>
+</body>
+</html>

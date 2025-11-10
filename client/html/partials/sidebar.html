@@ -34,70 +34,39 @@
         </h2>
     </div>
     <ul class="sidebar-menu">
-        <!-- 发布列表 - 所有用户可见 -->
+        <!-- 固件列表 - 所有用户可见 -->
         <li class="has-submenu">
-            <button class="menu-item submenu-toggle" type="button" data-page="release-list">
+            <button class="menu-item submenu-toggle" type="button" data-page="firmware-list">
                 <svg viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
                 </svg>
-                发布列表
+                固件列表
                 <span class="submenu-arrow" aria-hidden="true"></span>
             </button>
             <ul class="submenu">
                 <li>
-                    <a href="/releases?filter=all" class="menu-item submenu-item" data-page="release-list-all">
-                        ▫️ 所有固件
+                    <a href="/firmwares/release-list" class="menu-item submenu-item" data-page="release-list">
+                        ▫️ 发布列表
                     </a>
                 </li>
                 <li data-requires-role="admin,developer,tester">
-                    <a href="/releases?filter=my-released" class="menu-item submenu-item" data-page="release-list-my-released">
-                        ▫️ 我发布的
+                    <a href="/firmwares/test-list" class="menu-item submenu-item" data-page="test-list">
+                        ▫️ 测试列表
                     </a>
                 </li>
-            </ul>
-        </li>
-        
-        <!-- 测试列表 - 仅管理员、研发人员、测试人员可见 -->
-        <li class="has-submenu" data-requires-role="admin,developer,tester">
-            <button class="menu-item submenu-toggle" type="button" data-page="test-list">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19.5,3.5L18,2L16.5,3.5L15,2L13.5,3.5L12,2L10.5,3.5L9,2L7.5,3.5L6,2L4.5,3.5L3,2V22L4.5,20.5L6,22L7.5,20.5L9,22 L10.5,20.5L12,22L13.5,20.5L15,22L16.5,20.5L18,22L19.5,20.5L21,22V2L19.5,3.5z M19,19.09H5V4.91H19V19.09z M6,15H18V17H6V15z M6,11H18V13H6V11z M6,7H18V9H6V7z" />
-                </svg>
-                测试列表
-                <span class="submenu-arrow" aria-hidden="true"></span>
-            </button>
-            <ul class="submenu">
-                <li>
-                    <a href="/tests?filter=all" class="menu-item submenu-item" data-page="test-list-all">
-                        ▫️ 所有固件
+                <li data-requires-role="admin,developer">
+                    <a href="/firmwares/upload-list" class="menu-item submenu-item" data-page="upload-list">
+                        ▫️ 上传列表
                     </a>
                 </li>
                 <li>
-                    <a href="/tests?filter=my-tested" class="menu-item submenu-item" data-page="test-list-my-tested">
-                        ▫️ 我测试的
-                    </a>
-                </li>
-            </ul>
-        </li>
-        
-        <!-- 上传列表 - 仅研发人员和管理员可见 -->
-        <li class="has-submenu" data-requires-role="admin,developer">
-            <button class="menu-item submenu-toggle" type="button" data-page="upload-list">
-                <svg viewBox="0 0 24 24">
-                    <path d="M3,13h2v-2H3V13z M3,17h2v-2H3V17z M3,9h2V7H3V9z M7,13h14v-2H7V13z M7,17h14v-2H7V17z M7,7v2h14V7H7z" />
-                </svg>
-                上传列表
-                <span class="submenu-arrow" aria-hidden="true"></span>
-            </button>
-            <ul class="submenu">
-                <li>
-                    <a href="/uploads?filter=all" class="menu-item submenu-item" data-page="upload-list-all">
-                        ▫️ 所有固件
+                    <a href="/firmwares/rejected-list" class="menu-item submenu-item" data-page="rejected-list">
+                        ▫️ 驳回列表
                     </a>
                 </li>
                 <li>
-                    <a href="/uploads?filter=my-uploaded" class="menu-item submenu-item" data-page="upload-list-my-uploaded">
-                        ▫️ 我上传的
+                    <a href="/firmwares/my-related" class="menu-item submenu-item" data-page="my-related">
+                        ▫️ 和我相关
                     </a>
                 </li>
             </ul>
