@@ -385,10 +385,8 @@ class ModalManager {
             Utils.showMessage('固件委派成功', 'success');
             this.hideModal();
             
-            // 重新加载固件列表
-            if (window.firmwareManager) {
-                window.firmwareManager.loadFirmwares();
-            }
+            // 跳转到上传列表-所有固件
+            window.location.href = '/uploads?filter=all';
         } catch (error) {
             console.error('Error assigning firmware:', error);
             Utils.showMessage(error.message || '固件委派失败', 'error');
