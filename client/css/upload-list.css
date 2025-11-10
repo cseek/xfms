@@ -143,10 +143,12 @@
 }
 
 .firmware-card.pending { border-left-color: #6c757d; }
+.firmware-card.assigned { border-left-color: #17a2b8; }
 .firmware-card.testing { border-left-color: #17a2b8; }
 .firmware-card.passed { border-left-color: #28a745; }
 .firmware-card.failed { border-left-color: #dc3545; }
 .firmware-card.released { border-left-color: #20c997; }
+.firmware-card.rejected { border-left-color: #dc3545; }
 .firmware-card.obsolete { border-left-color: #000; }
 
 .firmware-header {
