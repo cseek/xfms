@@ -151,6 +151,16 @@
 .firmware-card.rejected { border-left-color: #dc3545; }
 .firmware-card.obsolete { border-left-color: #000; }
 
+/* 未委派给当前用户的固件卡片 - 背景色减弱 */
+.firmware-card.not-assigned-to-me {
+    background: #f8f9fa;
+    opacity: 0.6;
+}
+
+.firmware-card.not-assigned-to-me:hover {
+    opacity: 0.7;
+}
+
 .firmware-header {
     display: flex;
     justify-content: space-between;

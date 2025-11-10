@@ -118,8 +118,15 @@ class FirmwareManager {
         }
 
         // 直接渲染当前页的数据（服务端已分页）
-        grid.innerHTML = this.firmwares.map(firmware => `
-            <div class="firmware-card ${this.getStatusClassName(firmware.status)}" data-id="${firmware.id}">
+        grid.innerHTML = this.firmwares.map(firmware => {
+            // 在测试列表页面,检查固件是否委派给当前用户
+            const userRole = dashboard.currentUser?.role;
+            const isTestListPage = this.currentPageId === 'test-list';
+            const isAssignedToMe = userRole === 'admin' || firmware.assigned_to === dashboard.currentUser?.id;
+            const notAssignedClass = (isTestListPage && !isAssignedToMe) ? 'not-assigned-to-me' : '';
+            
+            return `
+            <div class="firmware-card ${this.getStatusClassName(firmware.status)} ${notAssignedClass}" data-id="${firmware.id}">
                 <div class="firmware-header">
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
@@ -161,7 +168,8 @@ class FirmwareManager {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         // 构建分页控件
         let paginationHtml = '<div class="pagination">';
