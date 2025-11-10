@@ -379,10 +379,8 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
             }
         }
         
-        // 如果状态是已驳回,清除测试人员信息,保存驳回原因
+        // 如果状态是已驳回,保存驳回原因(保留测试人员信息)
         if (status === '已驳回') {
-            updateSql += ', assigned_to = NULL';
-            
             if (reject_reason) {
                 updateSql += ', reject_reason = ?';
                 params.push(reject_reason);
