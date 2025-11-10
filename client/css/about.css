@@ -81,7 +81,7 @@
 }
 
 .permission-table thead th {
-    padding: 10px 16px;
+    padding: 9px 16px;
     text-align: center;
     font-weight: 600;
     font-size: 14px;
@@ -111,7 +111,7 @@
 }
 
 .permission-table tbody td {
-    padding: 8px 16px;
+    padding: 7px 16px;
     text-align: center;
     color: #475569;
 }
