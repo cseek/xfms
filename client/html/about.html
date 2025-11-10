@@ -52,6 +52,91 @@
                             <li>邮件通知 (待开发...)</li>
                             <li>响应式设计</li>
                         </ul>
+                        
+                        <h4 style="margin-top: 24px; margin-bottom: 16px; color: #667eea;"><i class="fas fa-shield-alt"></i> 权限矩阵</h4>
+                        <div class="permission-table-wrapper">
+                            <table class="permission-table">
+                                <thead>
+                                    <tr>
+                                        <th>功能模块</th>
+                                        <th>管理员</th>
+                                        <th>开发者</th>
+                                        <th>测试者</th>
+                                        <th>普通用户</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>上传固件</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>委派固件</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>测试固件</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>发布固件</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>驳回固件</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>模块管理</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-partial">△</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>项目管理</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-partial">△</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>用户管理</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                        <td><span class="permission-no">✗</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>查看列表</td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                        <td><span class="permission-yes">✓</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="permission-legend">
+                                <span><span class="permission-yes">✓</span> 完全权限</span>
+                                <span><span class="permission-partial">△</span> 部分权限（仅查看和管理自己创建的）</span>
+                                <span><span class="permission-no">✗</span> 无权限</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

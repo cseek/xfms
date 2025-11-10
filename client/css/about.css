@@ -48,3 +48,100 @@
     color: #555;
     line-height: 1.8;
 }
+
+/* 权限矩阵表格样式 */
+.permission-table-wrapper {
+    overflow-x: auto;
+    margin-top: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.permission-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 14px;
+}
+
+.permission-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.permission-table thead th {
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+}
+
+.permission-table thead th:first-child {
+    text-align: left;
+    border-top-left-radius: 8px;
+}
+
+.permission-table thead th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.permission-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.permission-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.permission-table tbody tr:hover {
+    background-color: #f7fafc;
+}
+
+.permission-table tbody td {
+    padding: 12px 16px;
+    text-align: center;
+    color: #475569;
+}
+
+.permission-table tbody td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.permission-yes {
+    color: #10b981;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.permission-no {
+    color: #ef4444;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.permission-partial {
+    color: #f59e0b;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.permission-legend {
+    display: flex;
+    gap: 24px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+}
+
+.permission-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
