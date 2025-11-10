@@ -102,6 +102,7 @@ const canAssignFirmware = (req, res, next) => {
 
 /**
  * 确保用户有发布/驳回固件的权限(管理员或测试人员)
+ * 注意:测试人员只能发布/驳回委派给自己的固件,需要在具体路由中进一步检查
  */
 const canPublishFirmware = (req, res, next) => {
     const user = req.session.user;

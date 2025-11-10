@@ -364,6 +364,11 @@ router.put('/:id/status', canPublishFirmware, (req, res) => {
             return res.status(404).json({ error: '固件不存在' });
         }
 
+        // 测试人员只能发布/驳回委派给自己的固件
+        if (user.role === 'tester' && firmware.assigned_to !== user.id) {
+            return res.status(403).json({ error: '您只能发布或驳回委派给自己的固件' });
+        }
+
         let updateSql = 'UPDATE firmwares SET status = ?';
         let params = [status];
 
