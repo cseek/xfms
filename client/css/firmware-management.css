@@ -236,7 +236,7 @@
 #projectsList {
     flex: 1 1 auto;
     overflow: hidden;
-    padding-bottom: 96px;
+    padding-bottom: 24px;
 }
 
 #modules .pagination,
