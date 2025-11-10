@@ -1,7 +1,7 @@
 /*
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-11-10
- * @LastEditTime: 2025-11-10 22:02:01
+ * @LastEditTime: 2025-11-10 23:26:51
  * @Description: 重构后的固件路由 - 适配新数据库结构
  */
 
@@ -112,7 +112,7 @@ router.get('/', (req, res) => {
 
     // 按测试者筛选
     if (req.query.tested_by) {
-        whereClause += ' AND (tu.username = ? OR f.tested_by IN (SELECT id FROM users WHERE username = ?))';
+        whereClause += ' AND (tu.username = ? OR f.assigned_to IN (SELECT id FROM users WHERE username = ?))';
         params.push(req.query.tested_by, req.query.tested_by);
     }
 
@@ -134,12 +134,12 @@ router.get('/', (req, res) => {
         params.push(username, username, username, username);
     }
 
-    // 先查询总数
+    // 查询总数
     const countSql = `
         SELECT COUNT(*) as total
         FROM firmwares f
         LEFT JOIN users uu ON f.uploaded_by = uu.id
-        LEFT JOIN users tu ON f.tested_by = tu.id
+        LEFT JOIN users tu ON f.assigned_to = tu.id
         LEFT JOIN users ru ON f.released_by = ru.id
         ${whereClause}
     `;
@@ -157,15 +157,21 @@ router.get('/', (req, res) => {
         const dataSql = `
             SELECT 
                 f.*,
+                f.version as version_name,
+                f.created_at as uploaded_at,
+                m.name as module_name,
+                p.name as project_name,
                 uu.username as uploader_name,
                 tu.username as tester_name,
                 ru.username as releaser_name
             FROM firmwares f
+            LEFT JOIN modules m ON f.module_id = m.id
+            LEFT JOIN projects p ON f.project_id = p.id
             LEFT JOIN users uu ON f.uploaded_by = uu.id
-            LEFT JOIN users tu ON f.tested_by = tu.id
+            LEFT JOIN users tu ON f.assigned_to = tu.id
             LEFT JOIN users ru ON f.released_by = ru.id
             ${whereClause}
-            ORDER BY f.uploaded_at DESC
+            ORDER BY f.created_at DESC
             LIMIT ? OFFSET ?
         `;
 
@@ -210,38 +216,17 @@ router.post('/upload', canUploadFirmware, uploadFirmware.single('firmware'), (re
         return res.status(400).json({ error: '固件文件不能为空' });
     }
 
-    // 先查询模块名和项目名
-    const getModuleName = new Promise((resolve, reject) => {
-        req.db.get('SELECT name FROM modules WHERE id = ?', [module_id], (err, row) => {
-            if (err) reject(err);
-            else if (!row) reject(new Error('模块不存在'));
-            else resolve(row.name);
-        });
-    });
-
-    const getProjectName = new Promise((resolve, reject) => {
-        req.db.get('SELECT name FROM projects WHERE id = ?', [project_id], (err, row) => {
-            if (err) reject(err);
-            else if (!row) reject(new Error('项目不存在'));
-            else resolve(row.name);
-        });
-    });
-
-    Promise.all([getModuleName, getProjectName])
-        .then(([module_name, project_name]) => {
-            // 计算文件MD5
-            return calculateFileMD5(req.file.path)
-                .then(md5Hash => ({ module_name, project_name, md5Hash }));
-        })
-        .then(({ module_name, project_name, md5Hash }) => {
+    // 计算文件MD5
+    calculateFileMD5(req.file.path)
+        .then(md5Hash => {
             const insertSql = `
                 INSERT INTO firmwares 
-                (module_name, project_name, version_name, description, file_path, file_size, md5, uploaded_by, status)
+                (module_id, project_id, version, description, file_path, file_size, md5, uploaded_by, status)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, '待委派')
             `;
             const fileSize = req.file.size;
 
-            req.db.run(insertSql, [module_name, project_name, version, description, req.file.path, fileSize, md5Hash, user.id], function(err) {
+            req.db.run(insertSql, [module_id, project_id, version, description, req.file.path, fileSize, md5Hash, user.id], function(err) {
                 if (err) {
                     cleanupUploadedFile(req.file);
                     console.error('Database error:', err);
@@ -325,9 +310,9 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
             }
         }
         
-        // 如果状态是已驳回，清除测试人员信息，保存驳回原因
+        // 如果状态是已驳回,清除测试人员信息,保存驳回原因
         if (status === '已驳回') {
-            updateSql += ', tested_by = NULL';
+            updateSql += ', assigned_to = NULL';
             
             if (reject_reason) {
                 updateSql += ', reject_reason = ?';
@@ -353,15 +338,15 @@ router.put('/:id/status', canTestFirmware, (req, res) => {
 router.post('/:id/assign', canUploadFirmware, (req, res) => {
     const user = req.session.user;
     const firmwareId = req.params.id;
-    const { tested_by } = req.body;
+    const { assigned_to } = req.body;
 
-    if (!tested_by) {
+    if (!assigned_to) {
         return res.status(400).json({ error: '测试人员ID不能为空' });
     }
 
     // 检查测试人员是否存在且角色正确
     const getTesterSql = 'SELECT * FROM users WHERE id = ?';
-    req.db.get(getTesterSql, [tested_by], (err, tester) => {
+    req.db.get(getTesterSql, [assigned_to], (err, tester) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
@@ -387,13 +372,13 @@ router.post('/:id/assign', canUploadFirmware, (req, res) => {
                 return res.status(404).json({ error: '固件不存在' });
             }
 
-            // 更新固件状态为待发布，并记录测试人员
+            // 更新固件状态为待发布,并记录测试人员
             const updateSql = `
                 UPDATE firmwares 
-                SET status = '待发布', tested_by = ?
+                SET status = '待发布', assigned_to = ?
                 WHERE id = ?
             `;
-            req.db.run(updateSql, [tested_by, firmwareId], function(err) {
+            req.db.run(updateSql, [assigned_to, firmwareId], function(err) {
                 if (err) {
                     console.error('Database error:', err);
                     return res.status(500).json({ error: '数据库错误' });
@@ -401,7 +386,7 @@ router.post('/:id/assign', canUploadFirmware, (req, res) => {
 
                 res.json({ 
                     message: '固件委派成功',
-                    tested_by: tester.username
+                    assigned_to: tester.username
                 });
             });
         });

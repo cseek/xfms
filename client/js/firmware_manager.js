@@ -119,13 +119,13 @@ class FirmwareManager {
 
         // 直接渲染当前页的数据（服务端已分页）
         grid.innerHTML = this.firmwares.map(firmware => `
-            <div class="firmware-card ${firmware.status || ''}" data-id="${firmware.id}">
+            <div class="firmware-card ${this.getStatusClassName(firmware.status)}" data-id="${firmware.id}">
                 <div class="firmware-header">
                     <div class="firmware-info">
                         <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
-                        <div class="version-status ${firmware.status || ''}">
+                        <div class="version-status ${this.getStatusClassName(firmware.status)}">
                             <span class="version-text">${firmware.version_name}</span>
-                            <span class="status-text">${this.getStatusDisplayName(firmware.status)}</span>
+                            <span class="status-text">${firmware.status}</span>
                         </div>
                     </div>
                 </div>
@@ -850,6 +850,17 @@ class FirmwareManager {
             'rejected': '已驳回'
         };
         return statusMap[status] || status;
+    }
+
+    // 将中文状态转换为英文CSS类名
+    getStatusClassName(status) {
+        const classMap = {
+            '待委派': 'pending',
+            '待发布': 'assigned',
+            '已发布': 'released',
+            '已驳回': 'rejected'
+        };
+        return classMap[status] || status;
     }
 }
 
