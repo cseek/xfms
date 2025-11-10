@@ -73,6 +73,7 @@
     border-collapse: collapse;
     background: #fff;
     font-size: 14px;
+    table-layout: fixed;
 }
 
 .permission-table thead {
@@ -86,11 +87,13 @@
     font-weight: 600;
     font-size: 14px;
     letter-spacing: 0.3px;
+    width: 20%;
 }
 
 .permission-table thead th:first-child {
     text-align: left;
     border-top-left-radius: 8px;
+    width: 20%;
 }
 
 .permission-table thead th:last-child {
@@ -114,10 +117,12 @@
     padding: 7px 16px;
     text-align: center;
     color: #475569;
+    width: 20%;
 }
 
 .permission-table tbody td:first-child {
     text-align: left;
+    width: 20%;
     font-weight: 500;
     color: #1e293b;
 }
