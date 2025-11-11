@@ -96,7 +96,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">添加模块</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -149,7 +149,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">添加项目</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -211,7 +211,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">添加用户</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -239,7 +239,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">保存修改</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -278,7 +278,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">保存修改</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -300,7 +300,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">上传测试报告</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -346,7 +346,7 @@ class ModalManager {
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                        <button type="submit" class="btn-submit">确认委派</button>
+                        <button type="submit" class="btn-submit">确认</button>
                     </div>
                 </form>
             `;
@@ -409,7 +409,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">确认发布</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
@@ -488,7 +488,7 @@ class ModalManager {
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                    <button type="submit" class="btn-submit">确认驳回</button>
+                    <button type="submit" class="btn-submit">确认</button>
                 </div>
             </form>
         `;
