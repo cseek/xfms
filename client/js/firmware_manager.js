@@ -600,43 +600,34 @@ class FirmwareManager {
             return;
         }
 
-        // 直接渲染服务端返回的数据,使用固件卡片样式
+        // 使用原来的卡片样式
         list.innerHTML = this.modules.map(module => `
-            <div class="firmware-card module-card">
-                <div class="firmware-header">
-                    <div class="firmware-info">
-                        <div class="firmware-title">${this.escapeHtml(module.name)}</div>
-                        <div class="version-status">
-                            <span class="version-text">模块</span>
-                        </div>
+            <div class="management-item">
+                <div class="management-item-header">
+                    <div class="management-item-icon">📦</div>
+                    <div class="management-item-info">
+                        <h3 class="management-item-title">${this.escapeHtml(module.name)}</h3>
+                        ${module.description ? `<p class="management-item-description">${this.escapeHtml(module.description)}</p>` : '<p class="management-item-description" style="color: #cbd5e1;">暂无描述</p>'}
                     </div>
                 </div>
-                <div class="firmware-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-user"></i>
-                        <span>创建人: ${module.creator_name || '未知'}</span>
+                <div class="management-item-meta">
+                    <div class="management-item-meta-row">
+                        <span class="icon">👤</span>
+                        <span>创建人: <span class="management-item-creator">${module.creator_name || '未知'}</span></span>
                     </div>
-                    <div class="meta-item">
-                        <i class="fas fa-align-left"></i>
-                        <span class="meta-truncated">${module.description ? this.escapeHtml(module.description) : '暂无描述'}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>创建时间: ${Utils.formatDate(module.created_at)}</span>
+                    <div class="management-item-meta-row">
+                        <span class="icon">🕒</span>
+                        <span>${Utils.formatDate(module.created_at)}</span>
                     </div>
                 </div>
-                <div class="firmware-actions">
-                    <button class="action-btn edit-btn" data-id="${module.id}">
-                        <i class="fas fa-edit"></i> 编辑
-                    </button>
-                    <button class="action-btn delete-btn" data-id="${module.id}">
-                        <i class="fas fa-trash"></i> 删除
-                    </button>
+                <div class="item-actions">
+                    <button class="edit-btn" data-id="${module.id}">编辑</button>
+                    <button class="delete-btn" data-id="${module.id}">删除</button>
                 </div>
             </div>
         `).join('');
 
-        // 构建分页控件(与固件卡片一致)
+        // 构建分页控件
         let paginationHtml = '<div class="pagination">';
         paginationHtml += `<button class="page-prev" ${this.modulesPage === 1 ? 'disabled' : ''}>上一页</button>`;
         paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">第 ${this.modulesPage}/${this.modulesTotalPages} 页 (共 ${this.modulesTotal} 条)</span>`;
