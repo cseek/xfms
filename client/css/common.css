@@ -724,34 +724,37 @@ body {
 }
 
 .details-btn {
-    background: #e0e7ff;
-    color: #4f46e5;
+    background-color: #f3f4f6; /* 浅灰色背景 */
+    color: #4b5563;      /* 深灰色文字 */
 }
 
 .details-btn:hover {
-    background: #c7d2fe;
+    background-color: #e5e7eb; /* 悬停时加深背景 */
+    color: #1f2937;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .edit-btn {
-    background: #fef3c7;
-    color: #d97706;
+    background-color: #f3f4f6;
+    color: #4b5563;
 }
 
 .edit-btn:hover {
-    background: #fde68a;
+    background-color: #e5e7eb;
+    color: #1f2937;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .delete-btn {
-    background: #fee2e2;
-    color: #dc2626;
+    background-color: #f3f4f6;
+    color: #ef4444; /* 默认状态下仅文字为红色，以作警示 */
 }
 
 .delete-btn:hover {
-    background: #fecaca;
+    background-color: #ef4444; /* 悬停时变为红色背景，白色文字，强化危险操作的警示 */
+    color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
