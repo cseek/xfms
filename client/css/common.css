@@ -566,6 +566,19 @@ body {
     align-items: start;
 }
 
+/* 模块列表使用固件卡片样式 - 调整grid布局 */
+#modules .management-list {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+    align-content: start;
+}
+
+/* 模块卡片使用主色调作为左边框 */
+.module-card {
+    border-left-color: var(--primary-color) !important;
+}
+
 .management-item {
     background: #ffffff;
     padding: 24px;

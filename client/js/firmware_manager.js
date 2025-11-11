@@ -30,14 +30,16 @@ class FirmwareManager {
         this.moduleSearchQuery = '';
         this.projectSearchQuery = '';
         // pagination state
-        this.pageSize = 6; // 服务端分页大小
-        this.modulesPageSize = 4;
-        this.projectsPageSize = 4;
-        this.currentPage = 1; // 当前页码
-        this.totalPages = 1; // 总页数
-        this.total = 0; // 总记录数
-        this.modulesPage = 1;
-        this.projectsPage = 1;
+        this.pageSize = 6; // 固件服务端分页大小
+        this.modulesPageSize = 6; // 模块服务端分页大小
+        this.projectsPageSize = 4; // 项目客户端分页大小
+        this.currentPage = 1; // 固件当前页码
+        this.totalPages = 1; // 固件总页数
+        this.total = 0; // 固件总记录数
+        this.modulesPage = 1; // 模块当前页码
+        this.modulesTotalPages = 1; // 模块总页数
+        this.modulesTotal = 0; // 模块总记录数
+        this.projectsPage = 1; // 项目当前页码
         this.currentFilters = {}; // 保存当前的过滤条件
         this.currentPageId = null; // 当前页面ID (upload-list, test-list, release-list)
     }
@@ -518,13 +520,23 @@ class FirmwareManager {
         }
     }
 
-    async loadModules() {
+    async loadModules(page = 1) {
         try {
-            const response = await fetch('/api/modules');
+            const params = new URLSearchParams({
+                page: page,
+                pageSize: this.modulesPageSize,
+                search: this.moduleSearchQuery
+            });
+            
+            const response = await fetch(`/api/modules?${params}`);
             if (!response.ok) throw new Error('Failed to load modules');
             
-            this.modules = await response.json();
-            this.modulesPage = 1;
+            const result = await response.json();
+            this.modules = result.data || [];
+            this.modulesPage = result.pagination?.page || 1;
+            this.modulesTotalPages = result.pagination?.totalPages || 1;
+            this.modulesTotal = result.pagination?.total || 0;
+            
             this.renderModules();
         } catch (error) {
             console.error('Error loading modules:', error);
@@ -548,21 +560,7 @@ class FirmwareManager {
 
     setModuleSearchQuery(query) {
         this.moduleSearchQuery = query ?? '';
-        this.modulesPage = 1;
-        this.renderModules();
-    }
-
-    getFilteredModules() {
-        const keyword = this.moduleSearchQuery.trim().toLowerCase();
-        if (!keyword) {
-            return this.modules.slice();
-        }
-
-        return this.modules.filter(module => {
-            const name = (module.name || '').toLowerCase();
-            const description = (module.description || '').toLowerCase();
-            return name.includes(keyword) || description.includes(keyword);
-        });
+        this.loadModules(1); // 重新从服务端加载第一页
     }
 
     setProjectSearchQuery(query) {
@@ -594,9 +592,7 @@ class FirmwareManager {
             searchInput.value = this.moduleSearchQuery;
         }
 
-        const filteredModules = this.getFilteredModules();
-
-        if (filteredModules.length === 0) {
+        if (this.modules.length === 0) {
             const message = this.moduleSearchQuery.trim() ? '未找到匹配的模块' : '暂无模块数据';
             list.innerHTML = `<div class="no-data">${message}</div>`;
             const oldPag = pageContainer?.querySelector('.pagination');
@@ -604,69 +600,76 @@ class FirmwareManager {
             return;
         }
 
-        // pagination for modules
-        const total = filteredModules.length;
-    const pageSize = this.modulesPageSize;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-        if (this.modulesPage > totalPages) this.modulesPage = totalPages;
-    const start = (this.modulesPage - 1) * pageSize;
-    const end = start + pageSize;
-        const pageItems = filteredModules.slice(start, end);
-
-        list.innerHTML = pageItems.map(module => `
-            <div class="management-item">
-                <div class="management-item-header">
-                    <div class="management-item-icon">📦</div>
-                    <div class="management-item-info">
-                        <h3 class="management-item-title">${this.escapeHtml(module.name)}</h3>
-                        ${module.description ? `<p class="management-item-description">${this.escapeHtml(module.description)}</p>` : '<p class="management-item-description" style="color: #cbd5e1;">暂无描述</p>'}
+        // 直接渲染服务端返回的数据,使用固件卡片样式
+        list.innerHTML = this.modules.map(module => `
+            <div class="firmware-card module-card">
+                <div class="firmware-header">
+                    <div class="firmware-info">
+                        <div class="firmware-title">${this.escapeHtml(module.name)}</div>
+                        <div class="version-status">
+                            <span class="version-text">模块</span>
+                        </div>
                     </div>
                 </div>
-                <div class="management-item-meta">
-                    <div class="management-item-meta-row">
-                        <span class="icon">👤</span>
-                        <span>创建人: <span class="management-item-creator">${module.creator_name || '未知'}</span></span>
+                <div class="firmware-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>创建人: ${module.creator_name || '未知'}</span>
                     </div>
-                    <div class="management-item-meta-row">
-                        <span class="icon">🕒</span>
-                        <span>${Utils.formatDate(module.created_at)}</span>
+                    <div class="meta-item">
+                        <i class="fas fa-align-left"></i>
+                        <span class="meta-truncated">${module.description ? this.escapeHtml(module.description) : '暂无描述'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>创建时间: ${Utils.formatDate(module.created_at)}</span>
                     </div>
                 </div>
-                <div class="item-actions">
-                    <button class="edit-btn" data-id="${module.id}">编辑</button>
-                    <button class="delete-btn" data-id="${module.id}">删除</button>
+                <div class="firmware-actions">
+                    <button class="action-btn edit-btn" data-id="${module.id}">
+                        <i class="fas fa-edit"></i> 编辑
+                    </button>
+                    <button class="action-btn delete-btn" data-id="${module.id}">
+                        <i class="fas fa-trash"></i> 删除
+                    </button>
                 </div>
             </div>
         `).join('');
 
-        // pagination controls (compact current/total) — insert into modules tab container
+        // 构建分页控件(与固件卡片一致)
         let paginationHtml = '<div class="pagination">';
-        paginationHtml += `<button class="modules-prev" data-page="${Math.max(1, this.modulesPage - 1)}" ${this.modulesPage===1? 'disabled':''}>上一页</button>`;
-        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.modulesPage}/${totalPages}</span>`;
-        paginationHtml += `<button class="modules-next" data-page="${Math.min(totalPages, this.modulesPage + 1)}" ${this.modulesPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += `<button class="page-prev" ${this.modulesPage === 1 ? 'disabled' : ''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">第 ${this.modulesPage}/${this.modulesTotalPages} 页 (共 ${this.modulesTotal} 条)</span>`;
+        paginationHtml += `<button class="page-next" ${this.modulesPage === this.modulesTotalPages ? 'disabled' : ''}>下一页</button>`;
         paginationHtml += '</div>';
 
-        // insert pagination into the modules tab (not the whole page bottom)
-    const oldPag = pageContainer.querySelector('.pagination');
+        // 插入分页控件
+        const oldPag = pageContainer.querySelector('.pagination');
         if (oldPag) oldPag.remove();
         pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
         this.attachManagementEventListeners('modules');
-        // pagination listeners (attach inside the modules tab)
-        const pagModules = pageContainer.querySelector('.pagination');
-        if (pagModules) {
-            const prev = pagModules.querySelector('.modules-prev');
-            const next = pagModules.querySelector('.modules-next');
-            if (prev) prev.addEventListener('click', () => {
-                const p = parseInt(prev.getAttribute('data-page')) || 1;
-                this.modulesPage = p;
-                this.renderModules();
-            });
-            if (next) next.addEventListener('click', () => {
-                const p = parseInt(next.getAttribute('data-page')) || totalPages;
-                this.modulesPage = p;
-                this.renderModules();
-            });
+        
+        // 添加分页按钮事件监听
+        const pag = pageContainer.querySelector('.pagination');
+        if (pag) {
+            const prevBtn = pag.querySelector('.page-prev');
+            const nextBtn = pag.querySelector('.page-next');
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (this.modulesPage > 1) {
+                        this.loadModules(this.modulesPage - 1);
+                    }
+                });
+            }
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (this.modulesPage < this.modulesTotalPages) {
+                        this.loadModules(this.modulesPage + 1);
+                    }
+                });
+            }
         }
     }
 
@@ -800,10 +803,17 @@ class FirmwareManager {
 
     async loadModulesForSelect() {
         try {
-            const response = await fetch('/api/modules');
+            // 获取所有模块用于下拉框(不分页,pageSize设置为一个大值)
+            const params = new URLSearchParams({
+                page: 1,
+                pageSize: 1000,
+                search: ''
+            });
+            const response = await fetch(`/api/modules?${params}`);
             if (!response.ok) throw new Error('Failed to load modules');
             
-            const modules = await response.json();
+            const result = await response.json();
+            const modules = result.data || [];
             
             // 更新上传表单的下拉框
             const moduleSelect = document.getElementById('moduleSelect');
