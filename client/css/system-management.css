@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 08:55:32
+ * @LastEditTime: 2025-11-12 14:30:00
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -24,146 +24,134 @@
  
 .table-container {
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     overflow: hidden;
-    margin: 20px 0;
+    margin: 24px 0;
+    border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .users-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .users-table thead {
-    background: linear-gradient(135deg, #dcdcdc 0%, #dcdcdc 100%);
+    background-color: #f9fafb;
 }
 
 .users-table thead th {
-    color: #000;
+    color: #6b7280;
     font-weight: 600;
-    padding: 16px 12px;
+    padding: 16px 24px;
     text-align: left;
-    font-size: 14px;
-    border-bottom: none;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .users-table tbody tr {
-    transition: all 0.2s ease;
-    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.users-table tbody tr:last-child {
+    border-bottom: none;
 }
 
 .users-table tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: #f9fafb;
 }
 
 .users-table tbody td {
-    padding: 16px 12px;
-    color: #333;
+    padding: 16px 24px;
+    color: #374151;
     vertical-align: middle;
 }
 
-.users-table tbody tr:nth-child(even) {
-    background-color: #fafafa;
-}
-
-.users-table tbody tr:nth-child(even):hover {
-    background-color: #f1f3f4;
-}
-
-.users-table td:first-child {
-    font-weight: 500;
-    color: #2c3e50;
-}
-
 .role-badge {
-    padding: 6px 12px;
+    padding: 5px 12px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
-    text-transform: capitalize;
     display: inline-block;
-    min-width: 70px;
     text-align: center;
+    border: 1px solid transparent;
 }
 
-.role-badge.admin {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-    color: #fff;
+.role-admin {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border-color: #fecaca;
 }
 
-.role-badge.user {
-    background: linear-gradient(135deg, #48cae4, #0096c7);
-    color: #fff;
+.role-user {
+    background-color: #dbeafe;
+    color: #3b82f6;
+    border-color: #bfdbfe;
 }
 
-.role-badge.tester {
-    background: linear-gradient(135deg, #51cf66, #40c057);
-    color: #fff;
+.role-tester {
+    background-color: #d1fae5;
+    color: #10b981;
+    border-color: #a7f3d0;
 }
 
-.role-badge.developer {
-    background: linear-gradient(135deg, #ffd43b, #fcc419);
-    color: #fff;
+.role-developer {
+    background-color: #fef3c7;
+    color: #f59e0b;
+    border-color: #fde68a;
 }
 
 .user-actions {
     display: flex;
     gap: 8px;
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .user-actions .action-btn {
-    padding: 6px 12px;
+    background: none;
     border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
+    color: #9ca3af;
     cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s;
 }
 
-.user-actions .action-btn.edit {
-    background: #e3f2fd;
-    color: #1976d2;
-}
-
-.user-actions .action-btn.edit:hover {
-    background: #bbdefb;
-    transform: translateY(-1px);
-}
-
-.user-actions .action-btn.delete {
-    background: #ffebee;
-    color: #d32f2f;
+.user-actions .action-btn:hover {
+    color: #374151;
+    background-color: #f3f4f6;
 }
 
 .user-actions .action-btn.delete:hover {
-    background: #ffcdd2;
-    transform: translateY(-1px);
+    color: #fff;
+    background-color: #ef4444;
 }
 
 .user-actions .action-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none !important;
+    background-color: transparent !important;
+    color: #d1d5db !important;
 }
 
 .users-table tbody:empty::after {
     content: "暂无用户数据";
     display: block;
     text-align: center;
-    padding: 40px;
-    color: #666;
-    font-style: italic;
+    padding: 60px;
+    color: #9ca3af;
+    font-size: 16px;
 }
 
 .content-area {
@@ -198,21 +186,45 @@
     margin: 0 auto;
     margin-top: auto;
     width: 100%;
-    padding: 12px 0;
-    background: rgba(245, 246, 250, 0.96);
-    backdrop-filter: blur(6px);
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
     position: sticky;
     bottom: 0;
     left: 0;
     right: 0;
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -12px 32px -16px rgba(15, 23, 42, 0.35);
+    border-top: 1px solid #e5e7eb;
     z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #users .pagination button {
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid #d1d5db;
     background: #fff;
+    color: #374151;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+#users .pagination button:hover:not(:disabled) {
+    background-color: #f9fafb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#users .pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#users .page-indicator {
+    margin: 0 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
 }
 
 @media (max-width: 768px) {

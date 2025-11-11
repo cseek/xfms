@@ -112,7 +112,7 @@ class UserManager {
                         ${pageItems.map(user => `
                             <tr>
                                 <td>${user.username}</td>
-                                <td><span class="role-badge ${user.role}">${this.getRoleDisplayName(user.role)}</span></td>
+                                <td><span class="role-badge role-${user.role}">${this.getRoleDisplayName(user.role)}</span></td>
                                 <td>${user.email || '-'}</td>
                                 <td>${Utils.formatDate(user.created_at)}</td>
                                 <td>
