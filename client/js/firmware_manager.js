@@ -221,7 +221,8 @@ class FirmwareManager {
         // 下载按钮 - 所有页面都有
         buttons.push(`
             <button class="action-menu-item" data-action="download" data-id="${firmware.id}">
-                <i class="fas fa-download"></i> 下载固件
+                <i class="fas fa-download"></i>
+                <span class="action-menu-item-label">下载固件</span>
             </button>
         `);
 
@@ -232,7 +233,8 @@ class FirmwareManager {
             if (firmware.status === '待委派') {
                 buttons.push(`
                     <button class="action-menu-item" data-action="assign" data-id="${firmware.id}">
-                        <i class="fas fa-user-check"></i> 委派固件
+                        <i class="fas fa-user-check"></i>
+                        <span class="action-menu-item-label">委派固件</span>
                     </button>
                 `);
             }
@@ -241,7 +243,8 @@ class FirmwareManager {
             if (userRole === 'admin' || firmware.uploaded_by === dashboard.currentUser.id) {
                 buttons.push(`
                     <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
-                        <i class="fas fa-trash"></i> 删除固件
+                        <i class="fas fa-trash"></i>
+                        <span class="action-menu-item-label">删除固件</span>
                     </button>
                 `);
             }
@@ -255,19 +258,22 @@ class FirmwareManager {
             
             buttons.push(`
                 <button class="action-menu-item release-item ${disabledClass}" data-action="release" data-id="${firmware.id}" ${disabledAttr} ${title}>
-                    <i class="fas fa-check"></i> 发布固件
+                    <i class="fas fa-check"></i>
+                    <span class="action-menu-item-label">发布固件</span>
                 </button>
             `);
             buttons.push(`
                 <button class="action-menu-item reject-item ${disabledClass}" data-action="reject" data-id="${firmware.id}" ${disabledAttr} ${title}>
-                    <i class="fas fa-ban"></i> 驳回固件
+                    <i class="fas fa-ban"></i>
+                    <span class="action-menu-item-label">驳回固件</span>
                 </button>
             `);
         } else if (pageId === 'release-list') {
             // 发布列表: 下载固件、下载测试报告
             buttons.push(`
                 <button class="action-menu-item" data-action="download-test-report" data-id="${firmware.id}">
-                    <i class="fas fa-file-download"></i> 下载报告
+                    <i class="fas fa-file-download"></i>
+                    <span class="action-menu-item-label">下载报告</span>
                 </button>
             `);
         } else {
@@ -275,14 +281,16 @@ class FirmwareManager {
             if (userRole === 'admin') {
                 buttons.push(`
                     <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
-                        <i class="fas fa-trash"></i> 删除固件
+                        <i class="fas fa-trash"></i>
+                        <span class="action-menu-item-label">删除固件</span>
                     </button>
                 `);
             } else if (userRole === 'developer' && firmware.uploaded_by === dashboard.currentUser.id) {
                 if (firmware.status !== '已发布') {
                     buttons.push(`
                         <button class="action-menu-item delete-item" data-action="delete" data-id="${firmware.id}">
-                            <i class="fas fa-trash"></i> 删除固件
+                            <i class="fas fa-trash"></i>
+                            <span class="action-menu-item-label">删除固件</span>
                         </button>
                     `);
                 }

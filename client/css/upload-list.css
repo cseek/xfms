@@ -317,8 +317,9 @@
 }
 
 .action-menu-item {
+    position: relative;
     width: 100%;
-    padding: 10px 15px;
+    padding: 10px 40px 10px 36px;
     border: none;
     background: transparent;
     color: #333;
@@ -327,8 +328,9 @@
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid #f0f0f0;
 }
 
@@ -341,9 +343,18 @@
 }
 
 .action-menu-item i {
+    position: absolute;
+    left: 16px;
     width: 16px;
     text-align: center;
     color: var(--primary-color);
+}
+
+.action-menu-item-label {
+    flex: 0 1 auto;
+    width: 100%;
+    display: block;
+    text-align: center;
 }
 
 .action-menu-item.release-item i {
