@@ -696,6 +696,7 @@ body {
     margin-top: 4px;
 }
 
+.details-btn,
 .edit-btn,
 .delete-btn {
     padding: 8px 16px;
@@ -712,12 +713,27 @@ body {
     gap: 6px;
 }
 
+.details-btn::before {
+    content: '📋';
+}
+
 .edit-btn::before {
     content: '✏️';
 }
 
 .delete-btn::before {
     content: '🗑️';
+}
+
+.details-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+}
+
+.details-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .edit-btn {
@@ -904,6 +920,38 @@ body {
     background: #e9ecef;
     border-color: #adb5bd;
     color: #212529;
+}
+
+/* 详情对话框样式 */
+.detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: #1e293b;
+    padding: 10px 14px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 @media (max-width: 768px) {

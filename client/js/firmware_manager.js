@@ -621,6 +621,7 @@ class FirmwareManager {
                     </div>
                 </div>
                 <div class="item-actions">
+                    <button class="details-btn" data-id="${module.id}">详情</button>
                     <button class="edit-btn" data-id="${module.id}">编辑</button>
                     <button class="delete-btn" data-id="${module.id}">删除</button>
                 </div>
@@ -713,6 +714,7 @@ class FirmwareManager {
                     </div>
                 </div>
                 <div class="item-actions">
+                    <button class="details-btn" data-id="${project.id}">详情</button>
                     <button class="edit-btn" data-id="${project.id}">编辑</button>
                     <button class="delete-btn" data-id="${project.id}">删除</button>
                 </div>
@@ -750,6 +752,14 @@ class FirmwareManager {
     }
 
     attachManagementEventListeners(type) {
+        document.querySelectorAll(`#${type}List .details-btn`).forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const item = this[type].find(item => item.id == id);
+                this.showManagementItemDetails(type, item);
+            });
+        });
+
         document.querySelectorAll(`#${type}List .edit-btn`).forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.target.getAttribute('data-id');
@@ -766,6 +776,64 @@ class FirmwareManager {
                 }
             });
         });
+    }
+
+    showManagementItemDetails(type, item) {
+        const modal = document.getElementById('modal');
+        const modalBody = document.getElementById('modalBody');
+        const itemType = type === 'modules' ? '模块' : '项目';
+        
+        modalBody.innerHTML = `
+            <div class="modal-header">
+                <h2 class="modal-title">${itemType}详情</h2>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <div class="detail-item">
+                        <label class="detail-label">名称:</label>
+                        <div class="detail-value">${this.escapeHtml(item.name)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">描述:</label>
+                        <div class="detail-value">${item.description ? this.escapeHtml(item.description) : '<span style="color: #999;">暂无描述</span>'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">创建人:</label>
+                        <div class="detail-value">${item.creator_name || '未知'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label class="detail-label">创建时间:</label>
+                        <div class="detail-value">${Utils.formatDate(item.created_at)}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeDetailsBtn">确认</button>
+            </div>
+        `;
+        
+        modal.classList.add('active');
+        
+        // 关闭按钮事件
+        document.getElementById('closeDetailsBtn').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        // ESC键关闭
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.classList.remove('active');
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+        
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        }, { once: true });
     }
 
     async deleteManagementItem(type, id) {
