@@ -77,13 +77,19 @@
                                         </div>
                                         <div class="form-group form-group--file">
                                             <label for="firmwareFile">📄 固件文件 *</label>
-                                            <div class="file-picker" data-role="file-picker">
+                                            <div class="file-upload-wrapper">
                                                 <input type="file" id="firmwareFile" name="firmware"
                                                     accept=".bin,.hex,.img,.zip,.tar.gz,.pkg,.deb,.app,.exe,.msi,.dmg,.rpm,.xpk,.apk"
                                                     required>
-                                                <label class="file-picker__control" for="firmwareFile" tabindex="0">
-                                                    <span class="file-picker__button">选择固件文件</span>
-                                                    <span class="file-picker__name" data-role="file-name">尚未选择文件</span>
+                                                <label for="firmwareFile" class="file-upload-label">
+                                                    <div class="file-upload-content">
+                                                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                                        <p class="file-upload-text">
+                                                            <span class="file-upload-cta">点击此处上传</span> 或拖拽文件到这里
+                                                        </p>
+                                                        <p class="file-upload-hint">支持 .bin, .hex, .zip 等多种固件格式</p>
+                                                        <p class="file-upload-filename" id="fileName"></p>
+                                                    </div>
                                                 </label>
                                             </div>
                                         </div>

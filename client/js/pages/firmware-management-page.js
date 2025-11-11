@@ -80,35 +80,36 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const fileInput = document.getElementById('firmwareFile');
-            const filePicker = document.querySelector('[data-role="file-picker"]');
-            const fileNameEl = filePicker?.querySelector('[data-role="file-name"]');
-            const fileControl = filePicker?.querySelector('.file-picker__control');
-            const defaultFileText = '尚未选择文件';
+            const fileLabel = document.querySelector('.file-upload-label');
+            const fileNameEl = document.getElementById('fileName');
 
-            const updateFileName = () => {
-                if (!fileNameEl) return;
-                const files = fileInput?.files;
-                fileNameEl.textContent = files && files.length ? files[0].name : defaultFileText;
-            };
-
-            fileInput?.addEventListener('change', updateFileName);
-            uploadForm?.addEventListener('reset', () => {
-                fileNameEl && (fileNameEl.textContent = defaultFileText);
-            });
-
-            fileControl?.addEventListener('click', (event) => {
-                event.preventDefault();
-                fileInput?.click();
-            });
-
-            fileControl?.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    fileInput?.click();
+            fileInput?.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    fileNameEl.textContent = `已选择文件: ${fileInput.files[0].name}`;
                 }
             });
 
-            updateFileName();
+            fileLabel?.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileLabel.classList.add('dragover');
+            });
+
+            fileLabel?.addEventListener('dragleave', () => {
+                fileLabel.classList.remove('dragover');
+            });
+
+            fileLabel?.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileLabel.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileNameEl.textContent = `已选择文件: ${e.dataTransfer.files[0].name}`;
+                }
+            });
+
+            uploadForm?.addEventListener('reset', () => {
+                fileNameEl.textContent = '';
+            });
 
             document.getElementById('addModuleBtn')?.addEventListener('click', () => {
                 modalManager.showAddModuleModal();
