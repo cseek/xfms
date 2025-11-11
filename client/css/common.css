@@ -796,13 +796,13 @@ body {
 }
 
 #modalBody {
-    padding: 24px 28px;
+    padding: 16px 20px;
     max-height: 72vh;
     overflow: auto;
 }
 
 .modal-form {
-    padding: 20px;
+    padding: 0;
 }
 
 .modal-title {
