@@ -724,36 +724,36 @@ body {
 }
 
 .details-btn {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #fff;
+    background: #e0e7ff;
+    color: #4f46e5;
 }
 
 .details-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: #c7d2fe;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .edit-btn {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    color: #fff;
+    background: #fef3c7;
+    color: #d97706;
 }
 
 .edit-btn:hover {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+    background: #fde68a;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
 }
 
 .delete-btn {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #fff;
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 .delete-btn:hover {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    background: #fecaca;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
 /* Modal */
