@@ -880,6 +880,32 @@ body {
     cursor: not-allowed;
 }
 
+/* 固件详情关闭按钮 */
+.modal-details-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.btn-close-details {
+    padding: 10px 32px;
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-close-details:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #212529;
+}
+
 @media (max-width: 768px) {
     .sidebar {
         width: var(--sidebar-collapsed-width);

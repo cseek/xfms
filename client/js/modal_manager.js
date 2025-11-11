@@ -786,6 +786,11 @@ class ModalManager {
                     </div>
                     <div class="text-content">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<span class="empty-text">暂无描述</span>'}</div>
                 </div>
+                
+                <!-- 关闭按钮 -->
+                <div class="modal-details-footer">
+                    <button type="button" class="btn-close-details" onclick="modalManager.hideModal()">关闭</button>
+                </div>
             </div>
         `;
 
