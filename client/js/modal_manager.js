@@ -32,10 +32,12 @@ class ModalManager {
     }
 
     init() {
-        // 关闭模态框事件
-        this.closeBtn.addEventListener('click', () => {
-            this.hideModal();
-        });
+        // 关闭模态框事件(如果关闭按钮存在)
+        if (this.closeBtn) {
+            this.closeBtn.addEventListener('click', () => {
+                this.hideModal();
+            });
+        }
 
         // 点击模态框外部关闭
         this.modal.addEventListener('click', (e) => {
