@@ -166,7 +166,7 @@ class FirmwareManager {
                         </div>
                     </div>
                     <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
-                        <i class="fas fa-info-circle"></i> 详情
+                        详情
                     </button>
                 </div>
             </div>

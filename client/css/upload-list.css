@@ -265,7 +265,7 @@
 /* 操作菜单样式 */
 .action-menu-wrapper {
     position: relative;
-    flex: 1;
+    flex: 3 1 0;
 }
 
 .action-menu-btn {
@@ -399,6 +399,20 @@
     color: var(--primary-color);
     border: 1px solid rgba(52, 152, 219, 0.3);
     min-width: 80px;
+}
+
+.firmware-actions .action-btn {
+    flex-shrink: 1;
+}
+
+.firmware-actions .details-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+}
+
+.firmware-actions .details-btn::before {
+    content: none;
 }
 
 .details-btn:hover {
