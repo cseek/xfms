@@ -788,61 +788,43 @@ class FirmwareManager {
     }
 
     showManagementItemDetails(type, item) {
-        const modal = document.getElementById('modal');
-        const modalBody = document.getElementById('modalBody');
         const itemType = type === 'modules' ? '模块' : '项目';
-        
-        modalBody.innerHTML = `
-            <div class="modal-header">
-                <h2 class="modal-title">${itemType}详情</h2>
-            </div>
-            <div class="modal-body">
-                <div class="detail-section">
-                    <div class="detail-item">
-                        <label class="detail-label">名称:</label>
-                        <div class="detail-value">${this.escapeHtml(item.name)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <label class="detail-label">描述:</label>
-                        <div class="detail-value">${item.description ? this.escapeHtml(item.description) : '<span style="color: #999;">暂无描述</span>'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <label class="detail-label">创建人:</label>
-                        <div class="detail-value">${item.creator_name || '未知'}</div>
-                    </div>
-                    <div class="detail-item">
-                        <label class="detail-label">创建时间:</label>
-                        <div class="detail-value">${Utils.formatDate(item.created_at)}</div>
-                    </div>
+
+        const content = `
+            <div class="detail-section">
+                <div class="detail-item">
+                    <label class="detail-label">名称:</label>
+                    <div class="detail-value">${this.escapeHtml(item.name)}</div>
+                </div>
+                <div class="detail-item">
+                    <label class="detail-label">描述:</label>
+                    <div class="detail-value">${item.description ? this.escapeHtml(item.description) : '<span style="color: #999;">暂无描述</span>'}</div>
+                </div>
+                <div class="detail-item">
+                    <label class="detail-label">创建人:</label>
+                    <div class="detail-value">${item.creator_name || '未知'}</div>
+                </div>
+                <div class="detail-item">
+                    <label class="detail-label">创建时间:</label>
+                    <div class="detail-value">${Utils.formatDate(item.created_at)}</div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="closeDetailsBtn">确认</button>
+            <div class="form-actions" style="justify-content:flex-end; margin-top:18px;">
+                <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
+                <button type="button" class="btn-submit" id="detailsConfirmBtn">确认</button>
             </div>
         `;
-        
-        modal.classList.add('active');
-        
-        // 关闭按钮事件
-        document.getElementById('closeDetailsBtn').addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
-        
-        // ESC键关闭
-        const escHandler = (e) => {
-            if (e.key === 'Escape') {
-                modal.classList.remove('active');
-                document.removeEventListener('keydown', escHandler);
-            }
-        };
-        document.addEventListener('keydown', escHandler);
-        
-        // 点击背景关闭
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        }, { once: true });
+
+        // 使用 modalManager 统一显示模态，传入标题
+        modalManager.showModal(`${itemType}详情`, content);
+
+        // 绑定确认按钮（关闭模态）
+        const confirmBtn = document.getElementById('detailsConfirmBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                modalManager.hideModal();
+            });
+        }
     }
 
     async deleteManagementItem(type, id) {
