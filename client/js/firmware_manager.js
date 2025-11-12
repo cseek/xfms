@@ -31,8 +31,8 @@ class FirmwareManager {
         this.projectSearchQuery = '';
         // pagination state
         this.pageSize = 6; // 固件服务端分页大小
-        this.modulesPageSize = 6; // 模块服务端分页大小
-        this.projectsPageSize = 4; // 项目客户端分页大小
+    this.modulesPageSize = 6; // 模块服务端分页大小
+    this.projectsPageSize = this.modulesPageSize; // 项目客户端分页大小，改为与模块一致
         this.currentPage = 1; // 固件当前页码
         this.totalPages = 1; // 固件总页数
         this.total = 0; // 固件总记录数
