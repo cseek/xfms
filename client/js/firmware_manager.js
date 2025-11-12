@@ -472,7 +472,8 @@ class FirmwareManager {
             if (!response.ok) throw new Error('Status update failed');
 
             Utils.showMessage('状态更新成功', 'success');
-            await this.loadFirmwares();
+            // 保持当前过滤条件和页码，避免在特定页面（如上传列表）丢失状态过滤
+            await this.loadFirmwares(this.currentFilters, this.currentPage);
         } catch (error) {
             console.error('Status update error:', error);
             Utils.showMessage('状态更新失败', 'error');
@@ -488,7 +489,8 @@ class FirmwareManager {
             if (!response.ok) throw new Error('Delete failed');
 
             Utils.showMessage('删除成功', 'success');
-            await this.loadFirmwares();
+            // 删除后保持当前过滤条件和页码，避免默认加载所有状态的固件
+            await this.loadFirmwares(this.currentFilters, this.currentPage);
         } catch (error) {
             console.error('Delete error:', error);
             Utils.showMessage('删除失败', 'error');
@@ -877,11 +879,15 @@ class FirmwareManager {
 
     async loadProjectsForSelect() {
         try {
-            const response = await fetch('/api/projects');
+            // 请求所有项目用于下拉（请求足够大的 pageSize）
+            const params = new URLSearchParams({ page: 1, pageSize: 1000, search: '' });
+            const response = await fetch(`/api/projects?${params}`);
             if (!response.ok) throw new Error('Failed to load projects');
-            
-            const projects = await response.json();
-            
+
+            const result = await response.json();
+            // 支持返回数组或带 data 的分页对象
+            const projects = Array.isArray(result) ? result : (result.data || []);
+
             // 更新上传表单的下拉框
             const projectSelect = document.getElementById('projectSelect');
             if (projectSelect) {
