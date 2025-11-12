@@ -809,22 +809,10 @@ class FirmwareManager {
                     <div class="detail-value">${Utils.formatDate(item.created_at)}</div>
                 </div>
             </div>
-            <div class="form-actions" style="justify-content:flex-end; margin-top:18px;">
-                <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
-                <button type="button" class="btn-submit" id="detailsConfirmBtn">确认</button>
-            </div>
         `;
 
-        // 使用 modalManager 统一显示模态，传入标题
+        // 使用 modalManager 统一显示模态（右上角 X 可关闭）
         modalManager.showModal(`${itemType}详情`, content);
-
-        // 绑定确认按钮（关闭模态）
-        const confirmBtn = document.getElementById('detailsConfirmBtn');
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                modalManager.hideModal();
-            });
-        }
     }
 
     async deleteManagementItem(type, id) {
