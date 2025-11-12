@@ -920,10 +920,13 @@
     align-items: center;
 }
 
-#modalBody .btn-submit {
-    padding: 8px 12px;
+/* 在 modal 内的按钮统一样式，保证取消/确认按钮尺寸一致 */
+#modalBody .btn-submit,
+#modalBody .btn-cancel {
+    padding: 10px 20px; /* 与全局按钮保持一致 */
     border-radius: 6px;
-    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 #modalBody .btn-submit:hover {
