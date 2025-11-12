@@ -50,9 +50,14 @@ class ModalManager {
 
     showModal(title, content) {
         // 在 modal-content 内注入右上角关闭 X（使用 .close 样式）
+        // 仅在 title 非空时渲染标题
+        const titleHtml = (title !== null && title !== undefined && String(title).trim() !== '')
+            ? `<h2 class="modal-title">${title}</h2>`
+            : '';
+
         const html = `
             <span class="close" aria-label="关闭">&times;</span>
-            <h2 class="modal-title">${title}</h2>
+            ${titleHtml}
             ${content}
         `;
 
@@ -808,7 +813,8 @@ class ModalManager {
             </div>
         `;
 
-        this.showModal(`固件详情`, content);
+        // 传入空标题以避免显示最顶端的“固件详情”文字
+        this.showModal('', content);
     }
 }
 

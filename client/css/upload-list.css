@@ -512,6 +512,8 @@
     border-radius: 12px;
     overflow: hidden;
     transition: box-shadow 0.2s ease;
+    /* 增大内边距使内容与边框距离更大 */
+    padding: 18px;
 }
 
 .details-card:hover {
@@ -581,7 +583,8 @@
 
 /* 卡片标题 */
 .card-title {
-    padding: 14px 18px;
+    /* 增大标题与卡片边距 */
+    padding: 18px 20px;
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
     font-weight: 600;
@@ -604,7 +607,8 @@
 
 .info-row {
     display: flex;
-    padding: 12px 18px;
+    /* 增加信息行内边距 */
+    padding: 14px 20px;
     border-bottom: 1px solid #f1f3f5;
     transition: background 0.15s ease;
 }
@@ -677,7 +681,7 @@
 
 /* 文本内容 */
 .text-content {
-    padding: 16px 18px;
+    padding: 18px 20px;
     color: #495057;
     line-height: 1.7;
     font-size: 13px;

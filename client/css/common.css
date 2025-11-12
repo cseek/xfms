@@ -813,7 +813,8 @@ body {
 }
 
 #modalBody {
-    padding: 16px 20px;
+    /* 增大内边距，增加内容与模态边框的距离 */
+    padding: 20px 24px;
     /* 将最大高度提高 10%：72vh -> 79.2vh */
     max-height: 79.2vh;
     overflow: auto;
