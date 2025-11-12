@@ -26,20 +26,58 @@ const express = require('express');
 const { adminRequired, canManageProject } = require('../middleware/auth');
 const router = express.Router();
 
-// 获取所有项目
+// 获取所有项目（支持分页和搜索）
 router.get('/', (req, res) => {
-    const sql = `
-        SELECT p.*, u.username as creator_name 
-        FROM projects p 
-        LEFT JOIN users u ON p.created_by = u.id 
-        ORDER BY p.name
-    `;
-    req.db.all(sql, [], (err, rows) => {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search || '';
+    const offset = (page - 1) * pageSize;
+
+    // 构建搜索条件
+    let whereClause = '';
+    let params = [];
+    if (search) {
+        whereClause = 'WHERE p.name LIKE ? OR p.description LIKE ?';
+        const searchPattern = `%${search}%`;
+        params = [searchPattern, searchPattern];
+    }
+
+    const countSql = `SELECT COUNT(*) as total FROM projects p ${whereClause}`;
+    req.db.get(countSql, params, (err, countResult) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: '数据库错误' });
         }
-        res.json(rows);
+
+        const total = countResult.total;
+        const totalPages = Math.ceil(total / pageSize) || 1;
+
+        const sql = `
+            SELECT p.*, u.username as creator_name 
+            FROM projects p 
+            LEFT JOIN users u ON p.created_by = u.id 
+            ${whereClause}
+            ORDER BY p.created_at DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, pageSize, offset];
+        req.db.all(sql, queryParams, (err, rows) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: '数据库错误' });
+            }
+
+            res.json({
+                data: rows,
+                pagination: {
+                    page,
+                    pageSize,
+                    total,
+                    totalPages
+                }
+            });
+        });
     });
 });
 

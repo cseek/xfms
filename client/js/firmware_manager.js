@@ -552,13 +552,23 @@ class FirmwareManager {
         }
     }
 
-    async loadProjects() {
+    async loadProjects(page = 1) {
         try {
-            const response = await fetch('/api/projects');
+            const params = new URLSearchParams({
+                page: page,
+                pageSize: this.projectsPageSize,
+                search: this.projectSearchQuery || ''
+            });
+
+            const response = await fetch(`/api/projects?${params}`);
             if (!response.ok) throw new Error('Failed to load projects');
-            
-            this.projects = await response.json();
-            this.projectsPage = 1;
+
+            const result = await response.json();
+            this.projects = result.data || [];
+            this.projectsPage = result.pagination?.page || 1;
+            this.projectsTotalPages = result.pagination?.totalPages || 1;
+            this.projectsTotal = result.pagination?.total || 0;
+
             this.renderProjects();
         } catch (error) {
             console.error('Error loading projects:', error);
@@ -574,7 +584,7 @@ class FirmwareManager {
     setProjectSearchQuery(query) {
         this.projectSearchQuery = query ?? '';
         this.projectsPage = 1;
-        this.renderProjects();
+        this.loadProjects(1);
     }
 
     getFilteredProjects() {
@@ -683,9 +693,7 @@ class FirmwareManager {
             searchInput.value = this.projectSearchQuery;
         }
 
-        const filteredProjects = this.getFilteredProjects();
-
-        if (filteredProjects.length === 0) {
+        if (!this.projects || this.projects.length === 0) {
             const message = this.projectSearchQuery.trim() ? '未找到匹配的项目' : '暂无项目数据';
             list.innerHTML = `<div class="no-data">${message}</div>`;
             const oldPag = pageContainer?.querySelector('.pagination');
@@ -693,16 +701,8 @@ class FirmwareManager {
             return;
         }
 
-        // pagination for projects
-        const total = filteredProjects.length;
-    const pageSize = this.projectsPageSize;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-        if (this.projectsPage > totalPages) this.projectsPage = totalPages;
-    const start = (this.projectsPage - 1) * pageSize;
-    const end = start + pageSize;
-        const pageItems = filteredProjects.slice(start, end);
-
-        list.innerHTML = pageItems.map(project => `
+        // 服务端已进行分页，直接渲染当前页数据
+        list.innerHTML = this.projects.map(project => `
             <div class="management-item">
                 <div class="management-item-header">
                     <div class="management-item-icon">🎯</div>
@@ -729,14 +729,15 @@ class FirmwareManager {
             </div>
         `).join('');
 
-        // pagination controls (compact current/total) — insert into projects tab container
+        // pagination controls (use service端 pagination 数据)
+        const totalPages = this.projectsTotalPages || 1;
         let paginationHtml = '<div class="pagination">';
-        paginationHtml += `<button class="projects-prev" data-page="${Math.max(1, this.projectsPage - 1)}" ${this.projectsPage===1? 'disabled':''}>上一页</button>`;
-        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">${this.projectsPage}/${totalPages}</span>`;
-        paginationHtml += `<button class="projects-next" data-page="${Math.min(totalPages, this.projectsPage + 1)}" ${this.projectsPage===totalPages? 'disabled':''}>下一页</button>`;
+        paginationHtml += `<button class="projects-prev" ${this.projectsPage===1? 'disabled':''}>上一页</button>`;
+        paginationHtml += `<span class="page-indicator" style="padding:6px 10px; background:rgba(0,0,0,0.06); border-radius:6px;">第 ${this.projectsPage}/${totalPages} 页 (共 ${this.projectsTotal || 0} 条)</span>`;
+        paginationHtml += `<button class="projects-next" ${this.projectsPage===totalPages? 'disabled':''}>下一页</button>`;
         paginationHtml += '</div>';
 
-    const oldPag = pageContainer.querySelector('.pagination');
+        const oldPag = pageContainer.querySelector('.pagination');
         if (oldPag) oldPag.remove();
         pageContainer.insertAdjacentHTML('beforeend', paginationHtml);
 
@@ -747,14 +748,14 @@ class FirmwareManager {
             const prev = pagProjects.querySelector('.projects-prev');
             const next = pagProjects.querySelector('.projects-next');
             if (prev) prev.addEventListener('click', () => {
-                const p = parseInt(prev.getAttribute('data-page')) || 1;
-                this.projectsPage = p;
-                this.renderProjects();
+                if (this.projectsPage > 1) {
+                    this.loadProjects(this.projectsPage - 1);
+                }
             });
             if (next) next.addEventListener('click', () => {
-                const p = parseInt(next.getAttribute('data-page')) || totalPages;
-                this.projectsPage = p;
-                this.renderProjects();
+                if (this.projectsPage < totalPages) {
+                    this.loadProjects(this.projectsPage + 1);
+                }
             });
         }
     }
