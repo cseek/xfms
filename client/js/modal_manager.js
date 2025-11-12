@@ -26,19 +26,13 @@ class ModalManager {
     constructor() {
         this.modal = document.getElementById('modal');
         this.modalBody = document.getElementById('modalBody');
-        this.closeBtn = document.querySelector('.close');
-        
+        // 不再假设页面初始存在 .close 元素，showModal 会动态注入关闭 X
+        this.closeBtn = null;
+
         this.init();
     }
 
     init() {
-        // 关闭模态框事件(如果关闭按钮存在)
-        if (this.closeBtn) {
-            this.closeBtn.addEventListener('click', () => {
-                this.hideModal();
-            });
-        }
-
         // 点击模态框外部关闭
         this.modal.addEventListener('click', (e) => {
             if (e.target === this.modal) {
@@ -55,12 +49,26 @@ class ModalManager {
     }
 
     showModal(title, content) {
-        this.modalBody.innerHTML = `
+        // 在 modal-content 内注入右上角关闭 X（使用 .close 样式）
+        const html = `
+            <span class="close" aria-label="关闭">&times;</span>
             <h2 class="modal-title">${title}</h2>
             ${content}
         `;
+
+        this.modalBody.innerHTML = html;
+
+        // 将 modal 显示，并禁止 body 滚动
         this.modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
+
+        // 绑定动态注入的关闭按钮事件
+        const dynamicClose = this.modal.querySelector('.modal-content .close') || this.modal.querySelector('.close');
+        if (dynamicClose) {
+            // 保存引用以便在 hideModal 中移除事件
+            this.closeBtn = dynamicClose;
+            this.closeBtn.addEventListener('click', () => this.hideModal());
+        }
     }
 
     // 简单 HTML 转义，防止注入
@@ -75,8 +83,17 @@ class ModalManager {
     }
 
     hideModal() {
+        // 隐藏并清理动态事件
         this.modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+
+        if (this.closeBtn) {
+            try { this.closeBtn.removeEventListener('click', () => this.hideModal()); } catch (e) { /* ignore */ }
+            this.closeBtn = null;
+        }
+
+        // 清空 modal body，避免残留 DOM
+        if (this.modalBody) this.modalBody.innerHTML = '';
     }
     
     showAddModuleModal() {
@@ -787,10 +804,7 @@ class ModalManager {
                     <div class="text-content">${firmware.description ? this.escapeHtml(firmware.description).replace(/\r\n|\r|\n/g, '<br/>') : '<span class="empty-text">暂无描述</span>'}</div>
                 </div>
                 
-                <!-- 关闭按钮 -->
-                <div class="modal-details-footer">
-                    <button type="button" class="btn-close-details" onclick="modalManager.hideModal()">关闭</button>
-                </div>
+                <!-- 底部关闭按钮已移除，使用右上角 X 关闭 -->
             </div>
         `;
 

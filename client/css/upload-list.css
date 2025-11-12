@@ -682,7 +682,8 @@
     line-height: 1.7;
     font-size: 13px;
     border-top: 1px solid #e9ecef;
-    max-height: 200px;
+    /* 提高 10% -> 220px */
+    max-height: 220px;
     overflow-y: auto;
     white-space: pre-wrap;
 }
@@ -854,7 +855,8 @@
     border-radius: 6px;
     color: #495057;
     line-height: 1.6;
-    max-height: 200px;
+    /* 提高 10% -> 220px */
+    max-height: 220px;
     overflow-y: auto;
     white-space: pre-wrap;
 }
@@ -888,9 +890,24 @@
     border-radius: 6px;
     margin-bottom: 12px;
     color: #444;
-    max-height: 28vh;
+    /* 提高 10% -> 30.8vh */
+    max-height: 30.8vh;
     overflow: auto;
     white-space: pre-wrap;
+}
+
+/* 顶部右上 X 关闭按钮（当 modal-content 动态注入时使用） */
+.modal-content .close {
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #7f8c8d;
+    z-index: 3;
+}
+.modal-content .close:hover {
+    color: var(--danger-color);
 }
 
 .modal-actions {

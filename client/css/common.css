@@ -814,7 +814,8 @@ body {
 
 #modalBody {
     padding: 16px 20px;
-    max-height: 72vh;
+    /* 将最大高度提高 10%：72vh -> 79.2vh */
+    max-height: 79.2vh;
     overflow: auto;
 }
 
