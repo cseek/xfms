@@ -122,16 +122,14 @@ router.get('/', (req, res) => {
         params.push('%' + req.query.search + '%');
     }
 
-    // 和我相关的筛选
+    // 和我相关的筛选：只要上传者或测试者中包含当前用户即视为相关（不再依赖具体状态）
     if (req.query.my_related && req.session.user) {
         const username = req.session.user.username;
         whereClause += ` AND (
-            (f.status = '待委派' AND uu.username = ?) OR
-            (f.status = '已驳回' AND ru.username = ?) OR
-            (f.status = '待发布' AND tu.username = ?) OR
-            (f.status = '已发布' AND ru.username = ?)
+            uu.username = ? OR
+            tu.username = ?
         )`;
-        params.push(username, username, username, username);
+        params.push(username, username);
     }
 
     // 查询总数

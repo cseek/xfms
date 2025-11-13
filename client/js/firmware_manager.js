@@ -144,6 +144,10 @@ class FirmwareManager {
                         <span>上传人员: ${firmware.uploader_name || '未知'}</span>
                     </div>
                     <div class="meta-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>测试人员: ${firmware.tester_name ? this.escapeHtml(firmware.tester_name) : '未指派'}</span>
+                    </div>
+                    <div class="meta-item">
                         <i class="fas fa-database"></i>
                         <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>
                     </div>
