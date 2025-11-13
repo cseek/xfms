@@ -179,6 +179,14 @@ db.serialize(() => {
             console.log('reject_reason column added to firmwares table');
         }
     });
+    // 添加驳回人员字段(rejected_by)
+    db.run(`ALTER TABLE firmwares ADD COLUMN rejected_by INTEGER REFERENCES users(id)`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+            console.error('Error adding rejected_by column:', err);
+        } else if (!err) {
+            console.log('rejected_by column added to firmwares table');
+        }
+    });
 
     db.run(`ALTER TABLE firmwares ADD COLUMN test_notes TEXT`, (err) => {
         if (err && !err.message.includes('duplicate column name')) {

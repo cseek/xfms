@@ -139,6 +139,7 @@ router.get('/', (req, res) => {
         LEFT JOIN users uu ON f.uploaded_by = uu.id
         LEFT JOIN users tu ON f.assigned_to = tu.id
         LEFT JOIN users ru ON f.released_by = ru.id
+        LEFT JOIN users rj ON f.rejected_by = rj.id
         ${whereClause}
     `;
 
@@ -161,13 +162,15 @@ router.get('/', (req, res) => {
                 p.name as project_name,
                 uu.username as uploader_name,
                 tu.username as tester_name,
-                ru.username as releaser_name
+                ru.username as releaser_name,
+                rj.username as rejecter_name
             FROM firmwares f
             LEFT JOIN modules m ON f.module_id = m.id
             LEFT JOIN projects p ON f.project_id = p.id
             LEFT JOIN users uu ON f.uploaded_by = uu.id
             LEFT JOIN users tu ON f.assigned_to = tu.id
             LEFT JOIN users ru ON f.released_by = ru.id
+            LEFT JOIN users rj ON f.rejected_by = rj.id
             ${whereClause}
             ORDER BY f.created_at DESC
             LIMIT ? OFFSET ?
@@ -240,7 +243,9 @@ router.get('/', (req, res) => {
                         assigned_to: row.assigned_to,
                         tester_name: row.tester_name,
                         reject_reason: row.reject_reason,
-                        test_report_path: row.test_report_path
+                        test_report_path: row.test_report_path,
+                        rejected_by: row.rejected_by,
+                        rejecter_name: row.rejecter_name
                     };
                 }
 
@@ -389,6 +394,9 @@ router.put('/:id/status', canPublishFirmware, (req, res) => {
                 updateSql += ', reject_reason = ?';
                 params.push(reject_reason);
             }
+            // 记录驳回人员
+            updateSql += ', rejected_by = ?';
+            params.push(user.id);
         }
 
         updateSql += ' WHERE id = ?';

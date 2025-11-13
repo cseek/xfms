@@ -127,6 +127,13 @@ class FirmwareManager {
             const isAssignedToMe = userRole === 'admin' || firmware.assigned_to === dashboard.currentUser?.id;
             const notAssignedClass = (isTestListPage && !isAssignedToMe) ? 'not-assigned-to-me' : '';
             
+            const testerMeta = (['已驳回', '待委派', '待发布', '已发布'].includes(firmware.status) ? '' : `
+                    <div class="meta-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>测试人员: ${firmware.tester_name ? this.escapeHtml(firmware.tester_name) : '未指派'}</span>
+                    </div>
+                    `);
+
             return `
             <div class="firmware-card ${this.getStatusClassName(firmware.status)} ${notAssignedClass}" data-id="${firmware.id}">
                 <div class="firmware-header">
@@ -143,10 +150,7 @@ class FirmwareManager {
                         <i class="fas fa-user"></i>
                         <span>上传人员: ${firmware.uploader_name || '未知'}</span>
                     </div>
-                    <div class="meta-item">
-                        <i class="fas fa-user-check"></i>
-                        <span>测试人员: ${firmware.tester_name ? this.escapeHtml(firmware.tester_name) : '未指派'}</span>
-                    </div>
+                    ${testerMeta}
                     <div class="meta-item">
                         <i class="fas fa-database"></i>
                         <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>

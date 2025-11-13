@@ -712,8 +712,8 @@ class ModalManager {
                         </div>
         `;
         
-        // 测试人员
-        if ((currentPageId === 'test-list' || currentPageId === 'release-list' || currentPageId === 'rejected-list') && firmware.tester_name) {
+        // 测试人员（已驳回时不显示）
+        if (firmware.status !== '已驳回' && (currentPageId === 'test-list' || currentPageId === 'release-list' || currentPageId === 'rejected-list') && firmware.tester_name) {
             content += `
                         <div class="info-row">
                             <span class="info-label">测试人员</span>
@@ -728,6 +728,16 @@ class ModalManager {
                             <span class="info-value">${firmware.uploaded_at ? new Date(firmware.uploaded_at).toLocaleString('zh-CN') : '-'}</span>
                         </div>
         `;
+
+        // 驳回人员（当状态为已驳回时显示）
+        if (firmware.status === '已驳回' && firmware.rejecter_name) {
+            content += `
+                        <div class="info-row">
+                            <span class="info-label">驳回人员</span>
+                            <span class="info-value">${this.escapeHtml(firmware.rejecter_name)}</span>
+                        </div>
+            `;
+        }
         
         // MD5校验
         if (firmware.md5) {
