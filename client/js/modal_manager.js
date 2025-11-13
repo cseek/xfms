@@ -783,8 +783,8 @@ class ModalManager {
             `;
         }
         
-        // 驳回原因
-        if (currentPageId === 'rejected-list' && firmware.reject_reason) {
+        // 驳回原因（在 rejected-list 和 my-related 页面显示）
+        if ((currentPageId === 'rejected-list' || currentPageId === 'my-related') && firmware.reject_reason) {
             content += `
                 <div class="details-card alert-card">
                     <div class="card-title">
