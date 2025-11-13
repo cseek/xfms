@@ -73,15 +73,21 @@ router.get('/', (req, res) => {
     let whereClause = 'WHERE 1=1';
     let params = [];
 
-    // 按模块名筛选
-    if (req.query.module_name) {
-        whereClause += ' AND f.module_name = ?';
+    // 按模块筛选 - 前端通常传递 module_id（兼容老版 module_name）
+    if (req.query.module_id) {
+        whereClause += ' AND f.module_id = ?';
+        params.push(req.query.module_id);
+    } else if (req.query.module_name) {
+        whereClause += ' AND m.name = ?';
         params.push(req.query.module_name);
     }
 
-    // 按项目名筛选
-    if (req.query.project_name) {
-        whereClause += ' AND f.project_name = ?';
+    // 按项目筛选 - 前端通常传递 project_id（兼容老版 project_name）
+    if (req.query.project_id) {
+        whereClause += ' AND f.project_id = ?';
+        params.push(req.query.project_id);
+    } else if (req.query.project_name) {
+        whereClause += ' AND p.name = ?';
         params.push(req.query.project_name);
     }
 
