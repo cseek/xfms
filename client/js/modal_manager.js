@@ -363,8 +363,9 @@ class ModalManager {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="assignNote">委派说明</label>
-                        <textarea id="assignNote" name="assign_note" rows="3" placeholder="选填：委派说明或测试要求"></textarea>
+                        <label for="assignNote">委派说明 *</label>
+                        <textarea id="assignNote" name="assign_note" rows="3" placeholder="请填写委派说明或测试要求" required oninput="this.setCustomValidity('')"></textarea>
+                        <div class="validation-message" id="assignNoteValidation" style="color:#f44336"></div>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn-cancel" onclick="modalManager.hideModal()">取消</button>
@@ -375,8 +376,25 @@ class ModalManager {
             
             this.showModal('委派固件', content);
             
-            document.getElementById('assignFirmwareForm').addEventListener('submit', async (e) => {
+            const assignForm = document.getElementById('assignFirmwareForm');
+            const assignNoteInput = document.getElementById('assignNote');
+            const assignNoteValidation = document.getElementById('assignNoteValidation');
+
+            assignNoteInput.addEventListener('input', function() {
+                if (this.value.trim() === '') {
+                    assignNoteValidation.textContent = '委派说明不能为空';
+                } else {
+                    assignNoteValidation.textContent = '';
+                }
+            });
+
+            assignForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                if (assignNoteInput.value.trim() === '') {
+                    assignNoteValidation.textContent = '委派说明不能为空';
+                    assignNoteInput.focus();
+                    return;
+                }
                 await this.assignFirmware(firmwareId);
             });
         } catch (error) {

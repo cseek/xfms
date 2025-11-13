@@ -423,6 +423,11 @@ router.post('/:id/assign', canAssignFirmware, (req, res) => {
         return res.status(400).json({ error: '请指定委派的测试人员' });
     }
 
+    // 委派说明为必填
+    if (!assign_note || String(assign_note).trim() === '') {
+        return res.status(400).json({ error: '委派说明不能为空' });
+    }
+
     // 检查被委派人是否为测试人员
     const getUserSql = 'SELECT * FROM users WHERE id = ? AND role = "tester"';
     req.db.get(getUserSql, [assigned_to], (err, tester) => {
@@ -452,17 +457,11 @@ router.post('/:id/assign', canAssignFirmware, (req, res) => {
                 return res.status(403).json({ error: '您只能委派自己上传的固件' });
             }
 
-            // 更新固件状态为待发布,并记录测试人员和委派说明
+            // 更新固件状态为待发布,并记录测试人员和委派说明（assign_note 必填）
             let updateSql = `
                 UPDATE firmwares 
-                SET status = '待发布', assigned_to = ?`;
-            let params = [assigned_to];
-            
-            if (assign_note) {
-                updateSql += ', assign_note = ?';
-                params.push(assign_note);
-            }
-            
+                SET status = '待发布', assigned_to = ?, assign_note = ?`;
+            let params = [assigned_to, assign_note];
             updateSql += ' WHERE id = ?';
             params.push(firmwareId);
             
