@@ -337,18 +337,18 @@ class ModalManager {
 
     async showAssignFirmwareModal(firmwareId) {
         try {
-            // 获取测试人员列表
-            const response = await fetch('/api/users');
+            // 获取测试人员列表（使用仅需登录即可访问的接口，避免 admin 权限限制）
+            const response = await fetch('/api/users/testers');
             if (!response.ok) throw new Error('获取测试人员列表失败');
             
-            const users = await response.json();
-            const testers = users.filter(user => user.role === 'tester');
-            
-            if (testers.length === 0) {
+            // API 返回的就是测试人员列表（id, username, email）
+            const testers = await response.json();
+
+            if (!Array.isArray(testers) || testers.length === 0) {
                 Utils.showMessage('没有可用的测试人员', 'error');
                 return;
             }
-            
+
             const testersOptions = testers.map(tester => 
                 `<option value="${tester.id}">${tester.username} (${tester.email || '无邮箱'})</option>`
             ).join('');

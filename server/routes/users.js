@@ -39,6 +39,22 @@ router.get('/', adminRequired, (req, res) => {
     });
 });
 
+// 获取所有测试人员（开发者或管理员在委派时使用）
+router.get('/testers', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: '请先登录' });
+    }
+
+    const sql = 'SELECT id, username, email FROM users WHERE role = ? ORDER BY username';
+    req.db.all(sql, ['tester'], (err, rows) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: '数据库错误' });
+        }
+        res.json(rows);
+    });
+});
+
 // 创建用户（仅管理员）
 router.post('/', adminRequired, (req, res) => {
     const { username, password, role, email } = req.body;
