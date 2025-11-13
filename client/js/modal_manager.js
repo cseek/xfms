@@ -712,8 +712,8 @@ class ModalManager {
                         </div>
         `;
         
-        // 测试人员（已驳回时不显示）
-        if (firmware.status !== '已驳回' && (currentPageId === 'test-list' || currentPageId === 'release-list' || currentPageId === 'rejected-list') && firmware.tester_name) {
+    // 测试人员（已驳回时不显示）。在 test-list、release-list、rejected-list、my-related 页面均显示测试人员信息
+    if (firmware.status !== '已驳回' && (currentPageId === 'test-list' || currentPageId === 'release-list' || currentPageId === 'rejected-list' || currentPageId === 'my-related') && firmware.tester_name) {
             content += `
                         <div class="info-row">
                             <span class="info-label">测试人员</span>
@@ -796,8 +796,8 @@ class ModalManager {
             `;
         }
         
-        // 测后说明
-        if (currentPageId === 'release-list' && firmware.test_notes) {
+    // 测后说明（在 release-list 和 my-related 页面显示）
+    if ((currentPageId === 'release-list' || currentPageId === 'my-related') && firmware.test_notes) {
             content += `
                 <div class="details-card">
                     <div class="card-title">
