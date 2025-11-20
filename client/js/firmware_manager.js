@@ -31,8 +31,8 @@ class FirmwareManager {
         this.projectSearchQuery = '';
         // pagination state
         this.pageSize = 20; // 固件服务端分页大小
-    this.modulesPageSize = 6; // 模块服务端分页大小
-    this.projectsPageSize = this.modulesPageSize; // 项目客户端分页大小，改为与模块一致
+        this.modulesPageSize = 10; // 模块服务端分页大小
+        this.projectsPageSize = this.modulesPageSize; // 项目分页大小
         this.currentPage = 1; // 固件当前页码
         this.totalPages = 1; // 固件总页数
         this.total = 0; // 固件总记录数
@@ -42,6 +42,7 @@ class FirmwareManager {
         this.projectsPage = 1; // 项目当前页码
         this.currentFilters = {}; // 保存当前的过滤条件
         this.currentPageId = null; // 当前页面ID (upload-list, test-list, release-list)
+        this.managementMenuOutsideHandler = null;
     }
 
     // 设置当前页面ID
@@ -644,33 +645,56 @@ class FirmwareManager {
             return;
         }
 
-        // 使用原来的卡片样式
-        list.innerHTML = this.modules.map(module => `
-            <div class="management-item">
-                <div class="management-item-header">
-                    <div class="management-item-icon">📦</div>
-                    <div class="management-item-info">
-                        <h3 class="management-item-title">${this.escapeHtml(module.name)}</h3>
-                        ${module.description ? `<p class="management-item-description">${this.escapeHtml(module.description)}</p>` : '<p class="management-item-description" style="color: #cbd5e1;">暂无描述</p>'}
+        const rowsHtml = this.modules.map(module => `
+            <tr>
+                <td data-label="模块名">
+                    <div class="table-cell-title">${this.escapeHtml(module.name)}</div>
+                </td>
+                <td data-label="描述">
+                    <div class="table-cell-description">
+                        ${module.description ? this.escapeHtml(module.description) : '<span class="muted">暂无描述</span>'}
                     </div>
-                </div>
-                <div class="management-item-meta">
-                    <div class="management-item-meta-row">
-                        <span class="icon">👤</span>
-                        <span>创建人: <span class="management-item-creator">${module.creator_name || '未知'}</span></span>
+                </td>
+                <td data-label="创建人">
+                    ${this.escapeHtml(module.creator_name || '未知')}
+                </td>
+                <td data-label="创建时间">
+                    ${Utils.formatDate(module.created_at)}
+                </td>
+                <td data-label="其他">
+                    <div class="management-table-actions">
+                        <button class="management-action-btn" data-action="toggle-menu" data-menu-id="module-${module.id}">
+                            <i class="fas fa-ellipsis-v"></i>
+                            操作
+                        </button>
+                        <div class="management-action-menu" data-menu-id="module-${module.id}">
+                            ${this.renderManagementMenuItems('modules', module.id)}
+                        </div>
                     </div>
-                    <div class="management-item-meta-row">
-                        <span class="icon">🕒</span>
-                        <span>${Utils.formatDate(module.created_at)}</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="details-btn" data-id="${module.id}">详情</button>
-                    <button class="edit-btn" data-id="${module.id}">编辑</button>
-                    <button class="delete-btn" data-id="${module.id}">删除</button>
+                </td>
+            </tr>
+        `).join('');
+
+        list.innerHTML = `
+            <div class="management-table-wrapper">
+                <div class="management-table-scroll">
+                    <table class="management-table">
+                        <thead>
+                            <tr>
+                                <th>模块名</th>
+                                <th>描述</th>
+                                <th>创建人</th>
+                                <th>创建时间</th>
+                                <th>其他</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        `).join('');
+        `;
 
         // 构建分页控件
         let paginationHtml = '<div class="pagination">';
@@ -727,33 +751,56 @@ class FirmwareManager {
             return;
         }
 
-        // 服务端已进行分页，直接渲染当前页数据
-        list.innerHTML = this.projects.map(project => `
-            <div class="management-item">
-                <div class="management-item-header">
-                    <div class="management-item-icon">🎯</div>
-                    <div class="management-item-info">
-                        <h3 class="management-item-title">${this.escapeHtml(project.name)}</h3>
-                        ${project.description ? `<p class="management-item-description">${this.escapeHtml(project.description)}</p>` : '<p class="management-item-description" style="color: #cbd5e1;">暂无描述</p>'}
+        const rowsHtml = this.projects.map(project => `
+            <tr>
+                <td data-label="项目名">
+                    <div class="table-cell-title">${this.escapeHtml(project.name)}</div>
+                </td>
+                <td data-label="描述">
+                    <div class="table-cell-description">
+                        ${project.description ? this.escapeHtml(project.description) : '<span class="muted">暂无描述</span>'}
                     </div>
-                </div>
-                <div class="management-item-meta">
-                    <div class="management-item-meta-row">
-                        <span class="icon">👤</span>
-                        <span>创建人: <span class="management-item-creator">${project.creator_name || '未知'}</span></span>
+                </td>
+                <td data-label="创建人">
+                    ${this.escapeHtml(project.creator_name || '未知')}
+                </td>
+                <td data-label="创建时间">
+                    ${Utils.formatDate(project.created_at)}
+                </td>
+                <td data-label="其他">
+                    <div class="management-table-actions">
+                        <button class="management-action-btn" data-action="toggle-menu" data-menu-id="project-${project.id}">
+                            <i class="fas fa-ellipsis-v"></i>
+                            操作
+                        </button>
+                        <div class="management-action-menu" data-menu-id="project-${project.id}">
+                            ${this.renderManagementMenuItems('projects', project.id)}
+                        </div>
                     </div>
-                    <div class="management-item-meta-row">
-                        <span class="icon">🕒</span>
-                        <span>${Utils.formatDate(project.created_at)}</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="details-btn" data-id="${project.id}">详情</button>
-                    <button class="edit-btn" data-id="${project.id}">编辑</button>
-                    <button class="delete-btn" data-id="${project.id}">删除</button>
+                </td>
+            </tr>
+        `).join('');
+
+        list.innerHTML = `
+            <div class="management-table-wrapper">
+                <div class="management-table-scroll">
+                    <table class="management-table">
+                        <thead>
+                            <tr>
+                                <th>项目名</th>
+                                <th>描述</th>
+                                <th>创建人</th>
+                                <th>创建时间</th>
+                                <th>其他</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        `).join('');
+        `;
 
         // pagination controls (use service端 pagination 数据)
         const totalPages = this.projectsTotalPages || 1;
@@ -787,30 +834,84 @@ class FirmwareManager {
     }
 
     attachManagementEventListeners(type) {
-        document.querySelectorAll(`#${type}List .details-btn`).forEach(btn => {
+        const container = document.getElementById(`${type}List`);
+        if (!container) return;
+
+        container.querySelectorAll('.management-action-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = e.target.getAttribute('data-id');
-                const item = this[type].find(item => item.id == id);
-                this.showManagementItemDetails(type, item);
+                e.stopPropagation();
+                const menuId = btn.getAttribute('data-menu-id');
+                const menu = container.querySelector(`.management-action-menu[data-menu-id="${menuId}"]`);
+
+                container.querySelectorAll('.management-action-menu.active').forEach(m => {
+                    if (m !== menu) m.classList.remove('active');
+                });
+
+                menu?.classList.toggle('active');
             });
         });
 
-        document.querySelectorAll(`#${type}List .edit-btn`).forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.getAttribute('data-id');
-                const item = this[type].find(item => item.id == id);
-                modalManager.showEditModal(type, item);
-            });
-        });
-
-        document.querySelectorAll(`#${type}List .delete-btn`).forEach(btn => {
+        container.querySelectorAll(`[data-management-action][data-management-type="${type}"]`).forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = e.target.getAttribute('data-id');
+                const action = btn.getAttribute('data-management-action');
+                const id = btn.getAttribute('data-id');
+                const menu = btn.closest('.management-action-menu');
+                menu?.classList.remove('active');
+                await this.handleManagementAction(type, action, id);
+            });
+        });
+
+        this.ensureManagementMenuOutsideHandler();
+    }
+
+    ensureManagementMenuOutsideHandler() {
+        if (this.managementMenuOutsideHandler) return;
+        this.managementMenuOutsideHandler = (e) => {
+            if (!e.target.closest('.management-table-actions')) {
+                document.querySelectorAll('.management-action-menu.active').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+            }
+        };
+        document.addEventListener('click', this.managementMenuOutsideHandler);
+    }
+
+    renderManagementMenuItems(type, id) {
+        const label = type === 'modules' ? '模块' : '项目';
+        return `
+            <button class="management-menu-item" data-management-action="details" data-management-type="${type}" data-id="${id}">
+                <i class="fas fa-info-circle"></i>
+                <span>${label}详情</span>
+            </button>
+            <button class="management-menu-item" data-management-action="edit" data-management-type="${type}" data-id="${id}">
+                <i class="fas fa-edit"></i>
+                <span>编辑${label}</span>
+            </button>
+            <button class="management-menu-item danger" data-management-action="delete" data-management-type="${type}" data-id="${id}">
+                <i class="fas fa-trash"></i>
+                <span>删除${label}</span>
+            </button>
+        `;
+    }
+
+    async handleManagementAction(type, action, id) {
+        const collection = this[type] || [];
+        const item = collection.find(entry => entry.id == id);
+        if (!item && action !== 'delete') return;
+
+        switch (action) {
+            case 'details':
+                this.showManagementItemDetails(type, item);
+                break;
+            case 'edit':
+                modalManager.showEditModal(type, item);
+                break;
+            case 'delete':
                 if (confirm(`确定要删除这个${type === 'modules' ? '模块' : '项目'}吗？`)) {
                     await this.deleteManagementItem(type, id);
                 }
-            });
-        });
+                break;
+        }
     }
 
     showManagementItemDetails(type, item) {
