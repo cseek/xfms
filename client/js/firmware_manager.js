@@ -125,34 +125,28 @@ class FirmwareManager {
             const isAssignedToMe = userRole === 'admin' || firmware.assigned_to === dashboard.currentUser?.id;
             const notAssignedClass = (isTestListPage && !isAssignedToMe) ? 'not-assigned-to-me' : '';
             const statusClass = this.getStatusClassName(firmware.status);
-            const testerDisplay = firmware.tester_name ? this.escapeHtml(firmware.tester_name) : '未指派';
-            const md5Display = firmware.md5 ? this.truncateAndEscape(firmware.md5, 22) : '计算中...';
-            const md5Title = firmware.md5 ? this.escapeHtml(firmware.md5) : '计算中...';
 
             return `
                 <tr class="firmware-row ${statusClass} ${notAssignedClass}">
-                    <td data-label="模块 / 项目">
+                    <td data-label="模块">
                         <div class="cell-title">${this.escapeHtml(firmware.module_name)}</div>
-                        <div class="cell-subtitle">${this.escapeHtml(firmware.project_name)}</div>
                     </td>
-                    <td data-label="版本 / 状态">
-                        <div class="cell-version">
-                            <span class="version-chip">${this.escapeHtml(firmware.version_name)}</span>
-                            <span class="status-chip ${statusClass}">${firmware.status}</span>
-                        </div>
+                    <td data-label="项目">
+                        <div class="cell-title">${this.escapeHtml(firmware.project_name)}</div>
                     </td>
-                    <td data-label="人员信息">
-                        <div class="cell-meta"><span class="cell-label">上传:</span>${this.escapeHtml(firmware.uploader_name || '未知')}</div>
-                        <div class="cell-meta"><span class="cell-label">测试:</span>${testerDisplay}</div>
+                    <td data-label="版本">
+                        <span class="version-chip">${this.escapeHtml(firmware.version_name)}</span>
                     </td>
-                    <td data-label="文件信息">
-                        <div class="cell-meta"><span class="cell-label">大小:</span>${Utils.formatFileSize(firmware.file_size)}</div>
-                        <div class="cell-meta"><span class="cell-label">MD5:</span><span class="md5-text" title="${md5Title}">${md5Display}</span></div>
+                    <td data-label="状态">
+                        <span class="status-chip ${statusClass}">${firmware.status}</span>
+                    </td>
+                    <td data-label="文件大小">
+                        <div class="cell-meta">${Utils.formatFileSize(firmware.file_size)}</div>
                     </td>
                     <td data-label="上传时间">
                         <div class="cell-meta">${Utils.formatDate(firmware.uploaded_at)}</div>
                     </td>
-                    <td data-label="操作">
+                    <td data-label="其他">
                         <div class="firmware-actions">
                             <div class="action-menu-wrapper">
                                 <button class="action-menu-btn" data-action="toggle-menu" data-id="${firmware.id}">
@@ -175,12 +169,13 @@ class FirmwareManager {
                     <table class="firmware-table">
                         <thead>
                             <tr>
-                                <th>模块 / 项目</th>
-                                <th>版本 / 状态</th>
-                                <th>人员信息</th>
-                                <th>文件信息</th>
+                                <th>模块</th>
+                                <th>项目</th>
+                                <th>版本</th>
+                                <th>状态</th>
+                                <th>文件大小</th>
                                 <th>上传时间</th>
-                                <th>操作</th>
+                                <th>其他</th>
                             </tr>
                         </thead>
                         <tbody>
