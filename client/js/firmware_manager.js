@@ -847,6 +847,21 @@ class FirmwareManager {
                     if (m !== menu) m.classList.remove('active');
                 });
 
+                // 将菜单宽度设置为与操作按钮一致。
+                // 这样“模块详情”、“编辑模块”、“删除模块”的宽度将与“操作”按钮匹配。
+                if (menu) {
+                    // 当菜单与按钮处于同一个容器中时，offsetWidth 可以可靠地返回按钮的显示宽度。
+                    // 在移动端(菜单为静态布局)时不应设置宽度。
+                    const isMobile = window.matchMedia('(max-width: 960px)').matches;
+                    if (!isMobile) {
+                        const btnWidth = btn.offsetWidth;
+                        menu.style.width = `${btnWidth}px`;
+                    } else {
+                        // 在移动布局上移除内联宽度，以便响应式规则生效
+                        menu.style.width = '';
+                    }
+                }
+
                 menu?.classList.toggle('active');
             });
         });
@@ -874,6 +889,24 @@ class FirmwareManager {
             }
         };
         document.addEventListener('click', this.managementMenuOutsideHandler);
+        // resize handler: 保证当窗口大小改变时（例如列宽变化），菜单宽度仍然和按钮一致
+        if (!this.managementMenuResizeHandler) {
+            this.managementMenuResizeHandler = () => {
+                document.querySelectorAll('.management-action-menu.active').forEach(menu => {
+                    const menuId = menu.getAttribute('data-menu-id');
+                    const btn = document.querySelector(`.management-action-btn[data-menu-id="${menuId}"]`);
+                    if (btn) {
+                        // 在 mobile 布局下使用 CSS 控制宽度
+                        if (!window.matchMedia('(max-width: 960px)').matches) {
+                            menu.style.width = `${btn.offsetWidth}px`;
+                        } else {
+                            menu.style.width = '';
+                        }
+                    }
+                });
+            };
+            window.addEventListener('resize', this.managementMenuResizeHandler);
+        }
     }
 
     renderManagementMenuItems(type, id) {
