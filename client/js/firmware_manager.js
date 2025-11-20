@@ -30,7 +30,7 @@ class FirmwareManager {
         this.moduleSearchQuery = '';
         this.projectSearchQuery = '';
         // pagination state
-        this.pageSize = 6; // 固件服务端分页大小
+        this.pageSize = 20; // 固件服务端分页大小
     this.modulesPageSize = 6; // 模块服务端分页大小
     this.projectsPageSize = this.modulesPageSize; // 项目客户端分页大小，改为与模块一致
         this.currentPage = 1; // 固件当前页码
