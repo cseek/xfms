@@ -302,13 +302,13 @@
 
 .action-menu-wrapper {
     position: relative;
-    flex: 1 1 130px;
-    min-width: 140px;
+    flex: 0 0 110px;
+    min-width: 110px;
 }
 
 .action-menu-btn {
     width: 100%;
-    padding: 9px 12px;
+    padding: 8px 10px;
     border-radius: 8px;
     border: 1px solid rgba(102, 126, 234, 0.35);
     background: rgba(102, 126, 234, 0.08);
@@ -356,7 +356,7 @@
 
 .action-menu-item {
     width: 100%;
-    padding: 10px 16px;
+    padding: 8px 10px;
     border: none;
     background: transparent;
     color: #1f2933;
