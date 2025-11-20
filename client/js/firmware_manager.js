@@ -119,67 +119,80 @@ class FirmwareManager {
             return;
         }
 
-        // 直接渲染当前页的数据（服务端已分页）
-        grid.innerHTML = this.firmwares.map(firmware => {
-            // 在测试列表页面,检查固件是否委派给当前用户
+        const rowsHtml = this.firmwares.map(firmware => {
             const userRole = dashboard.currentUser?.role;
             const isTestListPage = this.currentPageId === 'test-list';
             const isAssignedToMe = userRole === 'admin' || firmware.assigned_to === dashboard.currentUser?.id;
             const notAssignedClass = (isTestListPage && !isAssignedToMe) ? 'not-assigned-to-me' : '';
-            
-            const testerMeta = (['已驳回', '待委派', '待发布', '已发布'].includes(firmware.status) ? '' : `
-                    <div class="meta-item">
-                        <i class="fas fa-user-check"></i>
-                        <span>测试人员: ${firmware.tester_name ? this.escapeHtml(firmware.tester_name) : '未指派'}</span>
-                    </div>
-                    `);
+            const statusClass = this.getStatusClassName(firmware.status);
+            const testerDisplay = firmware.tester_name ? this.escapeHtml(firmware.tester_name) : '未指派';
+            const md5Display = firmware.md5 ? this.truncateAndEscape(firmware.md5, 22) : '计算中...';
+            const md5Title = firmware.md5 ? this.escapeHtml(firmware.md5) : '计算中...';
 
             return `
-            <div class="firmware-card ${this.getStatusClassName(firmware.status)} ${notAssignedClass}" data-id="${firmware.id}">
-                <div class="firmware-header">
-                    <div class="firmware-info">
-                        <div class="firmware-title">${firmware.module_name} - ${firmware.project_name}</div>
-                        <div class="version-status ${this.getStatusClassName(firmware.status)}">
-                            <span class="version-text">${firmware.version_name}</span>
-                            <span class="status-text">${firmware.status}</span>
+                <tr class="firmware-row ${statusClass} ${notAssignedClass}">
+                    <td data-label="模块 / 项目">
+                        <div class="cell-title">${this.escapeHtml(firmware.module_name)}</div>
+                        <div class="cell-subtitle">${this.escapeHtml(firmware.project_name)}</div>
+                    </td>
+                    <td data-label="版本 / 状态">
+                        <div class="cell-version">
+                            <span class="version-chip">${this.escapeHtml(firmware.version_name)}</span>
+                            <span class="status-chip ${statusClass}">${firmware.status}</span>
                         </div>
-                    </div>
-                </div>
-                <div class="firmware-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-user"></i>
-                        <span>上传人员: ${firmware.uploader_name || '未知'}</span>
-                    </div>
-                    ${testerMeta}
-                    <div class="meta-item">
-                        <i class="fas fa-database"></i>
-                        <span>文件大小: ${Utils.formatFileSize(firmware.file_size)}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <span class="meta-truncated">md5校验: ${firmware.md5 ? firmware.md5 : '计算中...'}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>上传时间: ${Utils.formatDate(firmware.uploaded_at)}</span>
-                    </div>
-                </div>
-                <div class="firmware-actions">
-                    <div class="action-menu-wrapper">
-                        <button class="action-menu-btn" data-action="toggle-menu" data-id="${firmware.id}">
-                            <i class="fas fa-ellipsis-v"></i> 操作
-                        </button>
-                        <div class="action-menu" data-menu-id="${firmware.id}">
-                            ${this.renderActionButtons(firmware)}
+                    </td>
+                    <td data-label="人员信息">
+                        <div class="cell-meta"><span class="cell-label">上传:</span>${this.escapeHtml(firmware.uploader_name || '未知')}</div>
+                        <div class="cell-meta"><span class="cell-label">测试:</span>${testerDisplay}</div>
+                    </td>
+                    <td data-label="文件信息">
+                        <div class="cell-meta"><span class="cell-label">大小:</span>${Utils.formatFileSize(firmware.file_size)}</div>
+                        <div class="cell-meta"><span class="cell-label">MD5:</span><span class="md5-text" title="${md5Title}">${md5Display}</span></div>
+                    </td>
+                    <td data-label="上传时间">
+                        <div class="cell-meta">${Utils.formatDate(firmware.uploaded_at)}</div>
+                    </td>
+                    <td data-label="操作">
+                        <div class="firmware-actions">
+                            <div class="action-menu-wrapper">
+                                <button class="action-menu-btn" data-action="toggle-menu" data-id="${firmware.id}">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                    <span>操作</span>
+                                </button>
+                                <div class="action-menu" data-menu-id="${firmware.id}">
+                                    ${this.renderActionButtons(firmware)}
+                                </div>
+                            </div>
+                            <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
+                                详情
+                            </button>
                         </div>
-                    </div>
-                    <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
-                        详情
-                    </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        grid.innerHTML = `
+            <div class="firmware-table-wrapper">
+                <div class="firmware-table-scroll">
+                    <table class="firmware-table">
+                        <thead>
+                            <tr>
+                                <th>模块 / 项目</th>
+                                <th>版本 / 状态</th>
+                                <th>人员信息</th>
+                                <th>文件信息</th>
+                                <th>上传时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         `;
-        }).join('');
 
         // 构建分页控件
         let paginationHtml = '<div class="pagination">';
@@ -308,9 +321,12 @@ class FirmwareManager {
         return buttons.join('');
     }
 
- attachFirmwareEventListeners() {
+    attachFirmwareEventListeners() {
+        const table = document.querySelector('.firmware-table');
+        if (!table) return;
+
         // 菜单切换按钮
-        document.querySelectorAll('.action-menu-btn').forEach(btn => {
+        table.querySelectorAll('.action-menu-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const firmwareId = btn.getAttribute('data-id');
@@ -327,7 +343,7 @@ class FirmwareManager {
         });
 
         // 菜单项点击事件
-        document.querySelectorAll('.firmware-card [data-action]').forEach(btn => {
+        table.querySelectorAll('[data-action]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 // use currentTarget to avoid clicks on inner <i> or text nodes
                 const target = e.currentTarget;
