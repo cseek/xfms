@@ -330,9 +330,10 @@
 .action-menu {
     position: absolute;
     top: calc(100% + 8px);
+    left: 0;
     right: 0;
-    left: auto;
-    width: 200px;
+    width: 100%;
+    min-width: 100%;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 16px 35px -18px rgba(15, 23, 42, 0.45);
@@ -353,15 +354,18 @@
 
 .action-menu-item {
     width: 100%;
-    padding: 10px 16px 10px 42px;
+    padding: 10px 16px;
     border: none;
     background: transparent;
     color: #1f2933;
     font-size: 13px;
     cursor: pointer;
     transition: background 0.2s ease;
-    position: relative;
-    text-align: left;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .action-menu-item + .action-menu-item {
@@ -373,11 +377,8 @@
 }
 
 .action-menu-item i {
-    position: absolute;
-    left: 16px;
+    position: static;
     color: var(--primary-color);
-    width: 16px;
-    text-align: center;
 }
 
 .action-menu-item.release-item i {
