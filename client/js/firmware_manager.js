@@ -163,9 +163,6 @@ class FirmwareManager {
                                     ${this.renderActionButtons(firmware)}
                                 </div>
                             </div>
-                            <button class="action-btn details-btn" data-action="details" data-id="${firmware.id}">
-                                详情
-                            </button>
                         </div>
                     </td>
                 </tr>
@@ -238,6 +235,14 @@ class FirmwareManager {
         const buttons = [];
         const userRole = dashboard.currentUser.role;
         const pageId = this.currentPageId;
+
+        // 详情按钮 - 所有页面
+        buttons.push(`
+            <button class="action-menu-item" data-action="details" data-id="${firmware.id}">
+                <i class="fas fa-info-circle"></i>
+                <span class="action-menu-item-label">查看详情</span>
+            </button>
+        `);
 
         // 下载按钮 - 所有页面都有
         buttons.push(`
