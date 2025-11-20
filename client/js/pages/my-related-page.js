@@ -12,7 +12,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     dashboard.init({
         pageId: 'my-related',
-        pageTitle: '和我相关',
+        pageTitle: '固件列表 - 和我相关',
         onReady: async () => {
             firmwareManager.setPageId('my-related');
             

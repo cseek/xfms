@@ -7,7 +7,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     dashboard.init({
         pageId: 'rejected-list',
-        pageTitle: '驳回列表',
+        pageTitle: '固件列表 - 驳回列表',
         onReady: async () => {
             firmwareManager.setPageId('rejected-list');
             

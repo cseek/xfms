@@ -2,7 +2,7 @@
  * @Author: aurson jassimxiong@gmail.com
  * @Date: 2025-09-14 17:33:37
  * @LastEditors: aurson jassimxiong@gmail.com
- * @LastEditTime: 2025-11-07 01:45:08
+ * @LastEditTime: 2025-11-20 17:30:00
  * @Description:
  *        ___ ___ _________ ___  ___ 
  *       / _ `/ // / __(_-</ _ \/ _ \
@@ -25,7 +25,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     dashboard.init({
         pageId: 'upload-list',
-        pageTitle: '上传列表',
+        pageTitle: '固件列表 - 上传列表',
         onReady: async () => {
             firmwareManager.setPageId('upload-list');
             

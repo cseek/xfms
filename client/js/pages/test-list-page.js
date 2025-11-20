@@ -7,7 +7,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     dashboard.init({
         pageId: 'test-list',
-        pageTitle: '测试列表',
+        pageTitle: '固件列表 - 测试列表',
         onReady: async () => {
             // 设置当前页面ID
             firmwareManager.setPageId('test-list');
