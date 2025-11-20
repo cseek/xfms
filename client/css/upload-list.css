@@ -141,16 +141,18 @@
 }
 
 .firmware-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
+    background-color: #f9fafb;
 }
 
 .firmware-table thead th {
-    padding: 14px 18px;
+    padding: 16px 24px;
     text-align: left;
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .firmware-table thead th:last-child {
