@@ -711,10 +711,6 @@ body {
     gap: 6px;
 }
 
-.details-btn::before {
-    content: '📋';
-}
-
 .edit-btn::before {
     content: '✏️';
 }
