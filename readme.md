@@ -66,7 +66,28 @@ npm start
 
 # 或使用 PM2
 pm2 start server/app.js --name xfms
+
+# 3. linux 使用 service 开机自启动
+xfms.service
+
+
+[Unit]
+Description=Node.js Application Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/xfms
+ExecStart=/usr/bin/node /opt/xfms/server/app.js
+ExecStop=/bin/bash -c 'kill -9 $(lsof -ti:3000)'
+ExecKill=/bin/bash -c 'kill -9 $(lsof -ti:3000)'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
 ```
+
 
 ## 📖 详细文档
 
