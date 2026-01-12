@@ -160,20 +160,17 @@ class UserManager {
 
     renderUserActions(user) {
         const currentUser = dashboard.currentUser;
+        const isAdmin = currentUser.role === 'admin';
         
-        // 只有管理员可以编辑和删除用户，且不能删除自己
-        if (currentUser.role !== 'admin') {
-            return '-';
-        }
-
         const actions = [];
         
         if (user.id !== currentUser.id) {
+            // 显示编辑和删除按钮，但非管理员时禁用
             actions.push(`
-                <button class="edit-btn" data-id="${user.id}">编辑</button>
+                <button class="edit-btn" data-id="${user.id}" ${!isAdmin ? 'disabled title="仅管理员可以编辑用户"' : ''}>编辑</button>
             `);
             actions.push(`
-                <button class="delete-btn" data-id="${user.id}">删除</button>
+                <button class="delete-btn" data-id="${user.id}" ${!isAdmin ? 'disabled title="仅管理员可以删除用户"' : ''}>删除</button>
             `);
         } else {
             actions.push(`

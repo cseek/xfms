@@ -53,8 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 switch (target) {
                     case 'users':
                         dashboard.setPageTitle(sectionTitles.users);
-                        if (dashboard.currentUser?.role === 'admin') {
-                            await userManager.loadUsers();
+                        await userManager.loadUsers();
+                        // 根据用户角色禁用/启用添加用户按钮
+                        const addUserBtn = document.getElementById('addUserBtn');
+                        if (addUserBtn) {
+                            const isAdmin = dashboard.currentUser?.role === 'admin';
+                            addUserBtn.disabled = !isAdmin;
+                            if (!isAdmin) {
+                                addUserBtn.title = '仅管理员可以添加用户';
+                            }
                         }
                         break;
                     case 'settings':

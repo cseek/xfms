@@ -23,11 +23,11 @@
  */
 
 const express = require('express');
-const { adminRequired, canManageModule } = require('../middleware/auth');
+const { adminRequired, canManageModule, requireAuth } = require('../middleware/auth');
 const router = express.Router();
 
-// 获取所有模块(支持分页和搜索)
-router.get('/', (req, res) => {
+// 获取所有模块(支持分页和搜索) - 所有登录用户可查看
+router.get('/', requireAuth, (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 6;
     const search = req.query.search || '';
@@ -83,8 +83,8 @@ router.get('/', (req, res) => {
     });
 });
 
-// 创建模块(管理员或开发者)
-router.post('/', canManageModule, (req, res) => {
+// 创建模块(仅管理员)
+router.post('/', adminRequired, (req, res) => {
     const { name, description } = req.body;
 
     if (!name) {
@@ -108,8 +108,8 @@ router.post('/', canManageModule, (req, res) => {
     });
 });
 
-// 更新模块(管理员或开发者,开发者只能更新自己创建的模块)
-router.put('/:id', canManageModule, (req, res) => {
+// 更新模块(仅管理员)
+router.put('/:id', adminRequired, (req, res) => {
     const user = req.session.user;
     const moduleId = req.params.id;
     const { name, description } = req.body;
@@ -130,11 +130,6 @@ router.put('/:id', canManageModule, (req, res) => {
             return res.status(404).json({ error: '模块不存在' });
         }
 
-        // 开发者只能更新自己创建的模块
-        if (user.role === 'developer' && module.created_by !== user.id) {
-            return res.status(403).json({ error: '您只能更新自己创建的模块' });
-        }
-
         const sql = 'UPDATE modules SET name = ?, description = ? WHERE id = ?';
         req.db.run(sql, [name, description, moduleId], function(err) {
             if (err) {
@@ -150,9 +145,8 @@ router.put('/:id', canManageModule, (req, res) => {
     });
 });
 
-// 删除模块(管理员或开发者,开发者只能删除自己创建的模块)
-router.delete('/:id', canManageModule, (req, res) => {
-    const user = req.session.user;
+// 删除模块(仅管理员)
+router.delete('/:id', adminRequired, (req, res) => {
     const moduleId = req.params.id;
 
     // 获取模块信息
@@ -165,11 +159,6 @@ router.delete('/:id', canManageModule, (req, res) => {
 
         if (!module) {
             return res.status(404).json({ error: '模块不存在' });
-        }
-
-        // 开发者只能删除自己创建的模块
-        if (user.role === 'developer' && module.created_by !== user.id) {
-            return res.status(403).json({ error: '您只能删除自己创建的模块' });
         }
 
         // 检查是否有固件使用此模块

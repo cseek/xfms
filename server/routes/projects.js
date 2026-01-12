@@ -23,11 +23,11 @@
  */
 
 const express = require('express');
-const { adminRequired, canManageProject } = require('../middleware/auth');
+const { adminRequired, canManageProject, requireAuth } = require('../middleware/auth');
 const router = express.Router();
 
-// 获取所有项目（支持分页和搜索）
-router.get('/', (req, res) => {
+// 获取所有项目（支持分页和搜索）- 所有登录用户可查看
+router.get('/', requireAuth, (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const search = req.query.search || '';
@@ -81,8 +81,8 @@ router.get('/', (req, res) => {
     });
 });
 
-// 创建项目(管理员或开发者)
-router.post('/', canManageProject, (req, res) => {
+// 创建项目(仅管理员)
+router.post('/', adminRequired, (req, res) => {
     console.log('收到创建项目请求:', req.body);
     
     const { name, description } = req.body;
@@ -118,8 +118,8 @@ router.post('/', canManageProject, (req, res) => {
     });
 });
 
-// 更新项目(管理员或开发者,开发者只能更新自己创建的项目)
-router.put('/:id', canManageProject, (req, res) => {
+// 更新项目(仅管理员)
+router.put('/:id', adminRequired, (req, res) => {
     const user = req.session.user;
     const projectId = req.params.id;
     const { name, description } = req.body;
@@ -140,11 +140,6 @@ router.put('/:id', canManageProject, (req, res) => {
             return res.status(404).json({ error: '项目不存在' });
         }
 
-        // 开发者只能更新自己创建的项目
-        if (user.role === 'developer' && project.created_by !== user.id) {
-            return res.status(403).json({ error: '您只能更新自己创建的项目' });
-        }
-
         const sql = 'UPDATE projects SET name = ?, description = ? WHERE id = ?';
         req.db.run(sql, [name, description, projectId], function(err) {
             if (err) {
@@ -160,9 +155,8 @@ router.put('/:id', canManageProject, (req, res) => {
     });
 });
 
-// 删除项目(管理员或开发者,开发者只能删除自己创建的项目)
-router.delete('/:id', canManageProject, (req, res) => {
-    const user = req.session.user;
+// 删除项目(仅管理员)
+router.delete('/:id', adminRequired, (req, res) => {
     const projectId = req.params.id;
 
     // 获取项目信息
@@ -175,11 +169,6 @@ router.delete('/:id', canManageProject, (req, res) => {
 
         if (!project) {
             return res.status(404).json({ error: '项目不存在' });
-        }
-
-        // 开发者只能删除自己创建的项目
-        if (user.role === 'developer' && project.created_by !== user.id) {
-            return res.status(403).json({ error: '您只能删除自己创建的项目' });
         }
 
         // 检查是否有固件使用此项目

@@ -145,6 +145,30 @@
     color: #d1d5db !important;
 }
 
+/* 禁用状态的按钮样式 */
+.edit-btn:disabled,
+.delete-btn:disabled,
+.add-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    background-color: #e5e7eb !important;
+    color: #6b7280 !important;
+    border-color: #d1d5db !important;
+    pointer-events: auto !important;
+}
+
+.add-btn:disabled {
+    background-color: #e5e7eb !important;
+    color: #6b7280 !important;
+}
+
+.edit-btn:disabled:hover,
+.delete-btn:disabled:hover,
+.add-btn:disabled:hover {
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
 .users-table tbody:empty::after {
     content: "暂无用户数据";
     display: block;

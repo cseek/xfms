@@ -116,7 +116,7 @@ app.get('/firmwares', ensureAuthenticated, (req, res) => {
     res.redirect('/uploads');
 });
 
-app.get('/manage/firmware', ensureAuthenticated, canManageFirmware, (req, res) => {
+app.get('/manage/firmware', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/html/firmware-management.html'));
 });
 

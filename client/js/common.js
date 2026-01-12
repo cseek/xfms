@@ -175,10 +175,8 @@ class DashboardApp {
             return;
         }
 
-        if (pageId.startsWith('system-management') && this.currentUser.role !== 'admin') {
-            Utils.showMessage('您没有权限访问系统管理页面', 'warning');
-            window.location.href = '/uploads';
-        }
+        // 系统管理页面现在允许所有用户访问（但操作权限由后端和按钮状态控制）
+        // 不再限制系统管理页面的访问
     }
 
     setPageTitle(title) {

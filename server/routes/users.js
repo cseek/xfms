@@ -24,11 +24,11 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { adminRequired } = require('../middleware/auth');
+const { adminRequired, requireAuth } = require('../middleware/auth');
 const router = express.Router();
 
-// 获取所有用户（仅管理员）
-router.get('/', adminRequired, (req, res) => {
+// 获取所有用户（所有登录用户可查看，但只有管理员能进行增删改操作）
+router.get('/', requireAuth, (req, res) => {
     const sql = 'SELECT id, username, role, email, created_at FROM users ORDER BY created_at DESC';
     req.db.all(sql, [], (err, rows) => {
         if (err) {

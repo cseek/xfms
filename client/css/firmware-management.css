@@ -487,6 +487,23 @@
     background: #f8fafc;
 }
 
+.management-menu-item:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    background-color: #f9fafb !important;
+    color: #6b7280 !important;
+    pointer-events: auto !important;
+}
+
+.management-menu-item:disabled:hover {
+    cursor: not-allowed !important;
+    background: #f9fafb !important;
+}
+
+.management-menu-item:disabled i {
+    color: #9ca3af !important;
+}
+
 .management-menu-item i {
     color: var(--primary-color);
     width: 16px;
@@ -495,6 +512,62 @@
 
 .management-menu-item.danger i {
     color: #e74c3c;
+}
+
+/* 添加按钮禁用样式 */
+.add-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    background-color: #e5e7eb !important;
+    color: #6b7280 !important;
+    border-color: #d1d5db !important;
+    pointer-events: auto !important;
+}
+
+.add-btn:disabled:hover {
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    transform: none !important;
+}
+
+/* 表单禁用样式 */
+.form-disabled input:disabled,
+.form-disabled select:disabled,
+.form-disabled textarea:disabled {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    border-color: #e5e7eb !important;
+    opacity: 0.7;
+}
+
+.form-disabled .file-upload-label {
+    background-color: #f9fafb !important;
+    border-color: #e5e7eb !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.form-disabled .file-upload-icon {
+    color: #9ca3af !important;
+}
+
+.form-disabled .file-upload-text,
+.form-disabled .file-upload-hint {
+    color: #9ca3af !important;
+}
+
+.form-disabled button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    background-color: #e5e7eb !important;
+    color: #6b7280 !important;
+    pointer-events: auto !important;
+}
+
+.form-disabled button[type="submit"]:disabled:hover {
+    cursor: not-allowed !important;
+    transform: none !important;
 }
 
 @media (max-width: 960px) {

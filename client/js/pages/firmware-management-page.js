@@ -60,11 +60,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 dashboard.setPageTitle(sectionTitles[resolved] || '固件管理');
 
                 switch (resolved) {
+                    case 'upload':
+                        // 根据用户角色禁用/启用上传表单
+                        const canUpload = dashboard.currentUser?.role === 'admin' || 
+                                         dashboard.currentUser?.role === 'developer';
+                        const uploadForm = document.getElementById('uploadForm');
+                        if (uploadForm && !canUpload) {
+                            // 禁用所有表单元素
+                            const formElements = uploadForm.querySelectorAll('input, select, textarea, button');
+                            formElements.forEach(element => {
+                                element.disabled = true;
+                                if (element.type !== 'submit') {
+                                    element.title = '仅管理员和开发者可以上传固件';
+                                }
+                            });
+                            // 添加禁用提示
+                            uploadForm.classList.add('form-disabled');
+                        }
+                        break;
                     case 'modules':
                         firmwareManager.loadModules();
+                        // 根据用户角色禁用/启用添加模块按钮
+                        const addModuleBtn = document.getElementById('addModuleBtn');
+                        if (addModuleBtn) {
+                            const isAdmin = dashboard.currentUser?.role === 'admin';
+                            addModuleBtn.disabled = !isAdmin;
+                            if (!isAdmin) {
+                                addModuleBtn.title = '仅管理员可以添加模块';
+                            }
+                        }
                         break;
                     case 'projects':
                         firmwareManager.loadProjects();
+                        // 根据用户角色禁用/启用添加项目按钮
+                        const addProjectBtn = document.getElementById('addProjectBtn');
+                        if (addProjectBtn) {
+                            const isAdmin = dashboard.currentUser?.role === 'admin';
+                            addProjectBtn.disabled = !isAdmin;
+                            if (!isAdmin) {
+                                addProjectBtn.title = '仅管理员可以添加项目';
+                            }
+                        }
                         break;
                     default:
                         break;

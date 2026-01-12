@@ -911,16 +911,20 @@ class FirmwareManager {
 
     renderManagementMenuItems(type, id) {
         const label = type === 'modules' ? '模块' : '项目';
+        const isAdmin = dashboard.currentUser?.role === 'admin';
+        const disabled = !isAdmin ? 'disabled' : '';
+        const title = !isAdmin ? `title="仅管理员可以操作"` : '';
+        
         return `
             <button class="management-menu-item" data-management-action="details" data-management-type="${type}" data-id="${id}">
                 <i class="fas fa-info-circle"></i>
                 <span>${label}详情</span>
             </button>
-            <button class="management-menu-item" data-management-action="edit" data-management-type="${type}" data-id="${id}">
+            <button class="management-menu-item" data-management-action="edit" data-management-type="${type}" data-id="${id}" ${disabled} ${title}>
                 <i class="fas fa-edit"></i>
                 <span>编辑${label}</span>
             </button>
-            <button class="management-menu-item danger" data-management-action="delete" data-management-type="${type}" data-id="${id}">
+            <button class="management-menu-item danger" data-management-action="delete" data-management-type="${type}" data-id="${id}" ${disabled} ${title}>
                 <i class="fas fa-trash"></i>
                 <span>删除${label}</span>
             </button>
